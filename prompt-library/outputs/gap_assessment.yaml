@@ -1,0 +1,37 @@
+id: gap-assessment-output
+output_type: gap_assessment
+version: "1.0"
+output_schema_prompt: |
+  You MUST return a JSON object matching EXACTLY this schema:
+
+  {
+    "framework": "<framework_id>",
+    "document_analyzed": "<document name or description>",
+    "overall_coverage_score": <integer 0-100>,
+    "overall_status": "<compliant|partial|non_compliant>",
+    "executive_summary": "<2-3 sentence plain-language summary of compliance posture>",
+    "controls": [
+      {
+        "control_id": "<e.g. A.5.15>",
+        "control_title": "<exact control title>",
+        "status": "<compliant|partial|non_compliant|no_evidence|not_applicable>",
+        "coverage_score": <integer 0-100>,
+        "severity": "<critical|high|medium|low>",
+        "finding": "<specific gap description, 50-300 chars. Reference what IS in the doc and what is MISSING. Be precise.>",
+        "evidence_found": ["<specific evidence present in document>"],
+        "evidence_required": ["<specific evidence missing or needed for full compliance>"],
+        "remediation": "<concrete actionable step, 50-200 chars. Start with a verb.>",
+        "effort": "<low|medium|high>",
+        "regulatory_reference": "<e.g. ISO/IEC 27001:2022 Annex A, A.5.15>"
+      }
+    ]
+  }
+
+  RULES:
+  - overall_coverage_score: weighted average of individual control scores
+  - overall_status: compliant if score>80, partial if 40-80, non_compliant if <40
+  - finding: must reference specific text from the document, not be generic
+  - remediation: must be actionable, not "improve the policy"
+  - Do NOT include any text outside the JSON object
+  - Do NOT use markdown code fences
+  - Array must contain AT LEAST one item per control assessed

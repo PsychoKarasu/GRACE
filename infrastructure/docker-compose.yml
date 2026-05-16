@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+
+  grace-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: grace-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      - grace-data:/app/data
+      - ../prompt-library:/app/../prompt-library:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  grace-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: grace-frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - GRACE_API_URL=http://grace-backend:8000
+    depends_on:
+      grace-backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  grace-data:
+    driver: local

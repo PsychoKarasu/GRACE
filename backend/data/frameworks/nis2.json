@@ -1,0 +1,88 @@
+{
+  "framework_id": "NIS2",
+  "version": "EU 2022/2555",
+  "name": "NIS2 Directive — Network and Information Security",
+  "total_controls": 10,
+  "controls": [
+    {
+      "control_id": "Art.21.2.a",
+      "domain": "Risk Management",
+      "title": "Policies on risk analysis and information system security",
+      "description": "Essential and important entities shall take appropriate and proportionate technical, operational and organisational measures to manage risks posed to the security of network and information systems. These measures shall include: policies on risk analysis and information system security.",
+      "keywords": ["risk analysis", "risk assessment", "information security policy", "ISMS", "risk management policy", "security policy"],
+      "evidence_types": ["Risk analysis methodology document", "Information security policy", "Risk register", "Risk assessment reports", "Management approval records"]
+    },
+    {
+      "control_id": "Art.21.2.b",
+      "domain": "Incident Management",
+      "title": "Incident handling — detection, analysis, containment and response",
+      "description": "Entities shall implement measures covering incident handling: detection, analysis, containment, response and recovery from incidents. This includes defined procedures for each phase and clear escalation paths.",
+      "keywords": ["incident response", "incident handling", "incident detection", "SIEM", "SOC", "incident procedure", "escalation", "containment", "recovery"],
+      "evidence_types": ["Incident response plan", "Incident handling procedure", "SIEM/detection configuration evidence", "Incident response team roster", "Post-incident reports", "Escalation matrix"]
+    },
+    {
+      "control_id": "Art.21.2.c",
+      "domain": "Business Continuity",
+      "title": "Business continuity — backup management, disaster recovery, crisis management",
+      "description": "Entities shall implement business continuity measures including backup management and disaster recovery, and crisis management procedures to ensure continuity of network and information systems.",
+      "keywords": ["business continuity", "BCP", "disaster recovery", "DRP", "backup", "crisis management", "RTO", "RPO", "resilience"],
+      "evidence_types": ["Business continuity plan", "Disaster recovery plan", "Backup configuration and test records", "RTO/RPO documentation", "Crisis management procedure", "BCP/DRP test results"]
+    },
+    {
+      "control_id": "Art.21.2.d",
+      "domain": "Supply Chain",
+      "title": "Supply chain security — relationships with direct suppliers and service providers",
+      "description": "Entities shall address supply chain security including security aspects concerning the relationships between each entity and its direct suppliers or service providers. This includes assessing the security practices of suppliers.",
+      "keywords": ["supply chain", "supplier security", "third party", "vendor management", "service provider", "third-party risk", "supplier assessment"],
+      "evidence_types": ["Supplier security policy", "Vendor risk assessment records", "Supplier security questionnaires", "Contractual security requirements", "Supplier inventory", "Third-party audit results"]
+    },
+    {
+      "control_id": "Art.21.2.e",
+      "domain": "Acquisition & Development",
+      "title": "Security in network and information systems acquisition, development and maintenance",
+      "description": "Entities shall implement security measures in the acquisition, development and maintenance of network and information systems, including vulnerability handling and disclosure.",
+      "keywords": ["secure development", "SDLC", "vulnerability management", "patch management", "security testing", "SAST", "DAST", "penetration testing", "secure coding"],
+      "evidence_types": ["Secure development policy", "Vulnerability management procedure", "Patch management records", "Penetration test reports", "Security testing evidence", "Vulnerability disclosure policy"]
+    },
+    {
+      "control_id": "Art.21.2.f",
+      "domain": "Risk Management",
+      "title": "Policies and procedures to assess effectiveness of cybersecurity risk management",
+      "description": "Entities shall have policies and procedures to assess the effectiveness of cybersecurity risk-management measures, including testing and auditing procedures.",
+      "keywords": ["effectiveness", "audit", "testing", "review", "metrics", "KPI", "cybersecurity assessment", "security audit", "control effectiveness"],
+      "evidence_types": ["Security metrics framework", "Audit schedule and reports", "Penetration testing programme", "Control effectiveness reviews", "Management review records", "Security KPI dashboard"]
+    },
+    {
+      "control_id": "Art.21.2.g",
+      "domain": "Cyber Hygiene",
+      "title": "Basic cyber hygiene practices and cybersecurity training",
+      "description": "Entities shall implement basic cyber hygiene practices and cybersecurity training for all personnel, including awareness of phishing, social engineering and safe use of IT systems.",
+      "keywords": ["cyber hygiene", "security training", "awareness", "phishing", "social engineering", "training programme", "security culture", "password policy"],
+      "evidence_types": ["Security awareness programme", "Training completion records", "Phishing simulation results", "Cyber hygiene baseline policy", "Password policy", "Training materials"]
+    },
+    {
+      "control_id": "Art.21.2.h",
+      "domain": "Cryptography",
+      "title": "Policies and procedures on cryptography and encryption",
+      "description": "Entities shall have policies and procedures on the use of cryptography and, where appropriate, encryption to protect data in transit and at rest.",
+      "keywords": ["cryptography", "encryption", "TLS", "data at rest", "data in transit", "key management", "PKI", "certificates", "cryptographic policy"],
+      "evidence_types": ["Cryptography policy", "Encryption standards document", "TLS configuration evidence", "Certificate inventory", "Key management procedure", "Data classification with encryption requirements"]
+    },
+    {
+      "control_id": "Art.21.2.i",
+      "domain": "Human Resources",
+      "title": "Human resources security — access control and asset management",
+      "description": "Entities shall implement human resources security measures, including access control policies and asset management for all personnel including contractors.",
+      "keywords": ["human resources security", "access control", "asset management", "privileged access", "identity management", "IAM", "onboarding", "offboarding", "background check"],
+      "evidence_types": ["HR security policy", "Access control policy", "Asset inventory", "Onboarding/offboarding procedure", "Privileged access review records", "Background verification evidence"]
+    },
+    {
+      "control_id": "Art.21.2.j",
+      "domain": "Authentication",
+      "title": "Multi-factor authentication and secured communications",
+      "description": "Entities shall use multi-factor authentication or continuous authentication solutions, secured voice, video and text communications, and secured emergency communication systems where appropriate.",
+      "keywords": ["MFA", "multi-factor authentication", "two-factor", "2FA", "secure communications", "authentication", "SSO", "zero trust"],
+      "evidence_types": ["MFA policy and configuration", "MFA deployment evidence (all users)", "Secure communications policy", "SSO/IdP configuration", "Authentication audit logs", "MFA coverage report"]
+    }
+  ]
+}

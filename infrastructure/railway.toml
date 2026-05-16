@@ -1,0 +1,21 @@
+# Railway deployment configuration
+# Deploy to railway.app for a public URL — no installation required
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "backend/Dockerfile"
+
+[deploy]
+startCommand = "uvicorn main:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+[[services]]
+name = "grace-backend"
+
+[[services]]
+name = "grace-frontend"
+dockerfilePath = "frontend/Dockerfile"
+startCommand = "streamlit run app.py --server.port $PORT --server.address 0.0.0.0"
