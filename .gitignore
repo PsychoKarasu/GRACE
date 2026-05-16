@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Local DB (auto-created at runtime)
+backend/data/grace.db
+backend/data/*.db-journal
+backend/data/*.db-wal
+backend/data/*.db-shm
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Streamlit
+.streamlit/

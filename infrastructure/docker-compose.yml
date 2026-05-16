@@ -1,10 +1,8 @@
-version: "3.9"
-
 services:
 
   grace-backend:
     build:
-      context: ./backend
+      context: ../backend
       dockerfile: Dockerfile
     container_name: grace-backend
     ports:
@@ -13,10 +11,10 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     volumes:
       - grace-data:/app/data
-      - ../prompt-library:/app/../prompt-library:ro
+      - ../prompt-library:/prompt-library:ro
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -24,7 +22,7 @@ services:
 
   grace-frontend:
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: Dockerfile
     container_name: grace-frontend
     ports:

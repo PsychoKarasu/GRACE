@@ -118,6 +118,11 @@ def get_documents():
     return {"documents": list_documents()}
 
 
+@app.get("/api/v1/documents/output")
+def get_output_documents():
+    return {"documents": list_output_documents()}
+
+
 @app.get("/api/v1/documents/{document_id}")
 def get_doc(document_id: str):
     doc = get_document(document_id)
@@ -261,11 +266,6 @@ def generate(body: GenerateRequest):
                 "framework_id": body.framework_id, "content": content}
     except Exception as e:
         raise HTTPException(500, detail=str(e))
-
-
-@app.get("/api/v1/documents/output")
-def get_output_documents():
-    return {"documents": list_output_documents()}
 
 
 # ─── KPI / Dashboard ─────────────────────────────────────────────────

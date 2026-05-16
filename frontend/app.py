@@ -2,6 +2,7 @@
 GRACE Prototype — Streamlit Frontend
 Professional GRC demo UI: Gap Analysis, Document Generation, Dashboard
 """
+import os
 import streamlit as st
 import requests
 import json
@@ -17,7 +18,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-API = "http://localhost:8000"
+API = os.environ.get("GRACE_API_URL", "http://localhost:8000")
 
 # ─── Custom CSS ──────────────────────────────────────────────────────
 
@@ -147,7 +148,7 @@ with st.sidebar:
         st.success("🟢 GRACE Engine: Online")
     else:
         st.error("🔴 GRACE Engine: Offline")
-    st.caption("API: localhost:8000")
+    st.caption(f"API: {API}")
 
 
 # ════════════════════════════════════════════════════════════════
