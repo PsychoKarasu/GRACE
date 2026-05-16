@@ -3,11 +3,10 @@ GRACE Prototype — Streamlit Frontend
 Professional GRC demo UI: Gap Analysis, Document Generation, Dashboard
 """
 import os
+import base64
+from pathlib import Path
 import streamlit as st
 import requests
-import json
-import time
-from datetime import datetime
 
 # ─── Config ──────────────────────────────────────────────────────────
 
@@ -20,135 +19,143 @@ st.set_page_config(
 
 API = os.environ.get("GRACE_API_URL", "http://localhost:8000")
 DEFAULT_LANGUAGE = os.environ.get("GRACE_DEFAULT_LANGUAGE", "en")
+DEFAULT_THEME = os.environ.get("GRACE_DEFAULT_THEME", "light")
+
+ASSETS = Path(__file__).parent / "assets"
+
+
+@st.cache_data
+def load_logo_b64() -> str:
+    p = ASSETS / "grace-logo.png"
+    if p.exists():
+        return base64.b64encode(p.read_bytes()).decode()
+    return ""
+
+
+LOGO_B64 = load_logo_b64()
+
 
 # ─── i18n ────────────────────────────────────────────────────────────
 
 TRANSLATIONS = {
     "en": {
-        # Sidebar
-        "sidebar.copilot_brand":      "**Microsoft Copilot** *(simulated)*",
-        "sidebar.language":           "Language",
         "sidebar.navigation":         "Navigation",
-        "sidebar.engine_online":      "🟢 GRACE Engine: Online",
-        "sidebar.engine_offline":     "🔴 GRACE Engine: Offline",
+        "sidebar.engine_online":      "GRACE Engine: Online",
+        "sidebar.engine_offline":     "GRACE Engine: Offline",
         "sidebar.api_label":          "API: {api}",
-        # Page nav labels
-        "nav.gap_analysis":           "🔍 Gap Analysis",
-        "nav.doc_gen":                "📄 Document Generation",
-        "nav.dashboard":              "📊 Governance Dashboard",
-        "nav.registry":               "🗂️ Finding Registry",
-        "nav.library":                "📚 Framework Library",
-        # Gap Analysis
+        "topbar.language":            "Language",
+        "topbar.theme.light":         "Light",
+        "topbar.theme.dark":          "Dark",
+        "topbar.tagline":             "Governance · Risk · Assurance · Compliance Engine",
+        "nav.gap_analysis":           "🔍  Gap Analysis",
+        "nav.doc_gen":                "📄  Document Generation",
+        "nav.dashboard":              "📊  Governance Dashboard",
+        "nav.registry":               "🗂️  Finding Registry",
+        "nav.library":                "📚  Framework Library",
         "ga.header":                  "Gap Analysis",
-        "ga.intro":                   "*Simulate a Copilot interaction: upload a document and receive a structured compliance assessment.*",
-        "ga.input":                   "📋 Input",
-        "ga.select_framework":        "Select framework",
+        "ga.intro":                   "Upload a document and receive a structured, framework-aligned compliance assessment in seconds.",
+        "ga.input":                   "Input",
+        "ga.select_framework":        "Framework",
         "ga.coming_soon_info":        "This framework will be available in Phase 3 of the GRACE rollout.",
         "ga.doc_source":              "Document source",
         "ga.opt_paste":               "Paste text",
         "ga.opt_upload":              "Upload file",
         "ga.opt_example":             "Use example policy",
         "ga.doc_title":               "Document title",
-        "ga.doc_content":             "Paste document content",
-        "ga.paste_placeholder":       "Paste your policy, procedure or standard here...",
-        "ga.upload_label":            "Upload PDF or DOCX",
+        "ga.doc_content":             "Document content",
+        "ga.paste_placeholder":       "Paste your policy, procedure or standard here…",
+        "ga.upload_label":            "Upload PDF, DOCX or TXT",
         "ga.choose_example":          "Choose example document",
         "ga.doc_preview":             "Document preview",
-        "ga.run_button":              "🚀 Run Gap Analysis",
-        "ga.copilot_response":        "📡 GRACE · Copilot Response",
+        "ga.run_button":              "🚀  Run Gap Analysis",
+        "ga.copilot_response":        "Assessment",
         "ga.provide_content":         "Please provide document content.",
-        "ga.registering":             "Registering document...",
-        "ga.analyzing":               "🤖 Claude is analyzing your document against the framework...",
+        "ga.registering":             "Registering document…",
+        "ga.analyzing":               "Claude is analysing your document against the framework…",
         "ga.registration_failed":     "Document registration failed: {detail}",
         "ga.assessment_failed":       "Assessment failed: {detail}",
         "ga.remediation":             "Remediation",
-        "ga.evidence_required":       "📋 Evidence required for full compliance",
-        # Document Generation
+        "ga.evidence_required":       "Evidence required for full compliance",
         "dg.header":                  "Document Generation",
-        "dg.intro":                   "*Generate audit-ready compliance documents using Claude AI.*",
+        "dg.intro":                   "Generate audit-ready compliance documents and export them in three formats.",
         "dg.configure":               "Configure",
         "dg.doc_type":                "Document type",
         "dg.framework":               "Framework",
         "dg.organization":            "Organization name",
-        "dg.processor":               "Processor / Vendor name",
+        "dg.processor":               "Processor / Vendor",
         "dg.purpose":                 "Processing purpose",
         "dg.policy_scope":            "Policy scope",
         "dg.isms_scope":              "ISMS scope",
-        "dg.generate_button":         "✍️ Generate Document",
+        "dg.generate_button":         "✍️  Generate",
         "dg.generated":               "Generated Document",
-        "dg.spinner":                 "Claude is generating your {kind}...",
-        "dg.success":                 "✅ Document generated and saved",
-        "dg.download":                "⬇️ Download as Markdown",
+        "dg.spinner":                 "Claude is generating your {kind}…",
+        "dg.success":                 "Document generated and saved.",
+        "dg.download_md":             "⬇️  Markdown",
+        "dg.download_pdf":            "📕  PDF",
+        "dg.download_docx":           "📘  Word (.docx)",
         "dg.placeholder":             "Configure the document and click Generate.",
         "dg.type_policy":             "Information Security Policy",
         "dg.type_dpa":                "Data Processing Agreement (GDPR Art.28)",
         "dg.type_soa":                "Statement of Applicability (SoA)",
-        # Dashboard
         "db.header":                  "Governance Dashboard",
-        "db.intro":                   "*Live view of compliance posture — simulates the XSOAR dashboard.*",
-        "db.no_data":                 "No data yet. Run some gap analyses first.",
+        "db.intro":                   "Live view of compliance posture across frameworks — simulates the XSOAR dashboard.",
+        "db.no_data":                 "No data yet. Run a gap analysis to populate the dashboard.",
         "db.kpi.open_findings":       "Open Findings",
         "db.kpi.documents":           "Documents",
-        "db.kpi.assessments":         "Assessments Run",
+        "db.kpi.assessments":         "Assessments",
         "db.kpi.avg_coverage":        "Avg Coverage",
         "db.kpi.critical_open":       "Critical Open",
-        "db.status_distribution":     "Compliance Status Distribution",
+        "db.status_distribution":     "Compliance Status",
         "db.coverage_framework":      "Coverage by Framework",
         "db.severity_breakdown":      "Severity Breakdown",
-        "db.recent_docs":             "📄 Recent Documents Analyzed",
+        "db.recent_docs":             "Recent Documents Analysed",
         "db.no_findings":             "No findings yet.",
         "db.no_framework_data":       "No framework data yet.",
         "db.no_severity_data":        "No severity data yet.",
-        "db.no_assessments":          "No assessments yet.",
+        "db.no_assessments":          "No completed assessments yet.",
         "db.no_document":             "(no document)",
         "db.findings_avg":            "{count} findings · avg {score}%",
-        # Registry
         "reg.header":                 "Finding Registry",
-        "reg.intro":                  "*All findings — simulates the XSOAR incident queue.*",
+        "reg.intro":                  "Every finding ever generated — simulates the XSOAR incident queue.",
         "reg.framework":              "Framework",
         "reg.verdict":                "Verdict",
         "reg.operational_status":     "Operational Status",
         "reg.no_findings":            "No findings yet. Run a Gap Analysis first.",
         "reg.findings_count":         "**{n} finding(s)**",
-        "reg.document":               "📄 **Document:** {title}",
+        "reg.document":               "**Document:** {title}",
         "reg.unknown_doc":            "(unknown document)",
         "reg.finding":                "Finding",
         "reg.remediation":            "Remediation",
         "reg.update_op_status":       "Update operational status",
         "reg.update_button":          "Update",
-        "reg.status_updated":         "Status updated",
-        # Library
+        "reg.status_updated":         "Status updated.",
         "lib.header":                 "Framework Library",
-        "lib.intro":                  "*25 international frameworks — P0 frameworks active in this prototype.*",
-        "lib.coming_phase3":          "🚧 Coming Phase 3",
-        "lib.active":                 "✅ Active",
+        "lib.intro":                  "25 international frameworks — P0 frameworks active in this prototype.",
+        "lib.coming_phase3":          "🚧  Coming Phase 3",
+        "lib.active":                 "✅  Active",
         "lib.category":               "Category",
         "lib.priority":               "Priority",
         "lib.controls":               "Controls",
-        "lib.controls_loaded":        "*{n} controls loaded in prototype*",
-        "lib.more_controls":          "+ {n} more controls...",
+        "lib.controls_loaded":        "{n} controls loaded in prototype",
+        "lib.more_controls":          "+ {n} more controls…",
         "lib.explain_ctrl":           "Explain a control",
-        "lib.explain_button":         "🤖 Explain with Claude",
-        "lib.explain_spinner":        "Getting plain-language explanation...",
+        "lib.explain_button":         "🤖  Explain with Claude",
+        "lib.explain_spinner":        "Getting plain-language explanation…",
         "lib.cannot_reach":           "Cannot reach GRACE API",
         "lib.framework_entry":        "**{name}** — {controls} controls · {tag}",
-        # Verdict labels (compliance status)
         "verdict.compliant":          "Compliant",
         "verdict.partial":            "Partial",
         "verdict.non_compliant":      "Non-Compliant",
         "verdict.no_evidence":        "No Evidence",
         "verdict.not_applicable":     "Not Applicable",
-        # Verdict labels with emoji (dashboard distribution)
         "verdict_emoji.compliant":    "✅ Compliant",
         "verdict_emoji.partial":      "⚠️ Partial",
         "verdict_emoji.non_compliant":"❌ Non-Compliant",
         "verdict_emoji.no_evidence":  "❓ No Evidence",
-        # Severity
         "severity.critical":          "CRITICAL",
         "severity.high":              "HIGH",
         "severity.medium":            "MEDIUM",
         "severity.low":               "LOW",
-        # Operational status
         "opstatus.new":               "New",
         "opstatus.acknowledged":      "Acknowledged",
         "opstatus.in_progress":       "In Progress",
@@ -156,108 +163,111 @@ TRANSLATIONS = {
         "opstatus.accepted_risk":     "Accepted Risk",
         "opstatus.closed":            "Closed",
         "opstatus.dismissed":         "Dismissed",
-        # Common
         "all":                        "All",
     },
     "it": {
-        "sidebar.copilot_brand":      "**Microsoft Copilot** *(simulato)*",
-        "sidebar.language":           "Lingua",
         "sidebar.navigation":         "Navigazione",
-        "sidebar.engine_online":      "🟢 Motore GRACE: Online",
-        "sidebar.engine_offline":     "🔴 Motore GRACE: Offline",
+        "sidebar.engine_online":      "Motore GRACE: Online",
+        "sidebar.engine_offline":     "Motore GRACE: Offline",
         "sidebar.api_label":          "API: {api}",
-        "nav.gap_analysis":           "🔍 Analisi dei Gap",
-        "nav.doc_gen":                "📄 Generazione Documenti",
-        "nav.dashboard":              "📊 Dashboard Governance",
-        "nav.registry":               "🗂️ Registro Findings",
-        "nav.library":                "📚 Libreria Framework",
+        "topbar.language":            "Lingua",
+        "topbar.theme.light":         "Chiaro",
+        "topbar.theme.dark":          "Scuro",
+        "topbar.tagline":             "Governance · Risk · Assurance · Compliance Engine",
+        "nav.gap_analysis":           "🔍  Analisi dei Gap",
+        "nav.doc_gen":                "📄  Generazione Documenti",
+        "nav.dashboard":              "📊  Dashboard Governance",
+        "nav.registry":               "🗂️  Registro Findings",
+        "nav.library":                "📚  Libreria Framework",
         "ga.header":                  "Analisi dei Gap",
-        "ga.intro":                   "*Simula un'interazione Copilot: carica un documento e ricevi un assessment di conformità strutturato.*",
-        "ga.input":                   "📋 Input",
-        "ga.select_framework":        "Seleziona framework",
-        "ga.coming_soon_info":        "Questo framework sarà disponibile in Fase 3 del rollout GRACE.",
+        "ga.intro":                   "Carica un documento e ottieni in pochi secondi un assessment di conformità strutturato e allineato al framework.",
+        "ga.input":                   "Input",
+        "ga.select_framework":        "Framework",
+        "ga.coming_soon_info":        "Questo framework sarà disponibile nella Fase 3 del rollout GRACE.",
         "ga.doc_source":              "Origine documento",
         "ga.opt_paste":               "Incolla testo",
         "ga.opt_upload":              "Carica file",
         "ga.opt_example":             "Usa policy d'esempio",
         "ga.doc_title":               "Titolo documento",
-        "ga.doc_content":             "Incolla il contenuto del documento",
-        "ga.paste_placeholder":       "Incolla qui la tua policy, procedura o standard...",
-        "ga.upload_label":            "Carica PDF o DOCX",
+        "ga.doc_content":             "Contenuto documento",
+        "ga.paste_placeholder":       "Incolla qui la tua policy, procedura o standard…",
+        "ga.upload_label":            "Carica PDF, DOCX o TXT",
         "ga.choose_example":          "Scegli documento d'esempio",
         "ga.doc_preview":             "Anteprima documento",
-        "ga.run_button":              "🚀 Esegui Analisi dei Gap",
-        "ga.copilot_response":        "📡 GRACE · Risposta Copilot",
+        "ga.run_button":              "🚀  Esegui Analisi",
+        "ga.copilot_response":        "Assessment",
         "ga.provide_content":         "Fornisci il contenuto del documento.",
-        "ga.registering":             "Registrazione del documento...",
-        "ga.analyzing":               "🤖 Claude sta analizzando il documento rispetto al framework...",
+        "ga.registering":             "Registrazione del documento…",
+        "ga.analyzing":               "Claude sta analizzando il documento rispetto al framework…",
         "ga.registration_failed":     "Registrazione documento fallita: {detail}",
         "ga.assessment_failed":       "Assessment fallito: {detail}",
         "ga.remediation":             "Rimedio",
-        "ga.evidence_required":       "📋 Evidenze richieste per piena conformità",
+        "ga.evidence_required":       "Evidenze richieste per piena conformità",
         "dg.header":                  "Generazione Documenti",
-        "dg.intro":                   "*Genera documenti di conformità audit-ready usando Claude AI.*",
+        "dg.intro":                   "Genera documenti di conformità audit-ready ed esportali in tre formati.",
         "dg.configure":               "Configura",
         "dg.doc_type":                "Tipo di documento",
         "dg.framework":               "Framework",
         "dg.organization":            "Nome organizzazione",
-        "dg.processor":               "Nome processor / fornitore",
+        "dg.processor":               "Processor / Fornitore",
         "dg.purpose":                 "Finalità del trattamento",
         "dg.policy_scope":            "Ambito della policy",
         "dg.isms_scope":              "Ambito ISMS",
-        "dg.generate_button":         "✍️ Genera Documento",
+        "dg.generate_button":         "✍️  Genera",
         "dg.generated":               "Documento Generato",
-        "dg.spinner":                 "Claude sta generando il tuo {kind}...",
-        "dg.success":                 "✅ Documento generato e salvato",
-        "dg.download":                "⬇️ Scarica in Markdown",
+        "dg.spinner":                 "Claude sta generando il tuo {kind}…",
+        "dg.success":                 "Documento generato e salvato.",
+        "dg.download_md":             "⬇️  Markdown",
+        "dg.download_pdf":            "📕  PDF",
+        "dg.download_docx":           "📘  Word (.docx)",
         "dg.placeholder":             "Configura il documento e clicca Genera.",
         "dg.type_policy":             "Information Security Policy",
         "dg.type_dpa":                "Data Processing Agreement (GDPR Art.28)",
         "dg.type_soa":                "Statement of Applicability (SoA)",
         "db.header":                  "Dashboard Governance",
-        "db.intro":                   "*Vista live della postura di conformità — simula la dashboard XSOAR.*",
-        "db.no_data":                 "Nessun dato. Esegui prima qualche analisi dei gap.",
+        "db.intro":                   "Vista live della postura di conformità tra framework — simula la dashboard XSOAR.",
+        "db.no_data":                 "Nessun dato. Esegui prima una gap analysis per popolare la dashboard.",
         "db.kpi.open_findings":       "Findings Aperti",
         "db.kpi.documents":           "Documenti",
-        "db.kpi.assessments":         "Assessment Eseguiti",
+        "db.kpi.assessments":         "Assessment",
         "db.kpi.avg_coverage":        "Copertura Media",
         "db.kpi.critical_open":       "Critici Aperti",
-        "db.status_distribution":    "Distribuzione Stato di Conformità",
+        "db.status_distribution":     "Stato di Conformità",
         "db.coverage_framework":      "Copertura per Framework",
         "db.severity_breakdown":      "Distribuzione Severità",
-        "db.recent_docs":             "📄 Ultimi Documenti Analizzati",
+        "db.recent_docs":             "Ultimi Documenti Analizzati",
         "db.no_findings":             "Nessun finding al momento.",
         "db.no_framework_data":       "Nessun dato per framework al momento.",
         "db.no_severity_data":        "Nessun dato di severità al momento.",
-        "db.no_assessments":          "Nessun assessment al momento.",
+        "db.no_assessments":          "Nessun assessment completato al momento.",
         "db.no_document":             "(nessun documento)",
         "db.findings_avg":            "{count} findings · media {score}%",
         "reg.header":                 "Registro Findings",
-        "reg.intro":                  "*Tutti i findings — simula la coda incident XSOAR.*",
+        "reg.intro":                  "Tutti i findings mai generati — simula la coda incident XSOAR.",
         "reg.framework":              "Framework",
         "reg.verdict":                "Verdetto",
         "reg.operational_status":     "Stato Operativo",
         "reg.no_findings":            "Nessun finding al momento. Esegui prima un'Analisi dei Gap.",
         "reg.findings_count":         "**{n} finding**",
-        "reg.document":               "📄 **Documento:** {title}",
+        "reg.document":               "**Documento:** {title}",
         "reg.unknown_doc":            "(documento sconosciuto)",
         "reg.finding":                "Finding",
         "reg.remediation":            "Rimedio",
         "reg.update_op_status":       "Aggiorna stato operativo",
         "reg.update_button":          "Aggiorna",
-        "reg.status_updated":         "Stato aggiornato",
+        "reg.status_updated":         "Stato aggiornato.",
         "lib.header":                 "Libreria Framework",
-        "lib.intro":                  "*25 framework internazionali — i framework P0 sono attivi in questo prototipo.*",
-        "lib.coming_phase3":          "🚧 In arrivo in Fase 3",
-        "lib.active":                 "✅ Attivo",
+        "lib.intro":                  "25 framework internazionali — i framework P0 sono attivi in questo prototipo.",
+        "lib.coming_phase3":          "🚧  In arrivo in Fase 3",
+        "lib.active":                 "✅  Attivo",
         "lib.category":               "Categoria",
         "lib.priority":               "Priorità",
         "lib.controls":               "Controlli",
-        "lib.controls_loaded":        "*{n} controlli caricati nel prototipo*",
-        "lib.more_controls":          "+ altri {n} controlli...",
+        "lib.controls_loaded":        "{n} controlli caricati nel prototipo",
+        "lib.more_controls":          "+ altri {n} controlli…",
         "lib.explain_ctrl":           "Spiega un controllo",
-        "lib.explain_button":         "🤖 Spiega con Claude",
-        "lib.explain_spinner":        "Recupero la spiegazione in linguaggio naturale...",
+        "lib.explain_button":         "🤖  Spiega con Claude",
+        "lib.explain_spinner":        "Recupero la spiegazione in linguaggio naturale…",
         "lib.cannot_reach":           "Impossibile raggiungere l'API GRACE",
         "lib.framework_entry":        "**{name}** — {controls} controlli · {tag}",
         "verdict.compliant":          "Conforme",
@@ -289,72 +299,275 @@ def get_lang() -> str:
     return st.session_state.get("language", DEFAULT_LANGUAGE)
 
 
+def get_theme() -> str:
+    return st.session_state.get("theme", DEFAULT_THEME)
+
+
 def t(key: str, **kwargs) -> str:
     lang = get_lang()
     s = TRANSLATIONS.get(lang, TRANSLATIONS["en"]).get(key, key)
     return s.format(**kwargs) if kwargs else s
 
 
-# ─── Custom CSS ──────────────────────────────────────────────────────
+# ─── Theme / CSS ─────────────────────────────────────────────────────
 
-st.markdown("""
+THEMES = {
+    "light": {
+        "bg":          "#FAFAF7",
+        "surface":     "#FFFFFF",
+        "surface_alt": "#F4F1E8",
+        "text":        "#163265",
+        "text_dim":    "#5A6F8C",
+        "primary":     "#163265",
+        "accent":      "#2A7A8A",
+        "accent_soft": "#D5EDF2",
+        "border":      "#E5E7EB",
+        "sidebar_bg":  "#F4F1E8",
+        "shadow":      "0 1px 3px rgba(22,50,101,0.08), 0 4px 16px rgba(22,50,101,0.05)",
+        "shadow_lg":   "0 4px 12px rgba(22,50,101,0.10), 0 16px 40px rgba(22,50,101,0.08)",
+        "card_hover_bg": "#F8F9FB",
+    },
+    "dark": {
+        "bg":          "#0A1929",
+        "surface":     "#152E47",
+        "surface_alt": "#1A3650",
+        "text":        "#E6F0F5",
+        "text_dim":    "#8FA5BD",
+        "primary":     "#4EC6D9",
+        "accent":      "#4EC6D9",
+        "accent_soft": "#1E3E5C",
+        "border":      "#1E3E5C",
+        "sidebar_bg":  "#0A1929",
+        "shadow":      "0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2)",
+        "shadow_lg":   "0 4px 12px rgba(0,0,0,0.4), 0 16px 40px rgba(0,0,0,0.3)",
+        "card_hover_bg": "#1A3650",
+    },
+}
+
+
+def inject_css():
+    th = THEMES[get_theme()]
+    st.markdown(f"""
 <style>
-/* Brightstar brand accent */
-:root { --bs-blue: #002EE5; --bs-deep: #000F4F; }
+:root {{
+  --bg:          {th['bg']};
+  --surface:     {th['surface']};
+  --surface-alt: {th['surface_alt']};
+  --text:        {th['text']};
+  --text-dim:    {th['text_dim']};
+  --primary:     {th['primary']};
+  --accent:      {th['accent']};
+  --accent-soft: {th['accent_soft']};
+  --border:      {th['border']};
+  --sidebar-bg:  {th['sidebar_bg']};
+  --shadow:      {th['shadow']};
+  --shadow-lg:   {th['shadow_lg']};
+  --card-hover-bg: {th['card_hover_bg']};
+}}
 
-/* Header strip */
-.grace-header {
-    background: linear-gradient(90deg, #000F4F 0%, #002EE5 100%);
-    color: white;
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-.grace-header h1 { margin: 0; font-size: 1.5rem; font-weight: 700; }
-.grace-header p  { margin: 0; font-size: 0.85rem; opacity: 0.8; }
+/* Streamlit app chrome */
+.stApp {{ background: var(--bg); color: var(--text); }}
+[data-testid="stHeader"] {{ display: none; }}
+[data-testid="stSidebar"] {{ background: var(--sidebar-bg); border-right: 1px solid var(--border); }}
+[data-testid="stSidebar"] * {{ color: var(--text) !important; }}
+.block-container {{ padding-top: 0.5rem !important; max-width: 1400px; }}
 
-/* Status badges */
-.badge-red    { background:#FEE2E2; color:#991B1B; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
-.badge-orange { background:#FFEDD5; color:#9A3412; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
-.badge-yellow { background:#FEF9C3; color:#854D0E; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
-.badge-amber  { background:#FEF3C7; color:#92400E; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
-.badge-green  { background:#D1FAE5; color:#065F46; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
-.badge-gray   { background:#F3F4F6; color:#374151; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
-.badge-blue   { background:#DBEAFE; color:#1E40AF; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+/* Typography */
+html, body, .stApp, [data-testid="stMarkdownContainer"], .stMarkdown p, .stMarkdown li {{
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+}}
+h1, h2, h3, h4 {{ color: var(--text); letter-spacing: -0.01em; }}
+h1 {{ font-weight: 700; }}
+h2 {{ font-weight: 650; }}
+h3 {{ font-weight: 600; }}
 
-/* Finding card */
-.finding-card {
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-bottom: 10px;
-    border-left: 4px solid #002EE5;
-}
-.finding-card.critical { border-left-color: #DC2626; }
-.finding-card.high     { border-left-color: #EA580C; }
-.finding-card.medium   { border-left-color: #EAB308; }
-.finding-card.low      { border-left-color: #6B7280; }
+/* Top bar */
+.grace-topbar {{
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 18px;
+  margin: 4px 0 18px 0;
+  box-shadow: var(--shadow);
+}}
+.grace-topbar .brand {{
+  display: flex; align-items: center; gap: 14px;
+}}
+.grace-topbar .brand-logo {{
+  height: 44px; width: auto;
+}}
+.grace-topbar .brand-text {{
+  display: flex; flex-direction: column; line-height: 1.15;
+}}
+.grace-topbar .brand-name {{
+  font-size: 1.2rem; font-weight: 700; color: var(--primary);
+  letter-spacing: 0.5px;
+}}
+.grace-topbar .brand-tagline {{
+  font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;
+}}
 
-/* KPI card */
-.kpi-card {
-    background: #F8FAFC;
-    border: 1px solid #E2E8F0;
-    border-radius: 8px;
-    padding: 16px;
-    text-align: center;
-}
-.kpi-value { font-size: 2rem; font-weight: 700; color: #000F4F; line-height: 1; }
-.kpi-label { font-size: 0.8rem; color: #64748B; margin-top: 4px; }
+/* Sidebar brand block */
+.grace-side-brand {{
+  background: linear-gradient(140deg, var(--primary) 0%, var(--accent) 100%);
+  border-radius: 12px;
+  padding: 18px 14px;
+  color: white !important;
+  text-align: center;
+  margin-bottom: 10px;
+}}
+.grace-side-brand * {{ color: white !important; }}
+.grace-side-brand img {{ height: 56px; margin-bottom: 6px; }}
+.grace-side-brand .name {{ font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }}
+.grace-side-brand .sub {{ font-size: 0.7rem; opacity: 0.85; margin-top: 2px; }}
+
+/* Status pill */
+.status-pill {{
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent-soft); color: var(--primary);
+  padding: 6px 12px; border-radius: 999px;
+  font-size: 0.8rem; font-weight: 600;
+  border: 1px solid var(--border);
+}}
+.status-pill.online::before {{
+  content: ""; width: 8px; height: 8px; border-radius: 50%; background: #16A34A;
+  box-shadow: 0 0 8px #16A34A;
+}}
+.status-pill.offline::before {{
+  content: ""; width: 8px; height: 8px; border-radius: 50%; background: #DC2626;
+}}
+
+/* Status badges (verdict/severity chips) */
+.badge {{
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 600;
+  border: 1px solid transparent;
+}}
+.badge-red    {{ background:#FEE2E2; color:#991B1B; border-color:#FCA5A5; }}
+.badge-orange {{ background:#FFEDD5; color:#9A3412; border-color:#FED7AA; }}
+.badge-yellow {{ background:#FEF9C3; color:#854D0E; border-color:#FDE68A; }}
+.badge-green  {{ background:#D1FAE5; color:#065F46; border-color:#86EFAC; }}
+.badge-gray   {{ background:#F3F4F6; color:#374151; border-color:#D1D5DB; }}
+.badge-teal   {{ background:#CCFBF1; color:#115E59; border-color:#5EEAD4; }}
+.badge-blue   {{ background:#DBEAFE; color:#1E40AF; border-color:#93C5FD; }}
+
+/* Finding cards */
+.finding-card {{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  border-left: 4px solid var(--accent);
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}}
+.finding-card:hover {{ transform: translateY(-1px); box-shadow: var(--shadow-lg); }}
+.finding-card.critical {{ border-left-color: #DC2626; }}
+.finding-card.high     {{ border-left-color: #EA580C; }}
+.finding-card.medium   {{ border-left-color: #EAB308; }}
+.finding-card.low      {{ border-left-color: #6B7280; }}
+.finding-card .ctrl-id {{
+  color: var(--primary); font-weight: 700; font-size: 0.95rem;
+}}
+.finding-card .ctrl-title {{ color: var(--text); font-weight: 500; }}
+.finding-card .finding-body {{
+  color: var(--text-dim); font-size: 0.88rem; margin: 8px 0;
+  line-height: 1.5;
+}}
+.finding-card .rem {{
+  color: var(--text); font-size: 0.83rem;
+  padding-top: 8px; border-top: 1px solid var(--border);
+}}
+.finding-card .reg-ref {{ color: var(--text-dim); font-size: 0.78rem; }}
+
+/* KPI cards */
+.kpi-card {{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 16px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}}
+.kpi-card:hover {{ transform: translateY(-2px); box-shadow: var(--shadow-lg); }}
+.kpi-card .kpi-value {{
+  font-size: 2.2rem; font-weight: 700; color: var(--primary); line-height: 1;
+}}
+.kpi-card .kpi-label {{
+  font-size: 0.78rem; color: var(--text-dim); margin-top: 6px;
+  text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+}}
+.kpi-card .kpi-icon {{
+  font-size: 1.4rem; opacity: 0.6;
+}}
 
 /* Score bar */
-.score-bar {
-    height: 8px; border-radius: 4px;
-    background: #E2E8F0; overflow: hidden;
-}
-.score-fill { height: 100%; border-radius: 4px; }
+.score-bar {{
+  height: 10px; border-radius: 10px;
+  background: var(--accent-soft); overflow: hidden;
+  border: 1px solid var(--border);
+}}
+.score-fill {{ height: 100%; border-radius: 10px; transition: width 0.3s ease; }}
+
+/* Hero panel for page header */
+.page-hero {{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}}
+.page-hero h1 {{
+  margin: 0 0 4px 0; font-size: 1.6rem; color: var(--primary);
+}}
+.page-hero p {{ margin: 0; color: var(--text-dim); font-size: 0.92rem; }}
+
+/* Section subtitle */
+.section-sub {{
+  font-size: 0.95rem; font-weight: 600; color: var(--primary);
+  margin: 16px 0 8px 0; letter-spacing: 0.3px;
+}}
+
+/* Streamlit widget tweaks */
+.stButton button, .stDownloadButton button {{
+  border-radius: 10px; font-weight: 600;
+  transition: all 0.15s ease;
+}}
+.stButton button[kind="primary"], .stDownloadButton button[kind="primary"] {{
+  background: var(--primary); color: white; border: none;
+}}
+.stButton button[kind="primary"]:hover {{
+  background: var(--accent); transform: translateY(-1px);
+}}
+[data-testid="stExpander"] {{
+  background: var(--surface); border-radius: 12px;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow);
+}}
+[data-testid="stExpander"] summary {{ padding: 6px 10px; }}
+[data-testid="stTextInput"] input, [data-testid="stTextArea"] textarea, [data-testid="stSelectbox"] {{
+  border-radius: 10px !important;
+}}
+
+/* Recent doc row */
+.recent-row {{
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; border-radius: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  margin-bottom: 6px;
+}}
+.recent-row .doc-name {{ font-weight: 600; color: var(--text); }}
+.recent-row .meta {{ color: var(--text-dim); font-size: 0.82rem; margin-left: auto; }}
+.recent-row .fw-tag {{
+  background: var(--accent-soft); color: var(--primary);
+  padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -363,24 +576,25 @@ st.markdown("""
 
 def status_badge(status: str) -> str:
     icons = {"compliant":"✅","partial":"⚠️","non_compliant":"❌","no_evidence":"❓","not_applicable":"➖"}
-    styles = {"compliant":"green","partial":"amber","non_compliant":"red","no_evidence":"gray","not_applicable":"gray"}
+    styles = {"compliant":"green","partial":"yellow","non_compliant":"red","no_evidence":"gray","not_applicable":"gray"}
     icon  = icons.get(status, "•")
     style = styles.get(status, "gray")
     label = t(f"verdict.{status}") if status in icons else status.replace("_"," ").title()
-    return f'<span class="badge-{style}">{icon} {label}</span>'
+    return f'<span class="badge badge-{style}">{icon} {label}</span>'
 
 def severity_badge(severity: str) -> str:
     styles = {"critical":"red","high":"orange","medium":"yellow","low":"gray"}
     style = styles.get(severity, "gray")
     label = t(f"severity.{severity}") if severity in styles else severity.upper()
-    return f'<span class="badge-{style}">{label}</span>'
+    return f'<span class="badge badge-{style}">{label}</span>'
 
 def opstatus_label(op_status: str) -> str:
     return t(f"opstatus.{op_status}") if op_status else ""
 
-def score_bar(score: int, color: str = "#002EE5") -> str:
-    return f"""<div class="score-bar">
-        <div class="score-fill" style="width:{score}%;background:{color}"></div></div>"""
+def score_bar(score: int, color: str = None) -> str:
+    if color is None:
+        color = THEMES[get_theme()]["accent"]
+    return f'<div class="score-bar"><div class="score-fill" style="width:{score}%;background:{color}"></div></div>'
 
 def api_get(path: str):
     try:
@@ -397,61 +611,127 @@ def api_post(path: str, data: dict):
         return {"error": str(e)}
 
 
-# ─── Header ──────────────────────────────────────────────────────────
+# ─── Init session state ──────────────────────────────────────────────
 
-st.markdown("""
-<div class="grace-header">
-    <div style="font-size:2rem">🛡️</div>
-    <div>
-        <h1>GRACE · Governance, Risk, Assurance & Compliance Engine</h1>
-        <p>Prototype v1.0 · Powered by Claude AI · Brightstar Security Operations</p>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+if "language" not in st.session_state:
+    st.session_state["language"] = DEFAULT_LANGUAGE
+if "theme" not in st.session_state:
+    st.session_state["theme"] = DEFAULT_THEME
 
 
-# ─── Sidebar Navigation ──────────────────────────────────────────────
+# Inject CSS for current theme
+inject_css()
 
-LANG_LABELS = {"en": "🇬🇧 English", "it": "🇮🇹 Italiano"}
 
-with st.sidebar:
-    # Language selector — first so it persists nav selection across switches
-    if "language" not in st.session_state:
-        st.session_state["language"] = DEFAULT_LANGUAGE
-    chosen_lang = st.selectbox(
-        TRANSLATIONS[get_lang()]["sidebar.language"],
-        options=list(LANG_LABELS.keys()),
-        index=list(LANG_LABELS.keys()).index(get_lang()),
-        format_func=lambda k: LANG_LABELS[k],
-        key="language",
+# ─── Top bar (logo + language + theme) ───────────────────────────────
+
+LANG_OPTIONS = {"en": "🇬🇧 EN", "it": "🇮🇹 IT"}
+
+# Build the top-bar as a single HTML block on the left + Streamlit widgets on the right
+top_left, top_mid, top_lang, top_theme = st.columns([5.5, 2, 1.4, 1.1])
+
+with top_left:
+    logo_html = (
+        f'<img class="brand-logo" src="data:image/png;base64,{LOGO_B64}" alt="GRACE">'
+        if LOGO_B64
+        else '<div style="font-size:2rem">🛡️</div>'
     )
-
     st.markdown(
-        """
-<div style="background:linear-gradient(135deg,#000F4F 0%,#002EE5 100%);
-            padding:14px 16px;border-radius:10px;color:white;margin-bottom:10px;">
-  <div style="font-size:1.6rem;line-height:1">🛡️</div>
-  <div style="font-size:1.1rem;font-weight:700;letter-spacing:0.5px;margin-top:2px">GRACE</div>
-  <div style="font-size:0.72rem;opacity:0.8">Governance · Risk · Assurance · Compliance</div>
+        f"""
+<div class="grace-topbar" style="margin-right:6px">
+  <div class="brand">
+    {logo_html}
+    <div class="brand-text">
+      <span class="brand-name">GRACE</span>
+      <span class="brand-tagline">{t('topbar.tagline')}</span>
+    </div>
+  </div>
 </div>
-        """,
+""",
         unsafe_allow_html=True,
     )
-    st.markdown("---")
+
+with top_mid:
+    st.markdown("")  # spacer
+
+with top_lang:
+    st.selectbox(
+        t("topbar.language"),
+        options=list(LANG_OPTIONS.keys()),
+        format_func=lambda k: LANG_OPTIONS[k],
+        key="language",
+        label_visibility="collapsed",
+    )
+
+with top_theme:
+    is_dark = get_theme() == "dark"
+    theme_label = "🌙" if not is_dark else "☀️"
+    if st.button(theme_label, use_container_width=True, help=t(f"topbar.theme.{'light' if is_dark else 'dark'}")):
+        st.session_state["theme"] = "light" if is_dark else "dark"
+        st.rerun()
+
+
+# ─── Sidebar ─────────────────────────────────────────────────────────
+
+with st.sidebar:
+    if LOGO_B64:
+        st.markdown(
+            f"""
+<div class="grace-side-brand">
+  <img src="data:image/png;base64,{LOGO_B64}" alt="GRACE">
+  <div class="name">GRACE</div>
+  <div class="sub">GRC Engine</div>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            """
+<div class="grace-side-brand">
+  <div style="font-size:2rem">🛡️</div>
+  <div class="name">GRACE</div>
+  <div class="sub">GRC Engine</div>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
 
     PAGE_KEYS = ["gap_analysis", "doc_gen", "dashboard", "registry", "library"]
     page = st.radio(
         t("sidebar.navigation"),
         PAGE_KEYS,
         format_func=lambda k: t(f"nav.{k}"),
+        label_visibility="collapsed",
     )
+
     st.markdown("---")
     health = api_get("/health")
     if health:
-        st.success(t("sidebar.engine_online"))
+        st.markdown(
+            f'<span class="status-pill online">{t("sidebar.engine_online")}</span>',
+            unsafe_allow_html=True,
+        )
     else:
-        st.error(t("sidebar.engine_offline"))
+        st.markdown(
+            f'<span class="status-pill offline">{t("sidebar.engine_offline")}</span>',
+            unsafe_allow_html=True,
+        )
     st.caption(t("sidebar.api_label", api=API))
+
+
+# ─── Helpers: page hero ──────────────────────────────────────────────
+
+def page_hero(title: str, subtitle: str):
+    st.markdown(
+        f"""
+<div class="page-hero">
+  <h1>{title}</h1>
+  <p>{subtitle}</p>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
 
 
 # ════════════════════════════════════════════════════════════════
@@ -459,15 +739,13 @@ with st.sidebar:
 # ════════════════════════════════════════════════════════════════
 
 if page == "gap_analysis":
-    st.header(t("ga.header"))
-    st.markdown(t("ga.intro"))
+    page_hero(t("ga.header"), t("ga.intro"))
 
     col1, col2 = st.columns([1.2, 1])
 
     with col1:
-        st.subheader(t("ga.input"))
+        st.markdown(f'<div class="section-sub">{t("ga.input")}</div>', unsafe_allow_html=True)
 
-        # Framework selection
         fw_data = api_get("/api/v1/frameworks")
         fw_options = {}
         if fw_data:
@@ -484,17 +762,9 @@ if page == "gap_analysis":
             st.info(t("ga.coming_soon_info"))
             st.stop()
 
-        # Document input method
-        input_methods = {
-            "paste":   t("ga.opt_paste"),
-            "upload":  t("ga.opt_upload"),
-            "example": t("ga.opt_example"),
-        }
-        input_method = st.radio(
-            t("ga.doc_source"),
-            list(input_methods.keys()),
-            format_func=lambda k: input_methods[k],
-        )
+        input_methods = {"paste": t("ga.opt_paste"), "upload": t("ga.opt_upload"), "example": t("ga.opt_example")}
+        input_method = st.radio(t("ga.doc_source"), list(input_methods.keys()),
+                                format_func=lambda k: input_methods[k], horizontal=True)
 
         document_text = ""
         document_title = ""
@@ -502,14 +772,11 @@ if page == "gap_analysis":
 
         if input_method == "paste":
             document_title = st.text_input(t("ga.doc_title"), value="Security Policy v1.0")
-            document_text = st.text_area(t("ga.doc_content"), height=200,
-                placeholder=t("ga.paste_placeholder"))
-
+            document_text = st.text_area(t("ga.doc_content"), height=200, placeholder=t("ga.paste_placeholder"))
         elif input_method == "upload":
             uploaded = st.file_uploader(t("ga.upload_label"), type=["pdf","docx","txt"])
             if uploaded:
                 document_title = uploaded.name
-
         elif input_method == "example":
             examples = {
                 "Access Control Policy (partial)": (
@@ -553,11 +820,10 @@ if page == "gap_analysis":
             document_text  = examples[choice]
             st.text_area(t("ga.doc_preview"), document_text, height=150, disabled=True)
 
-        # Run button
         run_clicked = st.button(t("ga.run_button"), type="primary", use_container_width=True)
 
     with col2:
-        st.subheader(t("ga.copilot_response"))
+        st.markdown(f'<div class="section-sub">{t("ga.copilot_response")}</div>', unsafe_allow_html=True)
         result_container = st.container()
 
     if run_clicked:
@@ -573,10 +839,8 @@ if page == "gap_analysis":
                                          files=files, data={"owner":"demo"})
                     doc_result = resp.json() if resp.ok else {}
                 else:
-                    doc_result = api_post("/api/v1/documents/text", {
-                        "title": document_title,
-                        "content": document_text
-                    })
+                    doc_result = api_post("/api/v1/documents/text",
+                                          {"title": document_title, "content": document_text})
 
                 if "document_id" not in doc_result:
                     st.error(t("ga.registration_failed", detail=str(doc_result)))
@@ -596,44 +860,52 @@ if page == "gap_analysis":
                 st.stop()
 
             result = assessment.get("result", {})
-
-            # ── Executive summary ──
             overall_score = result.get("overall_coverage_score", 0)
             overall_status = result.get("overall_status","partial")
-            color = "#059669" if overall_score >= 80 else "#D97706" if overall_score >= 40 else "#DC2626"
+            color = "#16A34A" if overall_score >= 80 else "#EA580C" if overall_score >= 40 else "#DC2626"
 
             st.markdown(f"""
-**{selected_fw_name}** · *{document_title}*
-
-{score_bar(overall_score, color)}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-<span style="font-size:1.5rem;font-weight:700;color:{color}">{overall_score}%</span>
-{status_badge(overall_status)}
+<div class="page-hero" style="margin-top:0">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px">
+    <div>
+      <div style="font-weight:700;color:var(--primary);font-size:1.05rem">{selected_fw_name}</div>
+      <div style="color:var(--text-dim);font-size:0.85rem">{document_title}</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:2rem;font-weight:700;color:{color};line-height:1">{overall_score}%</div>
+      {status_badge(overall_status)}
+    </div>
+  </div>
+  {score_bar(overall_score, color)}
+  <div style="margin-top:10px;color:var(--text);font-size:0.9rem;line-height:1.5">
+    {result.get('executive_summary','Assessment completed.')}
+  </div>
 </div>
-
-> {result.get('executive_summary','Assessment completed.')}
 """, unsafe_allow_html=True)
 
-            # ── Controls breakdown ──
-            st.markdown("---")
             controls = result.get("controls", [])
             for ctrl in controls:
                 severity = ctrl.get("severity","medium")
                 st.markdown(f"""
 <div class="finding-card {severity}">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-<strong>{ctrl.get('control_id','')} · {ctrl.get('control_title','')}</strong>
-<div>{status_badge(ctrl.get('status','no_evidence'))} &nbsp; {severity_badge(severity)}</div>
-</div>
-<div style="font-size:0.85rem;color:#4B5563;margin-bottom:6px">{ctrl.get('finding','')}</div>
-<div style="font-size:0.8rem">
-<strong>{t('ga.remediation')}:</strong> {ctrl.get('remediation','')} &nbsp;|&nbsp;
-<span style="color:#6B7280">{ctrl.get('regulatory_reference','')}</span>
-</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div>
+      <span class="ctrl-id">{ctrl.get('control_id','')}</span>
+      <span class="ctrl-title"> · {ctrl.get('control_title','')}</span>
+    </div>
+    <div style="display:flex;gap:6px">
+      {status_badge(ctrl.get('status','no_evidence'))}
+      {severity_badge(severity)}
+    </div>
+  </div>
+  <div class="finding-body">{ctrl.get('finding','')}</div>
+  <div class="rem">
+    <strong>{t('ga.remediation')}:</strong> {ctrl.get('remediation','')}
+    <div class="reg-ref" style="margin-top:4px">{ctrl.get('regulatory_reference','')}</div>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
-            # ── Evidence required ──
             with st.expander(t("ga.evidence_required")):
                 for ctrl in controls:
                     if ctrl.get("evidence_required"):
@@ -647,13 +919,12 @@ if page == "gap_analysis":
 # ════════════════════════════════════════════════════════════════
 
 elif page == "doc_gen":
-    st.header(t("dg.header"))
-    st.markdown(t("dg.intro"))
+    page_hero(t("dg.header"), t("dg.intro"))
 
     col1, col2 = st.columns([1, 1.5])
 
     with col1:
-        st.subheader(t("dg.configure"))
+        st.markdown(f'<div class="section-sub">{t("dg.configure")}</div>', unsafe_allow_html=True)
         fw_data = api_get("/api/v1/frameworks")
         fw_options = {}
         if fw_data:
@@ -661,11 +932,7 @@ elif page == "doc_gen":
                 if not fw.get("coming_soon"):
                     fw_options[fw["name"]] = fw["id"]
 
-        doc_types = {
-            "policy": t("dg.type_policy"),
-            "dpa":    t("dg.type_dpa"),
-            "soa":    t("dg.type_soa"),
-        }
+        doc_types = {"policy": t("dg.type_policy"), "dpa": t("dg.type_dpa"), "soa": t("dg.type_soa")}
 
         doc_type = st.selectbox(t("dg.doc_type"), list(doc_types.keys()),
                                 format_func=lambda k: doc_types[k])
@@ -687,14 +954,12 @@ elif page == "doc_gen":
         gen_clicked = st.button(t("dg.generate_button"), type="primary", use_container_width=True)
 
     with col2:
-        st.subheader(t("dg.generated"))
+        st.markdown(f'<div class="section-sub">{t("dg.generated")}</div>', unsafe_allow_html=True)
         if gen_clicked:
             with st.spinner(t("dg.spinner", kind=doc_type_name)):
                 resp = api_post("/api/v1/generate", {
-                    "framework_id": fw_id,
-                    "doc_type": doc_type,
-                    "context": context,
-                    "language": get_lang(),
+                    "framework_id": fw_id, "doc_type": doc_type,
+                    "context": context, "language": get_lang(),
                 })
 
             if "error" in resp:
@@ -703,10 +968,45 @@ elif page == "doc_gen":
                 content = resp.get("content","")
                 st.success(t("dg.success"))
                 st.markdown(content)
-                st.download_button(t("dg.download"),
-                                    data=content,
-                                    file_name=f"GRACE_{doc_type}_{fw_id}.md",
-                                    mime="text/markdown")
+
+                file_base = f"GRACE_{doc_type}_{fw_id}"
+
+                pdf_bytes = None
+                docx_bytes = None
+                try:
+                    pdf_r = requests.post(f"{API}/api/v1/generate/export",
+                        json={"content": content, "format": "pdf", "filename": file_base},
+                        timeout=60)
+                    if pdf_r.ok:
+                        pdf_bytes = pdf_r.content
+                except Exception:
+                    pass
+                try:
+                    docx_r = requests.post(f"{API}/api/v1/generate/export",
+                        json={"content": content, "format": "docx", "filename": file_base},
+                        timeout=60)
+                    if docx_r.ok:
+                        docx_bytes = docx_r.content
+                except Exception:
+                    pass
+
+                dl1, dl2, dl3 = st.columns(3)
+                dl1.download_button(t("dg.download_md"),
+                    data=content, file_name=f"{file_base}.md", mime="text/markdown",
+                    use_container_width=True)
+                if pdf_bytes:
+                    dl2.download_button(t("dg.download_pdf"),
+                        data=pdf_bytes, file_name=f"{file_base}.pdf",
+                        mime="application/pdf", use_container_width=True)
+                else:
+                    dl2.button(t("dg.download_pdf"), disabled=True, use_container_width=True)
+                if docx_bytes:
+                    dl3.download_button(t("dg.download_docx"),
+                        data=docx_bytes, file_name=f"{file_base}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        use_container_width=True)
+                else:
+                    dl3.button(t("dg.download_docx"), disabled=True, use_container_width=True)
         else:
             st.info(t("dg.placeholder"))
 
@@ -716,58 +1016,65 @@ elif page == "doc_gen":
 # ════════════════════════════════════════════════════════════════
 
 elif page == "dashboard":
-    st.header(t("db.header"))
-    st.markdown(t("db.intro"))
+    page_hero(t("db.header"), t("db.intro"))
 
     kpi = api_get("/api/v1/kpi/summary")
     if not kpi:
         st.warning(t("db.no_data"))
         st.stop()
 
-    # Top KPIs
     cols = st.columns(5)
     metrics = [
-        (t("db.kpi.open_findings"), kpi.get("total_open_findings",0),        None),
-        (t("db.kpi.documents"),      kpi.get("documents_registered",0),        None),
-        (t("db.kpi.assessments"),    kpi.get("assessment_runs",0),             None),
-        (t("db.kpi.avg_coverage"),  f"{kpi.get('avg_coverage_score',0):.0f}%", None),
-        (t("db.kpi.critical_open"),  kpi.get("by_severity",{}).get("critical",0), "🔴"),
+        (t("db.kpi.open_findings"),  kpi.get("total_open_findings",0),            "📋"),
+        (t("db.kpi.documents"),       kpi.get("documents_registered",0),            "📄"),
+        (t("db.kpi.assessments"),     kpi.get("assessment_runs",0),                 "🧪"),
+        (t("db.kpi.avg_coverage"),   f"{kpi.get('avg_coverage_score',0):.0f}%",    "📈"),
+        (t("db.kpi.critical_open"),   kpi.get("by_severity",{}).get("critical",0), "🔴"),
     ]
     for i, (label, value, icon) in enumerate(metrics):
         cols[i].markdown(f"""
 <div class="kpi-card">
-<div class="kpi-value">{icon or ''}{value}</div>
-<div class="kpi-label">{label}</div>
+  <div class="kpi-icon">{icon}</div>
+  <div class="kpi-value">{value}</div>
+  <div class="kpi-label">{label}</div>
 </div>""", unsafe_allow_html=True)
 
-    st.markdown("---")
+    st.markdown("&nbsp;", unsafe_allow_html=True)
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader(t("db.status_distribution"))
+        st.markdown(f'<div class="section-sub">{t("db.status_distribution")}</div>', unsafe_allow_html=True)
         by_status = kpi.get("by_status",{})
         if by_status:
             for status, count in by_status.items():
                 label = t(f"verdict_emoji.{status}") if status in ("compliant","partial","non_compliant","no_evidence") else status
-                st.markdown(f"**{label}** — {count}")
+                st.markdown(f"<div class='recent-row'><span class='doc-name'>{label}</span><span class='meta'>{count}</span></div>",
+                            unsafe_allow_html=True)
         else:
             st.info(t("db.no_findings"))
 
     with col2:
-        st.subheader(t("db.coverage_framework"))
+        st.markdown(f'<div class="section-sub">{t("db.coverage_framework")}</div>', unsafe_allow_html=True)
         by_fw = kpi.get("by_framework",{})
         if by_fw:
             for fw, data in by_fw.items():
                 score = data.get("avg_score",0) or 0
-                color = "#059669" if score >= 80 else "#D97706" if score >= 40 else "#DC2626"
-                st.markdown(f"**{fw}** — " + t("db.findings_avg", count=data.get('count',0), score=f"{score:.0f}"))
-                st.markdown(score_bar(score, color), unsafe_allow_html=True)
-                st.markdown("")
+                color = "#16A34A" if score >= 80 else "#EA580C" if score >= 40 else "#DC2626"
+                st.markdown(
+                    f"<div style='margin-bottom:10px'>"
+                    f"<div style='display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:4px'>"
+                    f"<span style='font-weight:600;color:var(--primary)'>{fw}</span>"
+                    f"<span style='color:var(--text-dim)'>" + t("db.findings_avg", count=data.get('count',0), score=f"{score:.0f}") + "</span>"
+                    f"</div>"
+                    f"{score_bar(score, color)}"
+                    f"</div>",
+                    unsafe_allow_html=True
+                )
         else:
             st.info(t("db.no_framework_data"))
 
-    st.markdown("---")
-    st.subheader(t("db.severity_breakdown"))
+    st.markdown("&nbsp;", unsafe_allow_html=True)
+    st.markdown(f'<div class="section-sub">{t("db.severity_breakdown")}</div>', unsafe_allow_html=True)
     by_sev = kpi.get("by_severity",{})
     sev_order = ["critical","high","medium","low"]
     sev_colors = {"critical":"#DC2626","high":"#EA580C","medium":"#EAB308","low":"#6B7280"}
@@ -777,14 +1084,14 @@ elif page == "dashboard":
             count = by_sev.get(sev,0)
             cols[i].markdown(f"""
 <div class="kpi-card">
-<div class="kpi-value" style="color:{sev_colors[sev]}">{count}</div>
-<div class="kpi-label">{t(f"severity.{sev}")}</div>
+  <div class="kpi-value" style="color:{sev_colors[sev]}">{count}</div>
+  <div class="kpi-label">{t(f"severity.{sev}")}</div>
 </div>""", unsafe_allow_html=True)
     else:
         st.info(t("db.no_severity_data"))
 
-    st.markdown("---")
-    st.subheader(t("db.recent_docs"))
+    st.markdown("&nbsp;", unsafe_allow_html=True)
+    st.markdown(f'<div class="section-sub">{t("db.recent_docs")}</div>', unsafe_allow_html=True)
     runs = api_get("/api/v1/assessments")
     completed_runs = [r for r in (runs or {}).get("runs", []) if r.get("status") == "completed"][:10]
     if completed_runs:
@@ -794,8 +1101,12 @@ elif page == "dashboard":
             doc = r.get("document_title") or t("db.no_document")
             fw = r.get("framework","")
             st.markdown(
-                f"✅ **{doc}** · `{fw}` · "
-                f"<span style='color:#6B7280;font-size:0.85rem'>{ts_short} UTC</span>",
+                f"<div class='recent-row'>"
+                f"<span style='color:#16A34A'>✅</span>"
+                f"<span class='doc-name'>{doc}</span>"
+                f"<span class='fw-tag'>{fw}</span>"
+                f"<span class='meta'>{ts_short} UTC</span>"
+                f"</div>",
                 unsafe_allow_html=True
             )
     else:
@@ -807,8 +1118,7 @@ elif page == "dashboard":
 # ════════════════════════════════════════════════════════════════
 
 elif page == "registry":
-    st.header(t("reg.header"))
-    st.markdown(t("reg.intro"))
+    page_hero(t("reg.header"), t("reg.intro"))
 
     OP_STATUSES = ["new","acknowledged","in_progress","resolved","accepted_risk","closed","dismissed"]
     VERDICTS = ["non_compliant","partial","compliant","no_evidence","not_applicable"]
@@ -817,18 +1127,15 @@ elif page == "registry":
 
     col1, col2, col3 = st.columns(3)
     fw_filter = col1.selectbox(
-        t("reg.framework"),
-        [ALL] + FRAMEWORKS,
+        t("reg.framework"), [ALL] + FRAMEWORKS,
         format_func=lambda v: t("all") if v == ALL else v,
     )
     verdict_filter = col2.selectbox(
-        t("reg.verdict"),
-        [ALL] + VERDICTS,
+        t("reg.verdict"), [ALL] + VERDICTS,
         format_func=lambda v: t("all") if v == ALL else t(f"verdict.{v}"),
     )
     op_status_filter = col3.selectbox(
-        t("reg.operational_status"),
-        [ALL] + OP_STATUSES,
+        t("reg.operational_status"), [ALL] + OP_STATUSES,
         format_func=lambda v: t("all") if v == ALL else t(f"opstatus.{v}"),
     )
 
@@ -866,8 +1173,7 @@ elif page == "registry":
                 st.markdown(f"*{f.get('regulatory_reference','')}*")
 
                 new_status = st.selectbox(
-                    t("reg.update_op_status"),
-                    OP_STATUSES,
+                    t("reg.update_op_status"), OP_STATUSES,
                     format_func=lambda v: t(f"opstatus.{v}"),
                     key=f"status_{f['finding_id']}"
                 )
@@ -886,8 +1192,7 @@ elif page == "registry":
 # ════════════════════════════════════════════════════════════════
 
 elif page == "library":
-    st.header(t("lib.header"))
-    st.markdown(t("lib.intro"))
+    page_hero(t("lib.header"), t("lib.intro"))
 
     fw_data = api_get("/api/v1/frameworks")
     if not fw_data:
@@ -903,7 +1208,6 @@ elif page == "library":
             col2.markdown(f"**{t('lib.controls')}:** {fw['controls']}")
 
             if not coming_soon:
-                # Show controls
                 ctrl_data = api_get(f"/api/v1/frameworks/{fw['id']}/controls")
                 if ctrl_data:
                     controls = ctrl_data.get("controls",[])
@@ -913,7 +1217,6 @@ elif page == "library":
                     if len(controls) > 5:
                         st.caption(t("lib.more_controls", n=len(controls)-5))
 
-                    # Explain a control
                     st.markdown("---")
                     ctrl_ids = [c["control_id"] for c in controls]
                     selected_ctrl = st.selectbox(t("lib.explain_ctrl"), ctrl_ids, key=f"ctrl_{fw['id']}")
