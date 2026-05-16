@@ -174,12 +174,15 @@ Remember: find what IS present AND what is MISSING. Be specific to this document
         progress_callback("Calling Claude AI for compliance analysis...")
 
     client = get_client()
-    response = client.messages.create(
+    with client.messages.stream(
         model="claude-sonnet-4-6",
         max_tokens=4096,
         system=system,
         messages=[{"role": "user", "content": user_content}]
-    )
+    ) as stream:
+        for _ in stream.text_stream:
+            pass
+        response = stream.get_final_message()
 
     raw = response.content[0].text
     result = _parse_and_validate(raw, framework_id, document_title)
@@ -273,12 +276,15 @@ def generate_document(doc_type: str, framework_id: str,
     system, user = builder(framework_id, context, language)
 
     client = get_client()
-    response = client.messages.create(
+    with client.messages.stream(
         model="claude-sonnet-4-6",
         max_tokens=3000,
         system=system,
         messages=[{"role": "user", "content": user}]
-    )
+    ) as stream:
+        for _ in stream.text_stream:
+            pass
+        response = stream.get_final_message()
     return response.content[0].text
 
 
@@ -363,10 +369,13 @@ def explain_control(framework_id: str, control_id: str) -> str:
         f"and the 3 most common gaps you see in practice. Keep it practical and concrete."
     )
     client = get_client()
-    response = client.messages.create(
+    with client.messages.stream(
         model="claude-sonnet-4-6",
         max_tokens=1000,
         system=system,
         messages=[{"role": "user", "content": user}]
-    )
+    ) as stream:
+        for _ in stream.text_stream:
+            pass
+        response = stream.get_final_message()
     return response.content[0].text
