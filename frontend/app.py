@@ -43,6 +43,8 @@ st.markdown("""
 
 /* Status badges */
 .badge-red    { background:#FEE2E2; color:#991B1B; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+.badge-orange { background:#FFEDD5; color:#9A3412; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+.badge-yellow { background:#FEF9C3; color:#854D0E; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
 .badge-amber  { background:#FEF3C7; color:#92400E; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
 .badge-green  { background:#D1FAE5; color:#065F46; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
 .badge-gray   { background:#F3F4F6; color:#374151; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
@@ -58,8 +60,8 @@ st.markdown("""
 }
 .finding-card.critical { border-left-color: #DC2626; }
 .finding-card.high     { border-left-color: #EA580C; }
-.finding-card.medium   { border-left-color: #D97706; }
-.finding-card.low      { border-left-color: #059669; }
+.finding-card.medium   { border-left-color: #EAB308; }
+.finding-card.low      { border-left-color: #6B7280; }
 
 /* KPI card */
 .kpi-card {
@@ -93,7 +95,7 @@ def status_badge(status: str) -> str:
     return f'<span class="badge-{style}">{icon} {label}</span>'
 
 def severity_badge(severity: str) -> str:
-    styles = {"critical":"red","high":"amber","medium":"amber","low":"green"}
+    styles = {"critical":"red","high":"orange","medium":"yellow","low":"gray"}
     style = styles.get(severity, "gray")
     return f'<span class="badge-{style}">{severity.upper()}</span>'
 
@@ -458,7 +460,7 @@ elif page == "📊 Governance Dashboard":
     st.subheader("Severity Breakdown")
     by_sev = kpi.get("by_severity",{})
     sev_order = ["critical","high","medium","low"]
-    sev_colors = {"critical":"#DC2626","high":"#EA580C","medium":"#D97706","low":"#059669"}
+    sev_colors = {"critical":"#DC2626","high":"#EA580C","medium":"#EAB308","low":"#6B7280"}
     if by_sev:
         cols = st.columns(len(sev_order))
         for i, sev in enumerate(sev_order):
@@ -471,6 +473,26 @@ elif page == "📊 Governance Dashboard":
     else:
         st.info("No severity data yet.")
 
+    st.markdown("---")
+    st.subheader("📄 Recent Documents Analyzed")
+    runs = api_get("/api/v1/assessments")
+    if runs and runs.get("runs"):
+        recent = runs["runs"][:10]
+        for r in recent:
+            ts = r.get("started_at","")
+            ts_short = ts[:19].replace("T", " ") if ts else ""
+            doc = r.get("document_title") or "(no document)"
+            fw = r.get("framework","")
+            status = r.get("status","")
+            status_emoji = {"completed":"✅","error":"❌","running":"⏳","pending":"⌛"}.get(status, "•")
+            st.markdown(
+                f"{status_emoji} **{doc}** · `{fw}` · "
+                f"<span style='color:#6B7280;font-size:0.85rem'>{ts_short} UTC</span>",
+                unsafe_allow_html=True
+            )
+    else:
+        st.info("No assessments yet.")
+
 
 # ════════════════════════════════════════════════════════════════
 # PAGE: FINDING REGISTRY
@@ -481,13 +503,24 @@ elif page == "🗂️ Finding Registry":
     st.markdown("*All findings — simulates the XSOAR incident queue.*")
 
     col1, col2, col3 = st.columns(3)
-    fw_filter  = col1.selectbox("Framework", ["All","ISO27001:2022","GDPR","SOC2"])
-    sts_filter = col2.selectbox("Status", ["All","non_compliant","partial","compliant","no_evidence"])
-
-    findings = api_get(
-        f"/api/v1/findings?framework={fw_filter if fw_filter!='All' else ''}"
-        f"&status={sts_filter if sts_filter!='All' else ''}&limit=50"
+    fw_filter  = col1.selectbox("Framework", ["All","ISO27001:2022","GDPR","SOC2","NIS2"])
+    verdict_filter = col2.selectbox(
+        "Verdict", ["All","non_compliant","partial","compliant","no_evidence","not_applicable"]
     )
+    op_status_filter = col3.selectbox(
+        "Operational Status",
+        ["All","new","acknowledged","in_progress","resolved","accepted_risk","closed","dismissed"]
+    )
+
+    query = f"/api/v1/findings?limit=100"
+    if fw_filter != "All":
+        query += f"&framework={fw_filter}"
+    if verdict_filter != "All":
+        query += f"&status={verdict_filter}"
+    if op_status_filter != "All":
+        query += f"&operational_status={op_status_filter}"
+
+    findings = api_get(query)
 
     if not findings or not findings.get("findings"):
         st.info("No findings yet. Run a Gap Analysis first.")
@@ -496,21 +529,23 @@ elif page == "🗂️ Finding Registry":
         st.markdown(f"**{len(items)} finding(s)**")
         for f in items:
             severity = f.get("severity","medium")
+            doc_title = f.get("document_title","(unknown document)")
             with st.expander(
                 f"[{f.get('framework','')}] {f.get('control_id','')} · "
                 f"{f.get('control_title','')[:60]} — {severity.upper()}"
             ):
+                st.markdown(f"📄 **Document:** {doc_title}")
                 cols = st.columns([2,1,1])
                 cols[0].markdown(f"**Finding:**  \n{f.get('description','')}")
-                cols[1].markdown(f"**Status:**  \n{f.get('compliance_status','')}")
-                cols[2].markdown(f"**Operational:**  \n{f.get('operational_status','')}")
+                cols[1].markdown(f"**Verdict:**  \n{f.get('compliance_status','')}")
+                cols[2].markdown(f"**Operational Status:**  \n{f.get('operational_status','')}")
 
                 st.markdown(f"**Remediation:** {f.get('recommended_action','')}")
                 st.markdown(f"*{f.get('regulatory_reference','')}*")
 
                 new_status = st.selectbox(
                     "Update operational status",
-                    ["new","acknowledged","in_progress","resolved","accepted_risk"],
+                    ["new","acknowledged","in_progress","resolved","accepted_risk","closed","dismissed"],
                     key=f"status_{f['finding_id']}"
                 )
                 if st.button("Update", key=f"upd_{f['finding_id']}"):

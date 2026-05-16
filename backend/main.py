@@ -228,8 +228,9 @@ def run_assessment_sync(body: AssessmentRequest):
 # ─── Findings ────────────────────────────────────────────────────────
 
 @app.get("/api/v1/findings")
-def get_findings(framework: Optional[str] = None, status: Optional[str] = None, limit: int = 100):
-    return {"findings": list_findings(framework, status, limit)}
+def get_findings(framework: Optional[str] = None, status: Optional[str] = None,
+                 operational_status: Optional[str] = None, limit: int = 100):
+    return {"findings": list_findings(framework, status, limit, operational_status)}
 
 
 class StatusUpdate(BaseModel):
@@ -239,7 +240,7 @@ class StatusUpdate(BaseModel):
 
 @app.patch("/api/v1/findings/{finding_id}/status")
 def patch_finding_status(finding_id: str, body: StatusUpdate):
-    valid = {"new","acknowledged","in_progress","resolved","accepted_risk","closed"}
+    valid = {"new","acknowledged","in_progress","resolved","accepted_risk","closed","dismissed"}
     if body.operational_status not in valid:
         raise HTTPException(400, detail=f"Invalid status. Must be one of: {valid}")
     update_operational_status(finding_id, body.operational_status, body.actor)
@@ -261,7 +262,7 @@ def generate(body: GenerateRequest):
     try:
         content = generate_document(body.doc_type, body.framework_id, body.context, body.language)
         doc_out_id = save_output_document(body.doc_type, body.framework_id,
-                                           body.run_id or "manual", content)
+                                           body.run_id, content)
         return {"document_out_id": doc_out_id, "doc_type": body.doc_type,
                 "framework_id": body.framework_id, "content": content}
     except Exception as e:
