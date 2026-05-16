@@ -1,82 +1,152 @@
 """
 GRACE Prototype — Document Export Helpers
-Markdown → PDF and Markdown → DOCX conversion (pure Python, no native deps).
+Markdown → PDF (reportlab) and Markdown → DOCX (python-docx).
+Pure-Python: no native libraries required.
 """
 import io
 import re
+from html import escape
 
-import markdown as md_lib
 from docx import Document
 from docx.shared import Pt
-from xhtml2pdf import pisa
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import cm
+from reportlab.lib import colors
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, Preformatted, Table, TableStyle, HRFlowable,
+)
+from reportlab.lib.enums import TA_LEFT
+
+NAVY = colors.HexColor("#163265")
+TEAL = colors.HexColor("#2A7A8A")
+TEXT_DIM = colors.HexColor("#5A6F8C")
+SOFT = colors.HexColor("#D5EDF2")
 
 
-_PDF_CSS = """
-@page { size: A4; margin: 2cm 2.2cm; }
-body {
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 10.5pt;
-    color: #163265;
-    line-height: 1.45;
-}
-h1 {
-    color: #163265;
-    border-bottom: 2px solid #2A7A8A;
-    padding-bottom: 4px;
-    font-size: 18pt;
-    margin-top: 0;
-}
-h2 { color: #2A7A8A; font-size: 14pt; margin-top: 16pt; }
-h3 { color: #163265; font-size: 12pt; margin-top: 12pt; }
-h4 { color: #2A7A8A; font-size: 11pt; }
-code {
-    background: #F3F4F6;
-    padding: 1px 4px;
-    border-radius: 3px;
-    font-family: "Courier New", monospace;
-    font-size: 9.5pt;
-}
-pre {
-    background: #F3F4F6;
-    padding: 8px;
-    border-left: 3px solid #2A7A8A;
-    font-family: "Courier New", monospace;
-    font-size: 9.5pt;
-}
-table { border-collapse: collapse; width: 100%; margin: 8pt 0; }
-th, td { border: 1px solid #E5E7EB; padding: 5pt; text-align: left; vertical-align: top; }
-th { background: #F1F5F9; color: #163265; font-weight: bold; }
-blockquote {
-    margin: 8pt 0;
-    padding: 4pt 12pt;
-    border-left: 3px solid #2A7A8A;
-    background: #F9FAFB;
-    color: #475569;
-}
-ul, ol { margin: 6pt 0 6pt 18pt; }
-li { margin: 2pt 0; }
-strong { color: #163265; }
-"""
+def _styles() -> dict:
+    base = getSampleStyleSheet()
+    return {
+        "h1": ParagraphStyle("GraceH1", parent=base["Heading1"], textColor=NAVY,
+            fontName="Helvetica-Bold", fontSize=18, spaceBefore=4, spaceAfter=10),
+        "h2": ParagraphStyle("GraceH2", parent=base["Heading2"], textColor=TEAL,
+            fontName="Helvetica-Bold", fontSize=14, spaceBefore=10, spaceAfter=6),
+        "h3": ParagraphStyle("GraceH3", parent=base["Heading3"], textColor=NAVY,
+            fontName="Helvetica-Bold", fontSize=12, spaceBefore=8, spaceAfter=4),
+        "h4": ParagraphStyle("GraceH4", parent=base["Heading4"], textColor=TEAL,
+            fontName="Helvetica-Bold", fontSize=11, spaceBefore=6, spaceAfter=3),
+        "body": ParagraphStyle("GraceBody", parent=base["BodyText"], textColor=NAVY,
+            fontName="Helvetica", fontSize=10.5, leading=14, alignment=TA_LEFT, spaceAfter=4),
+        "bullet": ParagraphStyle("GraceBullet", parent=base["BodyText"], textColor=NAVY,
+            fontName="Helvetica", fontSize=10.5, leading=14,
+            leftIndent=14, bulletIndent=2, spaceAfter=2),
+        "quote": ParagraphStyle("GraceQuote", parent=base["BodyText"], textColor=TEXT_DIM,
+            fontName="Helvetica-Oblique", fontSize=10.5, leading=14,
+            leftIndent=18, spaceBefore=4, spaceAfter=4),
+        "code": ParagraphStyle("GraceCode", parent=base["Code"], textColor=NAVY,
+            fontName="Courier", fontSize=9.5, leading=12,
+            leftIndent=10, spaceAfter=6),
+    }
 
 
-def markdown_to_pdf_bytes(markdown_text: str) -> bytes:
-    html_body = md_lib.markdown(
-        markdown_text,
-        extensions=["tables", "fenced_code", "sane_lists", "nl2br"],
-    )
-    html = f"<html><head><style>{_PDF_CSS}</style></head><body>{html_body}</body></html>"
+def _inline_md_to_html(text: str) -> str:
+    """Convert simple inline markdown to reportlab Paragraph HTML-like markup."""
+    text = escape(text, quote=False)
+    text = re.sub(r"\*\*([^*\n]+)\*\*", r"<b>\1</b>", text)
+    text = re.sub(r"(?<!\*)\*([^*\n]+)\*(?!\*)", r"<i>\1</i>", text)
+    text = re.sub(r"`([^`\n]+)`", r'<font face="Courier">\1</font>', text)
+    return text
+
+
+def markdown_to_pdf_bytes(md_text: str) -> bytes:
     buf = io.BytesIO()
-    result = pisa.CreatePDF(html, dest=buf, encoding="utf-8")
-    if result.err:
-        raise RuntimeError(f"PDF generation failed: {result.err}")
+    doc = SimpleDocTemplate(
+        buf, pagesize=A4,
+        leftMargin=2 * cm, rightMargin=2 * cm,
+        topMargin=2 * cm, bottomMargin=2 * cm,
+        title="GRACE Document",
+    )
+    s = _styles()
+    flow = []
+    lines = md_text.split("\n")
+    i = 0
+    while i < len(lines):
+        line = lines[i].rstrip()
+        if not line.strip():
+            flow.append(Spacer(1, 4))
+            i += 1
+            continue
+
+        if line.startswith("#### "):
+            flow.append(Paragraph(_inline_md_to_html(line[5:]), s["h4"]))
+        elif line.startswith("### "):
+            flow.append(Paragraph(_inline_md_to_html(line[4:]), s["h3"]))
+        elif line.startswith("## "):
+            flow.append(Paragraph(_inline_md_to_html(line[3:]), s["h2"]))
+        elif line.startswith("# "):
+            flow.append(Paragraph(_inline_md_to_html(line[2:]), s["h1"]))
+            flow.append(HRFlowable(width="100%", thickness=1, color=TEAL,
+                                   spaceBefore=2, spaceAfter=8))
+        elif re.match(r"^[\-\*]\s", line):
+            flow.append(Paragraph("• " + _inline_md_to_html(line[2:].strip()), s["bullet"]))
+        elif re.match(r"^\d+\.\s", line):
+            m = re.match(r"^(\d+\.)\s+(.*)", line)
+            if m:
+                flow.append(Paragraph(f"{m.group(1)} {_inline_md_to_html(m.group(2))}", s["bullet"]))
+        elif line.startswith("> "):
+            flow.append(Paragraph(_inline_md_to_html(line[2:]), s["quote"]))
+        elif line.startswith("|") and i + 1 < len(lines) and re.match(r"^\|[\s\-:|]+\|$", lines[i + 1].strip()):
+            header = [c.strip() for c in line.strip().strip("|").split("|")]
+            i += 2
+            rows = []
+            while i < len(lines) and lines[i].strip().startswith("|"):
+                rows.append([c.strip() for c in lines[i].strip().strip("|").split("|")])
+                i += 1
+            data = [[Paragraph(_inline_md_to_html(c), s["body"]) for c in header]] + [
+                [Paragraph(_inline_md_to_html(c), s["body"]) for c in r] for r in rows
+            ]
+            tbl = Table(data, repeatRows=1)
+            tbl.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), SOFT),
+                ("TEXTCOLOR", (0, 0), (-1, 0), NAVY),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 9.5),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#E5E7EB")),
+                ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                ("TOPPADDING", (0, 0), (-1, -1), 3),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+            ]))
+            flow.append(tbl)
+            flow.append(Spacer(1, 6))
+            continue
+        elif line.startswith("```"):
+            i += 1
+            code_lines = []
+            while i < len(lines) and not lines[i].startswith("```"):
+                code_lines.append(lines[i])
+                i += 1
+            flow.append(Preformatted("\n".join(code_lines), s["code"]))
+        elif re.match(r"^[\-_*]{3,}$", line.strip()):
+            flow.append(HRFlowable(width="100%", thickness=0.6,
+                                   color=colors.HexColor("#E5E7EB"),
+                                   spaceBefore=4, spaceAfter=4))
+        else:
+            flow.append(Paragraph(_inline_md_to_html(line), s["body"]))
+
+        i += 1
+
+    doc.build(flow)
     return buf.getvalue()
 
+
+# ─── DOCX ────────────────────────────────────────────────────────────
 
 _INLINE_RE = re.compile(r"(\*\*[^*\n]+\*\*|\*[^*\n]+\*|`[^`\n]+`)")
 
 
 def _add_runs_with_inline_formatting(paragraph, text: str):
-    """Split a line on **bold**, *italic*, `code` and apply runs accordingly."""
     parts = _INLINE_RE.split(text)
     for part in parts:
         if not part:
@@ -95,20 +165,16 @@ def _add_runs_with_inline_formatting(paragraph, text: str):
             paragraph.add_run(part)
 
 
-def markdown_to_docx_bytes(markdown_text: str) -> bytes:
-    """Convert markdown to DOCX bytes. Supports headings, paragraphs, bullets,
-    numbered lists, bold/italic/code inline, simple pipe tables."""
+def markdown_to_docx_bytes(md_text: str) -> bytes:
     doc = Document()
-    lines = markdown_text.split("\n")
+    lines = md_text.split("\n")
     i = 0
     while i < len(lines):
         line = lines[i].rstrip()
-
         if not line.strip():
             i += 1
             continue
 
-        # Headings
         if line.startswith("#### "):
             doc.add_heading(line[5:], level=4)
         elif line.startswith("### "):
@@ -117,25 +183,21 @@ def markdown_to_docx_bytes(markdown_text: str) -> bytes:
             doc.add_heading(line[3:], level=2)
         elif line.startswith("# "):
             doc.add_heading(line[2:], level=1)
-        # Bullet list
         elif re.match(r"^[\-\*]\s", line):
             p = doc.add_paragraph(style="List Bullet")
             _add_runs_with_inline_formatting(p, line[2:].strip())
-        # Numbered list
         elif re.match(r"^\d+\.\s", line):
             content = re.sub(r"^\d+\.\s", "", line)
             p = doc.add_paragraph(style="List Number")
             _add_runs_with_inline_formatting(p, content)
-        # Blockquote
         elif line.startswith("> "):
             p = doc.add_paragraph()
             p.paragraph_format.left_indent = Pt(18)
             run = p.add_run(line[2:].strip())
             run.italic = True
-        # Pipe table — accumulate consecutive lines
         elif line.startswith("|") and i + 1 < len(lines) and re.match(r"^\|[\s\-:|]+\|$", lines[i + 1].strip()):
             header_cells = [c.strip() for c in line.strip().strip("|").split("|")]
-            i += 2  # skip header and separator
+            i += 2
             rows = []
             while i < len(lines) and lines[i].strip().startswith("|"):
                 rows.append([c.strip() for c in lines[i].strip().strip("|").split("|")])
@@ -146,19 +208,16 @@ def markdown_to_docx_bytes(markdown_text: str) -> bytes:
             for c_idx, header in enumerate(header_cells):
                 cell = table.rows[0].cells[c_idx]
                 cell.text = ""
-                p = cell.paragraphs[0]
-                run = p.add_run(header)
+                run = cell.paragraphs[0].add_run(header)
                 run.bold = True
             for r_idx, row in enumerate(rows):
                 for c_idx in range(ncols):
                     cell_text = row[c_idx] if c_idx < len(row) else ""
                     table.rows[r_idx + 1].cells[c_idx].text = ""
                     _add_runs_with_inline_formatting(
-                        table.rows[r_idx + 1].cells[c_idx].paragraphs[0],
-                        cell_text,
+                        table.rows[r_idx + 1].cells[c_idx].paragraphs[0], cell_text
                     )
-            continue  # skip the i += 1 at the bottom
-        # Code fence — read until closing fence
+            continue
         elif line.startswith("```"):
             i += 1
             code_lines = []
@@ -169,10 +228,8 @@ def markdown_to_docx_bytes(markdown_text: str) -> bytes:
             run = p.add_run("\n".join(code_lines))
             run.font.name = "Courier New"
             run.font.size = Pt(9.5)
-        # Horizontal rule
         elif re.match(r"^[\-_*]{3,}$", line.strip()):
             doc.add_paragraph("─" * 60)
-        # Plain paragraph
         else:
             p = doc.add_paragraph()
             _add_runs_with_inline_formatting(p, line)
