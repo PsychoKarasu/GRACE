@@ -544,9 +544,9 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
     linear-gradient(160deg, var(--surface) 0%, var(--surface-alt) 100%);
   border: 1px solid var(--border);
   border-radius: 18px;
-  padding: 10px 20px;
+  padding: 8px 18px;
   margin: 14px 0 28px 0;
-  min-height: 170px;
+  min-height: 220px;
   box-shadow: var(--shadow);
   position: relative; overflow: hidden;
 }}
@@ -563,12 +563,14 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
   width: 100%; height: 100%;
 }}
 .grace-topbar .brand-logo {{
-  height: auto; width: auto;
-  max-height: 200px;
+  /* The logo image carries the wordmark and tagline natively.
+     Let it fill the entire topbar height (minus a touch of padding)
+     and grow proportionally on the horizontal axis. */
+  height: 200px;
+  width: auto;
   max-width: 100%;
   object-fit: contain;
   filter: drop-shadow(0 3px 8px rgba(22,50,101,0.25));
-  flex-grow: 0;
 }}
 
 /* ── Status pill ── */
