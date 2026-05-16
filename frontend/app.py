@@ -810,16 +810,26 @@ with st.sidebar:
     )
 
     PAGE_KEYS = ["gap_analysis", "doc_gen", "dashboard", "registry", "library"]
-    # An explicit key= survives reruns triggered by other widgets
-    # (e.g. the theme toggle), so navigation no longer snaps back to
-    # Gap Analysis when the user switches theme/language.
+    # Streamlit purges widget state for widgets that did NOT render in
+    # the previous run. The theme toggle in the topbar calls
+    # st.rerun() BEFORE this sidebar block executes, so the radio's
+    # built-in 'nav_page' key alone is not enough — its state is
+    # considered orphaned and reset on the next run.
+    #
+    # Mirror the selection into a non-widget key ('current_page') that
+    # Streamlit never purges, and derive the radio's `index=` from it.
+    current = st.session_state.get("current_page", PAGE_KEYS[0])
+    if current not in PAGE_KEYS:
+        current = PAGE_KEYS[0]
     page = st.radio(
         t("sidebar.navigation"),
         PAGE_KEYS,
+        index=PAGE_KEYS.index(current),
         format_func=lambda k: t(f"nav.{k}"),
         label_visibility="collapsed",
         key="nav_page",
     )
+    st.session_state["current_page"] = page
 
     st.markdown("---")
     health = api_get("/health")
