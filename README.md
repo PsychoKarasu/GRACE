@@ -5,6 +5,34 @@
 
 ---
 
+## ⚠️ Usage notice — All rights reserved
+
+**This software, its source code, design, prompts, data model and accompanying
+assets are the intellectual property of the project owner ([@PsychoKarasu](https://github.com/PsychoKarasu)).**
+
+Use, reproduction, distribution, modification, sublicensing, hosting,
+commercial exploitation, derivative-work creation or any redistribution
+of GRACE — in whole or in part — **is strictly prohibited without the
+prior, explicit, written consent of the owner.**
+
+This includes (non-exhaustive):
+- forking and publishing the repository under another name or organisation,
+- embedding GRACE (or any of its modules, prompts, schemas, datasets, or
+  brand assets) into other products, demos or services,
+- using GRACE in any client engagement, sales activity, training material
+  or marketing communication,
+- using GRACE outputs (gap assessments, generated policies, etc.) in any
+  audit, certification or regulatory submission without independent review.
+
+For any request to evaluate, license, integrate or otherwise use this
+project, contact the owner via GitHub before proceeding.
+
+> The project is shared publicly for **demonstration, review and educational
+> review only**. No license — express or implied — is granted by the mere
+> visibility of the source code on this repository.
+
+---
+
 ## What this prototype demonstrates
 
 | Capability | Description |
@@ -149,3 +177,9 @@ The prototype backend is production-equivalent. Migration requires:
 ---
 
 *GRACE Prototype v1.0 · Brightstar Security Operations · Confidential*
+
+---
+
+© 2026 [@PsychoKarasu](https://github.com/PsychoKarasu). All rights reserved.
+Unauthorised use, reproduction or distribution is prohibited. See the
+**Usage notice** at the top of this README.

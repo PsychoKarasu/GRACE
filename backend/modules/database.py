@@ -69,7 +69,8 @@ def init_db():
             owner               TEXT,
             due_date            TEXT,
             created_at          TEXT NOT NULL,
-            updated_at          TEXT NOT NULL
+            updated_at          TEXT NOT NULL,
+            language            TEXT DEFAULT 'en'
         );
 
         CREATE TABLE IF NOT EXISTS gaps (
@@ -109,6 +110,10 @@ def init_db():
             created_at  TEXT NOT NULL
         );
     """)
+    # Idempotent migrations for older DBs
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(findings)").fetchall()}
+    if "language" not in cols:
+        conn.execute("ALTER TABLE findings ADD COLUMN language TEXT DEFAULT 'en'")
     conn.commit()
     conn.close()
 
@@ -221,7 +226,8 @@ def list_runs(limit: int = 20) -> list:
 
 # ─── Finding operations ────────────────────────────────────────────
 
-def save_findings(run_id: str, document_id: str, assessment_result: dict) -> list:
+def save_findings(run_id: str, document_id: str, assessment_result: dict,
+                  language: str = "en") -> list:
     """Persist structured findings from LLM output."""
     conn = get_db()
     saved_ids = []
@@ -230,8 +236,9 @@ def save_findings(run_id: str, document_id: str, assessment_result: dict) -> lis
         conn.execute("""
             INSERT INTO findings
             (finding_id, run_id, document_id, framework, control_id, control_title,
-             compliance_status, severity, coverage_score, confidence, created_at, updated_at)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+             compliance_status, severity, coverage_score, confidence, created_at, updated_at,
+             language)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, (fid, run_id, document_id,
               assessment_result.get("framework", ""),
               ctrl.get("control_id", ""),
@@ -239,7 +246,7 @@ def save_findings(run_id: str, document_id: str, assessment_result: dict) -> lis
               ctrl.get("status", "no_evidence"),
               ctrl.get("severity", "medium"),
               ctrl.get("coverage_score", 0),
-              80, now_utc(), now_utc()))
+              80, now_utc(), now_utc(), language))
 
         gap_id = new_id()
         conn.execute("""
@@ -266,10 +273,10 @@ def list_findings(framework: str = None, status: str = None, limit: int = 100,
     q = """
         SELECT f.finding_id, f.framework, f.control_id, f.control_title,
                f.compliance_status, f.severity, f.coverage_score,
-               f.operational_status, f.created_at,
+               f.operational_status, f.created_at, f.language,
                g.description, g.recommended_action, g.regulatory_reference,
                g.evidence_required,
-               d.title as document_title, r.run_id
+               d.title as document_title, d.document_id, r.run_id
         FROM findings f
         LEFT JOIN gaps g ON g.finding_id = f.finding_id
         LEFT JOIN documents d ON d.document_id = f.document_id
