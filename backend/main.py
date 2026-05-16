@@ -50,7 +50,39 @@ def on_startup():
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "GRACE API", "version": "1.0.0-prototype"}
+    """Real liveness/readiness probe.
+
+    - 'ok'       : DB reachable AND Anthropic API key configured
+    - 'degraded' : DB reachable but API key missing (read-only)
+    - 'down'     : DB unreachable (returns HTTP 503)
+    """
+    import os
+    from fastapi import HTTPException
+    from modules.database import get_db
+
+    try:
+        conn = get_db()
+        conn.execute("SELECT 1").fetchone()
+        conn.close()
+        db_ok = True
+    except Exception:
+        db_ok = False
+
+    api_key_ok = bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())
+
+    if not db_ok:
+        raise HTTPException(status_code=503, detail={
+            "status": "down", "service": "GRACE API", "db": False,
+        })
+
+    status = "ok" if api_key_ok else "degraded"
+    return {
+        "status": status,
+        "service": "GRACE API",
+        "version": "1.0.0-prototype",
+        "db": True,
+        "api_key": api_key_ok,
+    }
 
 
 # ─── Frameworks ──────────────────────────────────────────────────────
@@ -236,8 +268,50 @@ def run_assessment_sync(body: AssessmentRequest):
 
 @app.get("/api/v1/findings")
 def get_findings(framework: Optional[str] = None, status: Optional[str] = None,
-                 operational_status: Optional[str] = None, limit: int = 100):
-    return {"findings": list_findings(framework, status, limit, operational_status)}
+                 operational_status: Optional[str] = None, limit: int = 100,
+                 language: Optional[str] = None):
+    """Return findings, with user-facing fields lazily translated to
+    `language` when it differs from the finding's stored generation
+    language. Translations are cached in the finding_translations table
+    so each (finding × target_lang) pair only hits Claude once."""
+    from modules.database import (
+        get_finding_translation, save_finding_translation,
+    )
+    from modules.grc_engine import translate_finding_fields
+
+    findings = list_findings(framework, status, limit, operational_status)
+
+    if not language or language not in ("en", "it"):
+        return {"findings": findings}
+
+    for f in findings:
+        src = (f.get("language") or "en").lower()
+        if src == language:
+            continue
+        cached = get_finding_translation(f["finding_id"], language)
+        if cached:
+            f["description"]          = cached["description"]
+            f["recommended_action"]   = cached["recommended_action"]
+            f["regulatory_reference"] = cached["regulatory_reference"]
+        else:
+            translated = translate_finding_fields(
+                f.get("description", ""),
+                f.get("recommended_action", ""),
+                f.get("regulatory_reference", ""),
+                language,
+            )
+            save_finding_translation(
+                f["finding_id"], language,
+                translated["description"],
+                translated["recommended_action"],
+                translated["regulatory_reference"],
+            )
+            f["description"]          = translated["description"]
+            f["recommended_action"]   = translated["recommended_action"]
+            f["regulatory_reference"] = translated["regulatory_reference"]
+        f["language"] = language
+
+    return {"findings": findings}
 
 
 class StatusUpdate(BaseModel):

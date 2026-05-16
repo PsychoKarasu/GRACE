@@ -109,6 +109,15 @@ def init_db():
             details     TEXT,
             created_at  TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS finding_translations (
+            finding_id           TEXT NOT NULL,
+            language             TEXT NOT NULL,
+            description          TEXT,
+            recommended_action   TEXT,
+            regulatory_reference TEXT,
+            created_at           TEXT NOT NULL,
+            PRIMARY KEY (finding_id, language)
+        );
     """)
     # Idempotent migrations for older DBs
     cols = {r["name"] for r in conn.execute("PRAGMA table_info(findings)").fetchall()}
@@ -313,6 +322,33 @@ def update_operational_status(finding_id: str, new_status: str, actor: str = "de
 
 
 # ─── KPI aggregation ────────────────────────────────────────────
+
+def get_finding_translation(finding_id: str, language: str) -> dict | None:
+    """Return cached translation for the finding or None."""
+    conn = get_db()
+    row = conn.execute(
+        "SELECT description, recommended_action, regulatory_reference "
+        "FROM finding_translations WHERE finding_id=? AND language=?",
+        (finding_id, language),
+    ).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def save_finding_translation(finding_id: str, language: str,
+                             description: str, recommended_action: str,
+                             regulatory_reference: str) -> None:
+    conn = get_db()
+    conn.execute(
+        "INSERT OR REPLACE INTO finding_translations "
+        "(finding_id, language, description, recommended_action, "
+        " regulatory_reference, created_at) VALUES (?,?,?,?,?,?)",
+        (finding_id, language, description, recommended_action,
+         regulatory_reference, now_utc()),
+    )
+    conn.commit()
+    conn.close()
+
 
 def get_kpi_summary() -> dict:
     conn = get_db()

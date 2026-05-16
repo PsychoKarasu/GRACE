@@ -341,6 +341,65 @@ def _status_to_score(status: str) -> int:
             "no_evidence":10,"not_applicable":100}.get(status, 10)
 
 
+# ─── Finding translation (lazy, cached) ──────────────────────────
+
+_LANG_LABEL = {"en": "English", "it": "Italian"}
+
+
+def translate_finding_fields(description: str, recommended_action: str,
+                              regulatory_reference: str,
+                              target_lang: str) -> dict:
+    """Translate the three user-facing fields of a finding to `target_lang`.
+
+    Returns a dict with the same keys. Falls back to the originals if
+    Claude returns an unparseable response so the UI never breaks.
+    """
+    target_name = _LANG_LABEL.get(target_lang, "English")
+    payload = json.dumps({
+        "description": description or "",
+        "recommended_action": recommended_action or "",
+        "regulatory_reference": regulatory_reference or "",
+    }, ensure_ascii=False)
+
+    prompt = (
+        f"You are translating a GRC (Governance, Risk, Compliance) finding "
+        f"into {target_name}. Preserve every regulatory reference, control "
+        f"identifier, framework name, product name, acronym and quoted clause "
+        f"verbatim — only translate natural-language sentences around them. "
+        f"Maintain a professional auditor tone.\n\n"
+        f"Return ONLY a valid JSON object with exactly these keys: "
+        f"\"description\", \"recommended_action\", \"regulatory_reference\". "
+        f"No prose around the JSON.\n\n"
+        f"Input JSON:\n{payload}"
+    )
+
+    try:
+        msg = get_client().messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1500,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text = msg.content[0].text.strip()
+        # Strip code fences if Claude wrapped the JSON
+        if text.startswith("```"):
+            text = text.split("```")[1]
+            if text.startswith("json"):
+                text = text[4:].strip()
+        translated = json.loads(text)
+        return {
+            "description":          translated.get("description") or description,
+            "recommended_action":   translated.get("recommended_action") or recommended_action,
+            "regulatory_reference": translated.get("regulatory_reference") or regulatory_reference,
+        }
+    except Exception:
+        logger.warning("Translation to %s failed; returning original fields", target_lang)
+        return {
+            "description":          description,
+            "recommended_action":   recommended_action,
+            "regulatory_reference": regulatory_reference,
+        }
+
+
 # ─── Document Generation ─────────────────────────────────────────
 
 def generate_document(doc_type: str, framework_id: str,
