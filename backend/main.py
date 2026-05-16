@@ -167,7 +167,7 @@ def _run_assessment_bg(run_id: str, document_id: str, framework: str,
             progress_callback=progress,
             language=language,
         )
-        finding_ids = save_findings(run_id, document_id, result)
+        finding_ids = save_findings(run_id, document_id, result, language=language)
         complete_run(run_id, "completed")
         _run_results[run_id] = {
             "status": "completed",
@@ -224,7 +224,7 @@ def run_assessment_sync(body: AssessmentRequest):
             controls_scope=body.controls_scope,
             language=body.language,
         )
-        finding_ids = save_findings(run_id, body.document_id, result)
+        finding_ids = save_findings(run_id, body.document_id, result, language=body.language or "en")
         complete_run(run_id, "completed")
         return {"run_id": run_id, "status": "completed", "result": result, "finding_ids": finding_ids}
     except Exception as e:

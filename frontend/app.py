@@ -25,14 +25,15 @@ ASSETS = Path(__file__).parent / "assets"
 
 
 @st.cache_data
-def load_logo_b64() -> str:
-    p = ASSETS / "grace-logo.png"
+def load_b64(filename: str) -> str:
+    p = ASSETS / filename
     if p.exists():
         return base64.b64encode(p.read_bytes()).decode()
     return ""
 
 
-LOGO_B64 = load_logo_b64()
+LOGO_B64 = load_b64("grace-logo.png")
+SYMBOL_B64 = load_b64("grace-symbol.png")
 
 
 # ─── i18n ────────────────────────────────────────────────────────────
@@ -121,9 +122,11 @@ TRANSLATIONS = {
         "reg.verdict":                "Verdict",
         "reg.operational_status":     "Operational Status",
         "reg.no_findings":            "No findings yet. Run a Gap Analysis first.",
-        "reg.findings_count":         "**{n} finding(s)**",
+        "reg.findings_count":         "**{n} finding(s)** across **{d} document(s)**",
         "reg.document":               "**Document:** {title}",
         "reg.unknown_doc":            "(unknown document)",
+        "reg.doc_summary":            "{n} finding(s) · {framework} · {date}",
+        "reg.lang_tag":               "Generated in",
         "reg.finding":                "Finding",
         "reg.remediation":            "Remediation",
         "reg.update_op_status":       "Update operational status",
@@ -248,9 +251,11 @@ TRANSLATIONS = {
         "reg.verdict":                "Verdetto",
         "reg.operational_status":     "Stato Operativo",
         "reg.no_findings":            "Nessun finding al momento. Esegui prima un'Analisi dei Gap.",
-        "reg.findings_count":         "**{n} finding**",
+        "reg.findings_count":         "**{n} finding** in **{d} documento/i**",
         "reg.document":               "**Documento:** {title}",
         "reg.unknown_doc":            "(documento sconosciuto)",
+        "reg.doc_summary":            "{n} finding · {framework} · {date}",
+        "reg.lang_tag":               "Generato in",
         "reg.finding":                "Finding",
         "reg.remediation":            "Rimedio",
         "reg.update_op_status":       "Aggiorna stato operativo",
@@ -409,19 +414,19 @@ h3 {{ font-weight: 600; }}
   font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;
 }}
 
-/* Sidebar brand block */
+/* Sidebar brand block — symbol on a light teal panel */
 .grace-side-brand {{
-  background: linear-gradient(140deg, var(--primary) 0%, var(--accent) 100%);
-  border-radius: 12px;
-  padding: 18px 14px;
-  color: white !important;
+  background: linear-gradient(140deg, #4EC6D9 0%, #2A7A8A 100%);
+  border-radius: 14px;
+  padding: 22px 14px 18px;
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
+  box-shadow: 0 6px 18px rgba(22,50,101,0.18);
 }}
-.grace-side-brand * {{ color: white !important; }}
-.grace-side-brand img {{ height: 56px; margin-bottom: 6px; }}
-.grace-side-brand .name {{ font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }}
-.grace-side-brand .sub {{ font-size: 0.7rem; opacity: 0.85; margin-top: 2px; }}
+.grace-side-brand img {{
+  height: 96px; width: auto; display: block; margin: 0 auto;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+}}
 
 /* Status pill */
 .status-pill {{
@@ -539,11 +544,22 @@ h3 {{ font-weight: 600; }}
   border-radius: 10px; font-weight: 600;
   transition: all 0.15s ease;
 }}
-.stButton button[kind="primary"], .stDownloadButton button[kind="primary"] {{
-  background: var(--primary); color: white; border: none;
+.stButton button[kind="primary"],
+.stDownloadButton button[kind="primary"] {{
+  background: var(--primary) !important;
+  color: #FFFFFF !important;
+  border: none !important;
 }}
-.stButton button[kind="primary"]:hover {{
-  background: var(--accent); transform: translateY(-1px);
+.stButton button[kind="primary"] *,
+.stButton button[kind="primary"] p,
+.stDownloadButton button[kind="primary"] *,
+.stDownloadButton button[kind="primary"] p {{
+  color: #FFFFFF !important;
+}}
+.stButton button[kind="primary"]:hover,
+.stDownloadButton button[kind="primary"]:hover {{
+  background: var(--accent) !important;
+  transform: translateY(-1px);
 }}
 [data-testid="stExpander"] {{
   background: var(--surface); border-radius: 12px;
@@ -674,26 +690,14 @@ with top_theme:
 # ─── Sidebar ─────────────────────────────────────────────────────────
 
 with st.sidebar:
-    if LOGO_B64:
+    if SYMBOL_B64:
         st.markdown(
-            f"""
-<div class="grace-side-brand">
-  <img src="data:image/png;base64,{LOGO_B64}" alt="GRACE">
-  <div class="name">GRACE</div>
-  <div class="sub">GRC Engine</div>
-</div>
-""",
+            f'<div class="grace-side-brand"><img src="data:image/png;base64,{SYMBOL_B64}" alt="GRACE"></div>',
             unsafe_allow_html=True,
         )
     else:
         st.markdown(
-            """
-<div class="grace-side-brand">
-  <div style="font-size:2rem">🛡️</div>
-  <div class="name">GRACE</div>
-  <div class="sub">GRC Engine</div>
-</div>
-""",
+            '<div class="grace-side-brand"><div style="font-size:3rem">🛡️</div></div>',
             unsafe_allow_html=True,
         )
 
@@ -1153,38 +1157,76 @@ elif page == "registry":
         st.info(t("reg.no_findings"))
     else:
         items = findings["findings"]
-        st.markdown(t("reg.findings_count", n=len(items)))
+
+        # Group by document
+        from collections import OrderedDict
+        groups = OrderedDict()
         for f in items:
-            severity = f.get("severity","medium")
-            doc_title = f.get("document_title") or t("reg.unknown_doc")
-            with st.expander(
-                f"[{f.get('framework','')}] {f.get('control_id','')} · "
-                f"{f.get('control_title','')[:60]} — {t(f'severity.{severity}')}"
-            ):
-                st.markdown(t("reg.document", title=doc_title))
-                cols = st.columns([2,1,1])
-                cols[0].markdown(f"**{t('reg.finding')}:**  \n{f.get('description','')}")
-                verdict = f.get('compliance_status','')
-                cols[1].markdown(f"**{t('reg.verdict')}:**  \n{t(f'verdict.{verdict}') if verdict else ''}")
-                op_st = f.get('operational_status','')
-                cols[2].markdown(f"**{t('reg.operational_status')}:**  \n{opstatus_label(op_st)}")
+            key = f.get("document_title") or t("reg.unknown_doc")
+            groups.setdefault(key, []).append(f)
 
-                st.markdown(f"**{t('reg.remediation')}:** {f.get('recommended_action','')}")
-                st.markdown(f"*{f.get('regulatory_reference','')}*")
+        st.markdown(t("reg.findings_count", n=len(items), d=len(groups)))
 
-                new_status = st.selectbox(
-                    t("reg.update_op_status"), OP_STATUSES,
-                    format_func=lambda v: t(f"opstatus.{v}"),
-                    key=f"status_{f['finding_id']}"
-                )
-                if st.button(t("reg.update_button"), key=f"upd_{f['finding_id']}"):
-                    resp = requests.patch(
-                        f"{API}/api/v1/findings/{f['finding_id']}/status",
-                        json={"operational_status": new_status}
+        LANG_FLAG = {"en": "🇬🇧 EN", "it": "🇮🇹 IT"}
+
+        for doc_title, doc_findings in groups.items():
+            # Document-level meta: latest framework, latest created_at, count
+            latest = max(doc_findings, key=lambda x: x.get("created_at",""))
+            doc_framework = latest.get("framework","")
+            doc_date = (latest.get("created_at","") or "")[:10]
+            summary = t("reg.doc_summary", n=len(doc_findings), framework=doc_framework, date=doc_date)
+            # Worst severity for the document (drives chip)
+            sev_rank = {"critical":4,"high":3,"medium":2,"low":1}
+            worst_sev = max((f.get("severity","medium") for f in doc_findings),
+                            key=lambda s: sev_rank.get(s, 0))
+
+            with st.expander(f"📄  {doc_title}  ·  {summary}  ·  {t(f'severity.{worst_sev}')}"):
+                for f in doc_findings:
+                    severity = f.get("severity","medium")
+                    finding_lang = f.get("language") or "en"
+                    lang_chip = ""
+                    if finding_lang != get_lang():
+                        lang_chip = (
+                            f"<span class='badge badge-blue' style='margin-left:8px;font-size:10px'>"
+                            f"{t('reg.lang_tag')} {LANG_FLAG.get(finding_lang, finding_lang.upper())}"
+                            f"</span>"
+                        )
+                    st.markdown(
+                        f"<div class='finding-card {severity}'>"
+                        f"<div style='display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap'>"
+                        f"<div><span class='ctrl-id'>{f.get('control_id','')}</span>"
+                        f"<span class='ctrl-title'> · {f.get('control_title','')}</span>"
+                        f"{lang_chip}</div>"
+                        f"<div style='display:flex;gap:6px'>"
+                        f"{status_badge(f.get('compliance_status','no_evidence'))}"
+                        f"{severity_badge(severity)}"
+                        f"</div></div>"
+                        f"<div class='finding-body'>{f.get('description','')}</div>"
+                        f"<div class='rem'><strong>{t('reg.remediation')}:</strong> {f.get('recommended_action','')}"
+                        f"<div class='reg-ref' style='margin-top:4px'>{f.get('regulatory_reference','')}</div>"
+                        f"</div></div>",
+                        unsafe_allow_html=True,
                     )
-                    if resp.ok:
-                        st.success(t("reg.status_updated"))
-                        st.rerun()
+
+                    op_st = f.get('operational_status','')
+                    upd_cols = st.columns([3, 1])
+                    new_status = upd_cols[0].selectbox(
+                        f"{t('reg.update_op_status')} — {f.get('control_id','')}",
+                        OP_STATUSES,
+                        index=OP_STATUSES.index(op_st) if op_st in OP_STATUSES else 0,
+                        format_func=lambda v: t(f"opstatus.{v}"),
+                        key=f"status_{f['finding_id']}",
+                        label_visibility="collapsed",
+                    )
+                    if upd_cols[1].button(t("reg.update_button"), key=f"upd_{f['finding_id']}",
+                                          use_container_width=True):
+                        resp = requests.patch(
+                            f"{API}/api/v1/findings/{f['finding_id']}/status",
+                            json={"operational_status": new_status}
+                        )
+                        if resp.ok:
+                            st.success(t("reg.status_updated"))
+                            st.rerun()
 
 
 # ════════════════════════════════════════════════════════════════
