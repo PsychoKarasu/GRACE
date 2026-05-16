@@ -67,8 +67,8 @@ def get_controls(framework_id: str):
 
 
 @app.get("/api/v1/frameworks/{framework_id}/controls/{control_id}/explain")
-def explain(framework_id: str, control_id: str):
-    explanation = explain_control(framework_id, control_id)
+def explain(framework_id: str, control_id: str, language: Optional[str] = "en"):
+    explanation = explain_control(framework_id, control_id, language=language)
     return {"framework_id": framework_id, "control_id": control_id, "explanation": explanation}
 
 
@@ -138,13 +138,15 @@ class AssessmentRequest(BaseModel):
     framework: str
     controls_scope: Optional[list] = None
     channel: Optional[str] = "web"
+    language: Optional[str] = "en"
 
 
 # In-memory run status store (lightweight for prototype)
 _run_results: dict = {}
 
 
-def _run_assessment_bg(run_id: str, document_id: str, framework: str, controls_scope: list):
+def _run_assessment_bg(run_id: str, document_id: str, framework: str,
+                       controls_scope: list, language: str = "en"):
     """Background task: run assessment and persist results."""
     try:
         doc = get_document(document_id)
@@ -160,7 +162,8 @@ def _run_assessment_bg(run_id: str, document_id: str, framework: str, controls_s
             document_title=doc["title"],
             framework_id=framework,
             controls_scope=controls_scope,
-            progress_callback=progress
+            progress_callback=progress,
+            language=language,
         )
         finding_ids = save_findings(run_id, document_id, result)
         complete_run(run_id, "completed")
@@ -179,7 +182,8 @@ def start_assessment(body: AssessmentRequest, background_tasks: BackgroundTasks)
     run_id = create_run(body.document_id, body.framework, body.controls_scope, body.channel)
     _run_results[run_id] = {"status": "pending"}
     background_tasks.add_task(
-        _run_assessment_bg, run_id, body.document_id, body.framework, body.controls_scope
+        _run_assessment_bg, run_id, body.document_id, body.framework,
+        body.controls_scope, body.language
     )
     return {"run_id": run_id, "status": "pending", "message": "Assessment started"}
 
@@ -216,6 +220,7 @@ def run_assessment_sync(body: AssessmentRequest):
             document_title=doc["title"],
             framework_id=body.framework,
             controls_scope=body.controls_scope,
+            language=body.language,
         )
         finding_ids = save_findings(run_id, body.document_id, result)
         complete_run(run_id, "completed")

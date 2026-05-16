@@ -14,6 +14,34 @@ PROMPT_DIR = Path("/prompt-library") if Path("/prompt-library").exists() \
              else Path(__file__).parent.parent.parent / "prompt-library"
 FRAMEWORK_DIR = Path(__file__).parent.parent / "data" / "frameworks"
 
+
+LANGUAGE_NAME = {
+    "en": "English",
+    "it": "Italian",
+}
+
+
+def _language_instruction(language: str, mode: str = "structured") -> str:
+    """
+    Build an instruction line that forces the model to respond in `language`.
+    mode='structured' is for gap_assessment-style JSON output where enum
+    values and control IDs must stay in English. mode='prose' is for free
+    text (policies, explanations).
+    """
+    lang_name = LANGUAGE_NAME.get(language, "English")
+    if language == "en":
+        return ""
+    if mode == "structured":
+        return (
+            f"\n\nOUTPUT LANGUAGE: All free-text fields (executive_summary, "
+            f"finding, evidence_found, evidence_required, remediation, "
+            f"regulatory_reference where it is descriptive) MUST be written "
+            f"in {lang_name}. Schema enum values (compliant, partial, "
+            f"non_compliant, no_evidence, not_applicable, critical, high, "
+            f"medium, low) and control IDs MUST remain in English."
+        )
+    return f"\n\nOUTPUT LANGUAGE: Respond entirely in {lang_name}."
+
 # Anthropic client — reads ANTHROPIC_API_KEY from environment
 _client: Optional[anthropic.Anthropic] = None
 
@@ -123,7 +151,7 @@ def select_relevant_controls(document_text: str, framework: dict, max_controls: 
 
 def run_gap_analysis(document_text: str, document_title: str,
                      framework_id: str, controls_scope: Optional[list] = None,
-                     progress_callback=None) -> dict:
+                     progress_callback=None, language: str = "en") -> dict:
     """
     Full gap analysis pipeline:
     1. Load framework and prompt
@@ -146,7 +174,7 @@ def run_gap_analysis(document_text: str, document_title: str,
 
     fw_prompt   = load_framework_prompt(framework_id)
     out_prompt  = load_output_prompt("gap_assessment")
-    system      = fw_prompt + "\n\n" + out_prompt
+    system      = fw_prompt + "\n\n" + out_prompt + _language_instruction(language, "structured")
 
     controls_str = json.dumps([{
         "control_id":    c["control_id"],
@@ -328,6 +356,7 @@ def generate_document(doc_type: str, framework_id: str,
     }
     builder = prompts.get(doc_type, _generic_doc_prompt)
     system, user = builder(framework_id, context, language)
+    system = system + _language_instruction(language, "prose")
 
     client = get_client()
     with client.messages.stream(
@@ -407,7 +436,7 @@ def _generic_doc_prompt(fw: str, ctx: dict, lang: str):
 
 # ─── Explain a control ────────────────────────────────────────────
 
-def explain_control(framework_id: str, control_id: str) -> str:
+def explain_control(framework_id: str, control_id: str, language: str = "en") -> str:
     """Plain-language explanation of a specific control."""
     framework = load_framework(framework_id)
     ctrl = next((c for c in framework.get("controls",[]) if c["control_id"] == control_id), None)
@@ -415,7 +444,8 @@ def explain_control(framework_id: str, control_id: str) -> str:
         return f"Control {control_id} not found in framework {framework_id}."
 
     fw_prompt = load_framework_prompt(framework_id)
-    system = fw_prompt + "\nRespond in plain, accessible English. No JSON output needed here — just a clear explanation."
+    system = (fw_prompt + "\nRespond in plain, accessible language. No JSON output needed here — just a clear explanation."
+              + _language_instruction(language, "prose"))
     user = (
         f"Explain {framework_id} control {control_id} — '{ctrl['title']}' "
         f"in plain language for a compliance manager with no deep technical background. "
