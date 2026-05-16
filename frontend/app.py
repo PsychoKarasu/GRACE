@@ -8,6 +8,8 @@ from pathlib import Path
 import streamlit as st
 import requests
 
+from avatar import render_avatar, AvatarState, state_for_page, get_state as get_avatar_state, set_state as set_avatar_state
+
 # ─── Config ──────────────────────────────────────────────────────────
 
 st.set_page_config(
@@ -352,7 +354,20 @@ THEMES = {
 
 def inject_css():
     th = THEMES[get_theme()]
+    is_dark = get_theme() == "dark"
+    # Atmospheric backdrop intensity differs per theme
+    bg_overlay = (
+        "radial-gradient(800px circle at 18% -10%, rgba(78,198,217,0.10) 0%, transparent 55%),"
+        "radial-gradient(900px circle at 90% 110%, rgba(244,114,182,0.06) 0%, transparent 55%)"
+        if is_dark else
+        "radial-gradient(800px circle at 18% -10%, rgba(42,122,138,0.06) 0%, transparent 55%),"
+        "radial-gradient(900px circle at 90% 110%, rgba(22,50,101,0.04) 0%, transparent 55%)"
+    )
+    grid_color = "rgba(78,198,217,0.04)" if is_dark else "rgba(22,50,101,0.04)"
     st.markdown(f"""
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {{
   --bg:          {th['bg']};
@@ -368,88 +383,127 @@ def inject_css():
   --shadow:      {th['shadow']};
   --shadow-lg:   {th['shadow_lg']};
   --card-hover-bg: {th['card_hover_bg']};
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:    'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
 }}
 
-/* Streamlit app chrome */
-.stApp {{ background: var(--bg); color: var(--text); }}
-[data-testid="stHeader"] {{ display: none; }}
-[data-testid="stSidebar"] {{ background: var(--sidebar-bg); border-right: 1px solid var(--border); }}
-[data-testid="stSidebar"] * {{ color: var(--text) !important; }}
-.block-container {{ padding-top: 0.5rem !important; max-width: 1400px; }}
-
-/* Typography */
-html, body, .stApp, [data-testid="stMarkdownContainer"], .stMarkdown p, .stMarkdown li {{
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+/* ── Streamlit app chrome ── */
+.stApp {{
+  background: var(--bg);
+  background-image: {bg_overlay};
+  background-attachment: fixed;
   color: var(--text);
 }}
-h1, h2, h3, h4 {{ color: var(--text); letter-spacing: -0.01em; }}
-h1 {{ font-weight: 700; }}
-h2 {{ font-weight: 650; }}
-h3 {{ font-weight: 600; }}
+[data-testid="stHeader"] {{ display: none; }}
+[data-testid="stSidebar"] {{
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+}}
+[data-testid="stSidebar"] * {{ color: var(--text) !important; }}
+.block-container {{
+  padding-top: 0.5rem !important;
+  max-width: 1500px;
+  position: relative;
+  z-index: 1;
+}}
 
-/* Top bar */
+/* Faint grid backdrop on the main app */
+.stApp::before {{
+  content: "";
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient({grid_color} 1px, transparent 1px),
+    linear-gradient(90deg, {grid_color} 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at 50% 30%, rgba(0,0,0,0.65) 0%, transparent 70%);
+  -webkit-mask-image: radial-gradient(circle at 50% 30%, rgba(0,0,0,0.65) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}}
+
+/* ── Typography ── */
+html, body, .stApp, [data-testid="stMarkdownContainer"],
+.stMarkdown p, .stMarkdown li {{
+  font-family: var(--font-body); color: var(--text);
+}}
+h1, h2, h3, h4 {{
+  font-family: var(--font-display);
+  color: var(--text); letter-spacing: -0.015em;
+}}
+h1 {{ font-weight: 700; }}
+h2 {{ font-weight: 600; }}
+h3 {{ font-weight: 600; }}
+code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
+
+/* ── Top bar ── */
 .grace-topbar {{
   display: flex; align-items: center; justify-content: space-between;
-  background: var(--surface);
+  background:
+    linear-gradient(160deg, var(--surface) 0%, var(--surface-alt) 100%);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 12px 18px;
-  margin: 4px 0 18px 0;
+  border-radius: 16px;
+  padding: 14px 22px;
+  margin: 4px 0 22px 0;
   box-shadow: var(--shadow);
+  position: relative; overflow: hidden;
+}}
+.grace-topbar::before {{
+  content: ""; position: absolute; inset: -1px;
+  background: linear-gradient(120deg, transparent 0%, rgba(78,198,217,0.30) 40%, transparent 80%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  padding: 1px; border-radius: 16px; pointer-events: none;
 }}
 .grace-topbar .brand {{
-  display: flex; align-items: center; gap: 14px;
+  display: flex; align-items: center; gap: 16px; position: relative; z-index: 1;
 }}
 .grace-topbar .brand-logo {{
-  height: 44px; width: auto;
+  height: 50px; width: auto;
+  filter: drop-shadow(0 2px 4px rgba(22,50,101,0.18));
 }}
 .grace-topbar .brand-text {{
   display: flex; flex-direction: column; line-height: 1.15;
 }}
 .grace-topbar .brand-name {{
-  font-size: 1.2rem; font-weight: 700; color: var(--primary);
-  letter-spacing: 0.5px;
+  font-family: var(--font-display);
+  font-size: 1.35rem; font-weight: 700; color: var(--primary);
+  letter-spacing: 1px;
 }}
 .grace-topbar .brand-tagline {{
-  font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;
+  font-size: 0.74rem; color: var(--text-dim); margin-top: 3px;
+  letter-spacing: 0.6px;
 }}
 
-/* Sidebar brand block — symbol on a light teal panel */
-.grace-side-brand {{
-  background: linear-gradient(140deg, #4EC6D9 0%, #2A7A8A 100%);
-  border-radius: 14px;
-  padding: 22px 14px 18px;
-  text-align: center;
-  margin-bottom: 14px;
-  box-shadow: 0 6px 18px rgba(22,50,101,0.18);
-}}
-.grace-side-brand img {{
-  height: 96px; width: auto; display: block; margin: 0 auto;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
-}}
-
-/* Status pill */
+/* ── Status pill ── */
 .status-pill {{
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--accent-soft); color: var(--primary);
   padding: 6px 12px; border-radius: 999px;
-  font-size: 0.8rem; font-weight: 600;
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.3px;
   border: 1px solid var(--border);
+  font-family: var(--font-display);
 }}
 .status-pill.online::before {{
-  content: ""; width: 8px; height: 8px; border-radius: 50%; background: #16A34A;
-  box-shadow: 0 0 8px #16A34A;
+  content: ""; width: 8px; height: 8px; border-radius: 50%; background: #22C55E;
+  box-shadow: 0 0 8px #22C55E;
+  animation: grace-pulse 2s ease-in-out infinite;
 }}
 .status-pill.offline::before {{
   content: ""; width: 8px; height: 8px; border-radius: 50%; background: #DC2626;
 }}
+@keyframes grace-pulse {{
+  0%, 100% {{ box-shadow: 0 0 0 0 rgba(34,197,94,0.55); }}
+  50%      {{ box-shadow: 0 0 0 6px rgba(34,197,94,0); }}
+}}
 
-/* Status badges (verdict/severity chips) */
+/* ── Badges ── */
 .badge {{
   display: inline-flex; align-items: center; gap: 4px;
   padding: 3px 10px; border-radius: 999px;
   font-size: 11.5px; font-weight: 600;
   border: 1px solid transparent;
+  font-family: var(--font-display); letter-spacing: 0.3px;
 }}
 .badge-red    {{ background:#FEE2E2; color:#991B1B; border-color:#FCA5A5; }}
 .badge-orange {{ background:#FFEDD5; color:#9A3412; border-color:#FED7AA; }}
@@ -459,96 +513,128 @@ h3 {{ font-weight: 600; }}
 .badge-teal   {{ background:#CCFBF1; color:#115E59; border-color:#5EEAD4; }}
 .badge-blue   {{ background:#DBEAFE; color:#1E40AF; border-color:#93C5FD; }}
 
-/* Finding cards */
+/* ── Finding card ── */
 .finding-card {{
-  background: var(--surface);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-alt) 100%);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 18px;
-  margin-bottom: 12px;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 14px;
   border-left: 4px solid var(--accent);
   box-shadow: var(--shadow);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.18s cubic-bezier(.2,.6,.2,1), box-shadow 0.18s ease;
+  position: relative; overflow: hidden;
 }}
-.finding-card:hover {{ transform: translateY(-1px); box-shadow: var(--shadow-lg); }}
+.finding-card::after {{
+  content: ""; position: absolute; right: -40px; top: -40px;
+  width: 110px; height: 110px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(78,198,217,0.10) 0%, transparent 70%);
+  pointer-events: none;
+}}
+.finding-card:hover {{ transform: translateY(-2px); box-shadow: var(--shadow-lg); }}
 .finding-card.critical {{ border-left-color: #DC2626; }}
 .finding-card.high     {{ border-left-color: #EA580C; }}
 .finding-card.medium   {{ border-left-color: #EAB308; }}
 .finding-card.low      {{ border-left-color: #6B7280; }}
 .finding-card .ctrl-id {{
-  color: var(--primary); font-weight: 700; font-size: 0.95rem;
+  color: var(--primary); font-weight: 700;
+  font-family: var(--font-mono); font-size: 0.9rem;
 }}
 .finding-card .ctrl-title {{ color: var(--text); font-weight: 500; }}
 .finding-card .finding-body {{
-  color: var(--text-dim); font-size: 0.88rem; margin: 8px 0;
-  line-height: 1.5;
+  color: var(--text-dim); font-size: 0.88rem; margin: 10px 0;
+  line-height: 1.55;
 }}
 .finding-card .rem {{
-  color: var(--text); font-size: 0.83rem;
-  padding-top: 8px; border-top: 1px solid var(--border);
+  color: var(--text); font-size: 0.84rem;
+  padding-top: 10px; border-top: 1px solid var(--border);
 }}
-.finding-card .reg-ref {{ color: var(--text-dim); font-size: 0.78rem; }}
+.finding-card .reg-ref {{ color: var(--text-dim); font-size: 0.78rem; font-family: var(--font-mono); }}
 
-/* KPI cards */
+/* ── KPI cards (hub-grid style) ── */
 .kpi-card {{
-  background: var(--surface);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-alt) 100%);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 20px 16px;
+  border-radius: 16px;
+  padding: 22px 18px;
   text-align: center;
   box-shadow: var(--shadow);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.18s cubic-bezier(.2,.6,.2,1), box-shadow 0.18s ease;
+  position: relative; overflow: hidden;
 }}
-.kpi-card:hover {{ transform: translateY(-2px); box-shadow: var(--shadow-lg); }}
+.kpi-card::before {{
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(78,198,217,0.10) 0%, transparent 60%);
+  pointer-events: none;
+}}
+.kpi-card:hover {{ transform: translateY(-3px); box-shadow: var(--shadow-lg); }}
 .kpi-card .kpi-value {{
-  font-size: 2.2rem; font-weight: 700; color: var(--primary); line-height: 1;
+  font-family: var(--font-display);
+  font-size: 2.4rem; font-weight: 700; color: var(--primary); line-height: 1;
 }}
 .kpi-card .kpi-label {{
-  font-size: 0.78rem; color: var(--text-dim); margin-top: 6px;
-  text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 0.74rem; color: var(--text-dim); margin-top: 8px;
+  text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;
 }}
-.kpi-card .kpi-icon {{
-  font-size: 1.4rem; opacity: 0.6;
-}}
+.kpi-card .kpi-icon {{ font-size: 1.5rem; opacity: 0.65; margin-bottom: 4px; }}
 
-/* Score bar */
+/* ── Score bar ── */
 .score-bar {{
   height: 10px; border-radius: 10px;
   background: var(--accent-soft); overflow: hidden;
   border: 1px solid var(--border);
 }}
-.score-fill {{ height: 100%; border-radius: 10px; transition: width 0.3s ease; }}
+.score-fill {{
+  height: 100%; border-radius: 10px;
+  transition: width 0.4s cubic-bezier(.2,.6,.2,1);
+  background: linear-gradient(90deg, currentColor 0%, color-mix(in srgb, currentColor 70%, white) 100%);
+}}
 
-/* Hero panel for page header */
+/* ── Hero panel ── */
 .page-hero {{
-  background: var(--surface);
+  background:
+    linear-gradient(135deg, var(--surface) 0%, var(--surface-alt) 100%);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px 22px;
-  margin-bottom: 16px;
+  border-radius: 16px;
+  padding: 22px 26px;
+  margin-bottom: 20px;
   box-shadow: var(--shadow);
+  position: relative; overflow: hidden;
+}}
+.page-hero::after {{
+  content: ""; position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(78,198,217,0.14) 0%, transparent 70%);
+  pointer-events: none;
 }}
 .page-hero h1 {{
-  margin: 0 0 4px 0; font-size: 1.6rem; color: var(--primary);
+  margin: 0 0 6px 0; font-size: 1.75rem; color: var(--primary);
+  font-family: var(--font-display); font-weight: 700;
+  letter-spacing: -0.5px;
 }}
-.page-hero p {{ margin: 0; color: var(--text-dim); font-size: 0.92rem; }}
+.page-hero p {{ margin: 0; color: var(--text-dim); font-size: 0.94rem; }}
 
-/* Section subtitle */
+/* ── Section subtitle ── */
 .section-sub {{
-  font-size: 0.95rem; font-weight: 600; color: var(--primary);
-  margin: 16px 0 8px 0; letter-spacing: 0.3px;
+  font-family: var(--font-display);
+  font-size: 0.85rem; font-weight: 700; color: var(--accent);
+  margin: 18px 0 10px 0; letter-spacing: 1.4px; text-transform: uppercase;
 }}
 
-/* Streamlit widget tweaks */
+/* ── Streamlit widget tweaks ── */
 .stButton button, .stDownloadButton button {{
   border-radius: 10px; font-weight: 600;
-  transition: all 0.15s ease;
+  font-family: var(--font-body);
+  transition: all 0.18s cubic-bezier(.2,.6,.2,1);
 }}
 .stButton button[kind="primary"],
 .stDownloadButton button[kind="primary"] {{
-  background: var(--primary) !important;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%) !important;
   color: #FFFFFF !important;
   border: none !important;
+  box-shadow: 0 4px 14px rgba(22,50,101,0.25);
 }}
 .stButton button[kind="primary"] *,
 .stButton button[kind="primary"] p,
@@ -558,31 +644,51 @@ h3 {{ font-weight: 600; }}
 }}
 .stButton button[kind="primary"]:hover,
 .stDownloadButton button[kind="primary"]:hover {{
-  background: var(--accent) !important;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(78,198,217,0.35);
+  filter: brightness(1.06);
 }}
 [data-testid="stExpander"] {{
-  background: var(--surface); border-radius: 12px;
+  background: var(--surface);
+  border-radius: 12px;
   border: 1px solid var(--border) !important;
   box-shadow: var(--shadow);
+  transition: box-shadow 0.18s ease;
 }}
-[data-testid="stExpander"] summary {{ padding: 6px 10px; }}
-[data-testid="stTextInput"] input, [data-testid="stTextArea"] textarea, [data-testid="stSelectbox"] {{
+[data-testid="stExpander"]:hover {{ box-shadow: var(--shadow-lg); }}
+[data-testid="stExpander"] summary {{ padding: 10px 14px; font-weight: 500; }}
+[data-testid="stTextInput"] input,
+[data-testid="stTextArea"] textarea {{
   border-radius: 10px !important;
+  border: 1px solid var(--border) !important;
+  font-family: var(--font-body) !important;
 }}
+[data-testid="stTextInput"] input:focus,
+[data-testid="stTextArea"] textarea:focus {{
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-soft) !important;
+}}
+[data-testid="stSelectbox"] > div {{ border-radius: 10px !important; }}
 
-/* Recent doc row */
+/* ── Recent doc row ── */
 .recent-row {{
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 12px; border-radius: 8px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: 10px;
   background: var(--surface); border: 1px solid var(--border);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }}
+.recent-row:hover {{ transform: translateX(2px); box-shadow: var(--shadow); }}
 .recent-row .doc-name {{ font-weight: 600; color: var(--text); }}
-.recent-row .meta {{ color: var(--text-dim); font-size: 0.82rem; margin-left: auto; }}
+.recent-row .meta {{
+  color: var(--text-dim); font-size: 0.78rem;
+  margin-left: auto; font-family: var(--font-mono);
+}}
 .recent-row .fw-tag {{
   background: var(--accent-soft); color: var(--primary);
-  padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;
+  padding: 3px 9px; border-radius: 6px;
+  font-size: 0.72rem; font-weight: 700;
+  font-family: var(--font-display); letter-spacing: 0.5px;
 }}
 </style>
 """, unsafe_allow_html=True)
@@ -690,16 +796,8 @@ with top_theme:
 # ─── Sidebar ─────────────────────────────────────────────────────────
 
 with st.sidebar:
-    if SYMBOL_B64:
-        st.markdown(
-            f'<div class="grace-side-brand"><img src="data:image/png;base64,{SYMBOL_B64}" alt="GRACE"></div>',
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            '<div class="grace-side-brand"><div style="font-size:3rem">🛡️</div></div>',
-            unsafe_allow_html=True,
-        )
+    # GRACE virtual analyst avatar — animated SVG
+    st.markdown(render_avatar(get_avatar_state()), unsafe_allow_html=True)
 
     PAGE_KEYS = ["gap_analysis", "doc_gen", "dashboard", "registry", "library"]
     page = st.radio(
@@ -722,6 +820,11 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
     st.caption(t("sidebar.api_label", api=API))
+
+# Set the default avatar state for the active page (page-level handlers
+# may override via avatar.set_state(...) after specific events).
+if "avatar_state" not in st.session_state:
+    st.session_state["avatar_state"] = state_for_page(page).value
 
 
 # ─── Helpers: page hero ──────────────────────────────────────────────
@@ -851,6 +954,7 @@ if page == "gap_analysis":
                     st.stop()
                 doc_id = doc_result["document_id"]
 
+            set_avatar_state(AvatarState.ANALYZING)
             with st.spinner(t("ga.analyzing")):
                 assessment = api_post("/api/v1/assessments/run-sync", {
                     "document_id": doc_id,
@@ -860,12 +964,20 @@ if page == "gap_analysis":
                 })
 
             if "error" in assessment:
+                set_avatar_state(AvatarState.ERROR)
                 st.error(t("ga.assessment_failed", detail=assessment['error']))
                 st.stop()
 
             result = assessment.get("result", {})
             overall_score = result.get("overall_coverage_score", 0)
             overall_status = result.get("overall_status","partial")
+            # Map result to avatar mood
+            if overall_score >= 80:
+                set_avatar_state(AvatarState.SUCCESS)
+            elif overall_score < 40:
+                set_avatar_state(AvatarState.WARNING)
+            else:
+                set_avatar_state(AvatarState.ATTENTIVE)
             color = "#16A34A" if overall_score >= 80 else "#EA580C" if overall_score >= 40 else "#DC2626"
 
             st.markdown(f"""
@@ -960,6 +1072,7 @@ elif page == "doc_gen":
     with col2:
         st.markdown(f'<div class="section-sub">{t("dg.generated")}</div>', unsafe_allow_html=True)
         if gen_clicked:
+            set_avatar_state(AvatarState.THINKING)
             with st.spinner(t("dg.spinner", kind=doc_type_name)):
                 resp = api_post("/api/v1/generate", {
                     "framework_id": fw_id, "doc_type": doc_type,
@@ -967,8 +1080,10 @@ elif page == "doc_gen":
                 })
 
             if "error" in resp:
+                set_avatar_state(AvatarState.ERROR)
                 st.error(resp["error"])
             else:
+                set_avatar_state(AvatarState.SUCCESS)
                 content = resp.get("content","")
                 st.success(t("dg.success"))
                 st.markdown(content)
