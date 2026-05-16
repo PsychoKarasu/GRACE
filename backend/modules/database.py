@@ -260,7 +260,8 @@ def save_findings(run_id: str, document_id: str, assessment_result: dict) -> lis
     return saved_ids
 
 
-def list_findings(framework: str = None, status: str = None, limit: int = 100) -> list:
+def list_findings(framework: str = None, status: str = None, limit: int = 100,
+                  operational_status: str = None) -> list:
     conn = get_db()
     q = """
         SELECT f.finding_id, f.framework, f.control_id, f.control_title,
@@ -282,6 +283,9 @@ def list_findings(framework: str = None, status: str = None, limit: int = 100) -
     if status:
         q += " AND f.compliance_status = ?"
         params.append(status)
+    if operational_status:
+        q += " AND f.operational_status = ?"
+        params.append(operational_status)
     q += " ORDER BY f.created_at DESC LIMIT ?"
     params.append(limit)
     rows = conn.execute(q, params).fetchall()
@@ -343,7 +347,7 @@ def get_kpi_summary() -> dict:
 
 # ─── Saved generated documents ────────────────────────────────────
 
-def save_output_document(doc_type: str, framework: str, run_id: str,
+def save_output_document(doc_type: str, framework: str, run_id: Optional[str],
                           content_text: str, quality_score: float = 90.0) -> str:
     doc_id = new_id()
     conn = get_db()
