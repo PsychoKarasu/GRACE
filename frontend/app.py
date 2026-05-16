@@ -79,6 +79,10 @@ TRANSLATIONS = {
         "dg.spinner":                 "Claude is generating your {kind}...",
         "dg.success":                 "✅ Document generated and saved",
         "dg.download":                "⬇️ Download as Markdown",
+        "dg.download_md":             "⬇️ Markdown",
+        "dg.download_pdf":            "📕 PDF",
+        "dg.download_docx":           "📘 Word (DOCX)",
+        "dg.export_error":            "Export to {fmt} failed: {detail}",
         "dg.placeholder":             "Configure the document and click Generate.",
         "dg.type_policy":             "Information Security Policy",
         "dg.type_dpa":                "Data Processing Agreement (GDPR Art.28)",
@@ -210,6 +214,10 @@ TRANSLATIONS = {
         "dg.spinner":                 "Claude sta generando il tuo {kind}...",
         "dg.success":                 "✅ Documento generato e salvato",
         "dg.download":                "⬇️ Scarica in Markdown",
+        "dg.download_md":             "⬇️ Markdown",
+        "dg.download_pdf":            "📕 PDF",
+        "dg.download_docx":           "📘 Word (DOCX)",
+        "dg.export_error":            "Esportazione in {fmt} fallita: {detail}",
         "dg.placeholder":             "Configura il documento e clicca Genera.",
         "dg.type_policy":             "Information Security Policy",
         "dg.type_dpa":                "Data Processing Agreement (GDPR Art.28)",
@@ -703,10 +711,59 @@ elif page == "doc_gen":
                 content = resp.get("content","")
                 st.success(t("dg.success"))
                 st.markdown(content)
-                st.download_button(t("dg.download"),
-                                    data=content,
-                                    file_name=f"GRACE_{doc_type}_{fw_id}.md",
-                                    mime="text/markdown")
+
+                file_base = f"GRACE_{doc_type}_{fw_id}"
+
+                # Fetch PDF and DOCX bytes from backend exporter
+                pdf_bytes = None
+                docx_bytes = None
+                try:
+                    pdf_r = requests.post(f"{API}/api/v1/generate/export",
+                                          json={"content": content, "format": "pdf",
+                                                "filename": file_base},
+                                          timeout=60)
+                    if pdf_r.ok:
+                        pdf_bytes = pdf_r.content
+                except Exception:
+                    pass
+                try:
+                    docx_r = requests.post(f"{API}/api/v1/generate/export",
+                                           json={"content": content, "format": "docx",
+                                                 "filename": file_base},
+                                           timeout=60)
+                    if docx_r.ok:
+                        docx_bytes = docx_r.content
+                except Exception:
+                    pass
+
+                dl1, dl2, dl3 = st.columns(3)
+                dl1.download_button(
+                    t("dg.download_md"),
+                    data=content,
+                    file_name=f"{file_base}.md",
+                    mime="text/markdown",
+                    use_container_width=True,
+                )
+                if pdf_bytes:
+                    dl2.download_button(
+                        t("dg.download_pdf"),
+                        data=pdf_bytes,
+                        file_name=f"{file_base}.pdf",
+                        mime="application/pdf",
+                        use_container_width=True,
+                    )
+                else:
+                    dl2.button(t("dg.download_pdf"), disabled=True, use_container_width=True)
+                if docx_bytes:
+                    dl3.download_button(
+                        t("dg.download_docx"),
+                        data=docx_bytes,
+                        file_name=f"{file_base}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        use_container_width=True,
+                    )
+                else:
+                    dl3.button(t("dg.download_docx"), disabled=True, use_container_width=True)
         else:
             st.info(t("dg.placeholder"))
 

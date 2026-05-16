@@ -4,10 +4,12 @@ All REST endpoints — /api/v1/
 """
 import json
 import io
+import re
 from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import fitz  # PyMuPDF
 import docx2txt
@@ -272,6 +274,40 @@ def generate(body: GenerateRequest):
                 "framework_id": body.framework_id, "content": content}
     except Exception as e:
         raise HTTPException(500, detail=str(e))
+
+
+class ExportRequest(BaseModel):
+    content: str
+    format: str  # "pdf" | "docx"
+    filename: Optional[str] = "GRACE_Document"
+
+
+@app.post("/api/v1/generate/export")
+def export_document(body: ExportRequest):
+    from modules.export import markdown_to_pdf_bytes, markdown_to_docx_bytes
+
+    fmt = body.format.lower()
+    if fmt == "pdf":
+        try:
+            data = markdown_to_pdf_bytes(body.content)
+        except Exception as e:
+            raise HTTPException(500, detail=f"PDF export failed: {e}")
+        media_type = "application/pdf"
+    elif fmt == "docx":
+        try:
+            data = markdown_to_docx_bytes(body.content)
+        except Exception as e:
+            raise HTTPException(500, detail=f"DOCX export failed: {e}")
+        media_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    else:
+        raise HTTPException(400, detail="format must be 'pdf' or 'docx'")
+
+    safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", body.filename or "GRACE_Document")
+    return StreamingResponse(
+        io.BytesIO(data),
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}.{fmt}"'},
+    )
 
 
 # ─── KPI / Dashboard ─────────────────────────────────────────────────
