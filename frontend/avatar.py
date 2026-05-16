@@ -428,11 +428,15 @@ def _svg(state: AvatarState) -> str:
 def render_avatar(state: Optional[AvatarState] = None,
                   show_status_pill: bool = True) -> str:
     """
-    Return the complete HTML (CSS + SVG + frame) for the GRACE avatar.
+    Return a self-contained HTML document with the GRACE avatar.
 
-    Call once per page. If `state` is None the current session state is
-    used. The frame around the SVG includes the analyst name, role and
-    a live status pill — feel free to suppress with show_status_pill=False.
+    Designed to be injected via `st.components.v1.html(..., height=...)`,
+    which sandboxes the content in an iframe and bypasses Streamlit's
+    HTML sanitizer (which strips/mangles <svg>, <style>, <link> etc.).
+
+    The returned document is fully standalone: includes <!DOCTYPE>,
+    transparent body background, the frame CSS, the SVG with all
+    layered groups, and the name/role/status pill.
     """
     s = state if state is not None else get_state()
     status_label = s.value.capitalize()
@@ -441,11 +445,22 @@ def render_avatar(state: Optional[AvatarState] = None,
         if show_status_pill else ""
     )
     return (
-        _css()
+        '<!DOCTYPE html><html><head>'
+        '<style>'
+        'html,body{margin:0;padding:0;background:transparent;}'
+        '*{box-sizing:border-box;}'
+        '</style>'
+        + _css()
+        + '</head><body>'
         + '<div class="grace-avatar-frame">'
         + _svg(s)
         + '<div class="grace-avatar-name">GRACE</div>'
         + '<div class="grace-avatar-role">GRC Virtual Analyst</div>'
         + pill
         + '</div>'
+        + '</body></html>'
     )
+
+
+# Recommended iframe height for st.components.v1.html callers.
+AVATAR_FRAME_HEIGHT = 340
