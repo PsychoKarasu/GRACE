@@ -426,8 +426,17 @@ with st.sidebar:
         key="language",
     )
 
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/320px-Microsoft_logo.svg.png", width=80)
-    st.markdown(t("sidebar.copilot_brand"))
+    st.markdown(
+        """
+<div style="background:linear-gradient(135deg,#000F4F 0%,#002EE5 100%);
+            padding:14px 16px;border-radius:10px;color:white;margin-bottom:10px;">
+  <div style="font-size:1.6rem;line-height:1">🛡️</div>
+  <div style="font-size:1.1rem;font-weight:700;letter-spacing:0.5px;margin-top:2px">GRACE</div>
+  <div style="font-size:0.72rem;opacity:0.8">Governance · Risk · Assurance · Compliance</div>
+</div>
+        """,
+        unsafe_allow_html=True,
+    )
     st.markdown("---")
 
     PAGE_KEYS = ["gap_analysis", "doc_gen", "dashboard", "registry", "library"]
@@ -777,17 +786,15 @@ elif page == "dashboard":
     st.markdown("---")
     st.subheader(t("db.recent_docs"))
     runs = api_get("/api/v1/assessments")
-    if runs and runs.get("runs"):
-        recent = runs["runs"][:10]
-        for r in recent:
+    completed_runs = [r for r in (runs or {}).get("runs", []) if r.get("status") == "completed"][:10]
+    if completed_runs:
+        for r in completed_runs:
             ts = r.get("started_at","")
             ts_short = ts[:19].replace("T", " ") if ts else ""
             doc = r.get("document_title") or t("db.no_document")
             fw = r.get("framework","")
-            status = r.get("status","")
-            status_emoji = {"completed":"✅","error":"❌","running":"⏳","pending":"⌛"}.get(status, "•")
             st.markdown(
-                f"{status_emoji} **{doc}** · `{fw}` · "
+                f"✅ **{doc}** · `{fw}` · "
                 f"<span style='color:#6B7280;font-size:0.85rem'>{ts_short} UTC</span>",
                 unsafe_allow_html=True
             )
@@ -806,28 +813,31 @@ elif page == "registry":
     OP_STATUSES = ["new","acknowledged","in_progress","resolved","accepted_risk","closed","dismissed"]
     VERDICTS = ["non_compliant","partial","compliant","no_evidence","not_applicable"]
     FRAMEWORKS = ["ISO27001:2022","GDPR","SOC2","NIS2"]
+    ALL = "__ALL__"
 
     col1, col2, col3 = st.columns(3)
     fw_filter = col1.selectbox(
-        t("reg.framework"), [t("all")] + FRAMEWORKS
+        t("reg.framework"),
+        [ALL] + FRAMEWORKS,
+        format_func=lambda v: t("all") if v == ALL else v,
     )
     verdict_filter = col2.selectbox(
         t("reg.verdict"),
-        [t("all")] + VERDICTS,
-        format_func=lambda v: v if v == t("all") else t(f"verdict.{v}")
+        [ALL] + VERDICTS,
+        format_func=lambda v: t("all") if v == ALL else t(f"verdict.{v}"),
     )
     op_status_filter = col3.selectbox(
         t("reg.operational_status"),
-        [t("all")] + OP_STATUSES,
-        format_func=lambda v: v if v == t("all") else t(f"opstatus.{v}")
+        [ALL] + OP_STATUSES,
+        format_func=lambda v: t("all") if v == ALL else t(f"opstatus.{v}"),
     )
 
     query = "/api/v1/findings?limit=100"
-    if fw_filter != t("all"):
+    if fw_filter != ALL:
         query += f"&framework={fw_filter}"
-    if verdict_filter != t("all"):
+    if verdict_filter != ALL:
         query += f"&status={verdict_filter}"
-    if op_status_filter != t("all"):
+    if op_status_filter != ALL:
         query += f"&operational_status={op_status_filter}"
 
     findings = api_get(query)
