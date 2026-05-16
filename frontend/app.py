@@ -110,7 +110,7 @@ def api_get(path: str):
 
 def api_post(path: str, data: dict):
     try:
-        r = requests.post(f"{API}{path}", json=data, timeout=120)
+        r = requests.post(f"{API}{path}", json=data, timeout=300)
         return r.json() if r.ok else {"error": r.text}
     except Exception as e:
         return {"error": str(e)}
