@@ -8,7 +8,12 @@ from pathlib import Path
 import streamlit as st
 import requests
 
-from avatar import render_avatar, AvatarState, state_for_page, get_state as get_avatar_state, set_state as set_avatar_state
+import streamlit.components.v1 as components
+from avatar import (
+    render_avatar, AvatarState, state_for_page,
+    get_state as get_avatar_state, set_state as set_avatar_state,
+    AVATAR_FRAME_HEIGHT,
+)
 
 # ─── Config ──────────────────────────────────────────────────────────
 
@@ -794,15 +799,26 @@ with top_theme:
 # ─── Sidebar ─────────────────────────────────────────────────────────
 
 with st.sidebar:
-    # GRACE virtual analyst avatar — animated SVG
-    st.markdown(render_avatar(get_avatar_state()), unsafe_allow_html=True)
+    # GRACE virtual analyst avatar — rendered in an isolated iframe
+    # (st.components.v1.html bypasses Streamlit's HTML sanitizer, which
+    # otherwise strips <svg>/<style> and yields a TypeError in the React
+    # runtime when injected via st.markdown).
+    components.html(
+        render_avatar(get_avatar_state()),
+        height=AVATAR_FRAME_HEIGHT,
+        scrolling=False,
+    )
 
     PAGE_KEYS = ["gap_analysis", "doc_gen", "dashboard", "registry", "library"]
+    # An explicit key= survives reruns triggered by other widgets
+    # (e.g. the theme toggle), so navigation no longer snaps back to
+    # Gap Analysis when the user switches theme/language.
     page = st.radio(
         t("sidebar.navigation"),
         PAGE_KEYS,
         format_func=lambda k: t(f"nav.{k}"),
         label_visibility="collapsed",
+        key="nav_page",
     )
 
     st.markdown("---")
