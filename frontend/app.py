@@ -49,6 +49,7 @@ TRANSLATIONS = {
     "en": {
         "sidebar.navigation":         "Navigation",
         "sidebar.engine_online":      "GRACE Engine: Online",
+        "sidebar.engine_degraded":    "GRACE Engine: Degraded",
         "sidebar.engine_offline":     "GRACE Engine: Offline",
         "sidebar.api_label":          "API: {api}",
         "topbar.language":            "Language",
@@ -178,6 +179,7 @@ TRANSLATIONS = {
     "it": {
         "sidebar.navigation":         "Navigazione",
         "sidebar.engine_online":      "Motore GRACE: Online",
+        "sidebar.engine_degraded":    "Motore GRACE: Degradato",
         "sidebar.engine_offline":     "Motore GRACE: Offline",
         "sidebar.api_label":          "API: {api}",
         "topbar.language":            "Lingua",
@@ -391,6 +393,52 @@ def inject_css():
   --font-mono:    'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
 }}
 
+/* ── Compact language selector + theme toggle in the topbar ── */
+.grace-lang-wrap [data-testid="stSelectbox"] > div > div {{
+  min-height: 36px !important;
+  padding: 2px 8px !important;
+  border-radius: 10px !important;
+  font-family: var(--font-display) !important;
+  font-weight: 600 !important;
+  font-size: 0.82rem !important;
+}}
+.grace-lang-wrap [data-testid="stSelectbox"] svg {{ height: 16px; width: 16px; }}
+
+.grace-theme-wrap .stButton button {{
+  min-height: 36px !important;
+  height: 36px !important;
+  width: 42px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  font-size: 1.1rem !important;
+  line-height: 1 !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow);
+}}
+.grace-theme-wrap .stButton button:hover {{
+  border-color: var(--accent) !important;
+  transform: translateY(-1px);
+}}
+.grace-theme-wrap .stButton button p {{
+  margin: 0 !important; font-size: 1.05rem !important;
+}}
+
+/* ── Finding "Update" button visibility in dark mode ── */
+.finding-update .stButton button {{
+  background: var(--surface-alt) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--accent) !important;
+  font-weight: 600 !important;
+}}
+.finding-update .stButton button:hover {{
+  background: var(--accent) !important;
+  color: #FFFFFF !important;
+  border-color: var(--accent) !important;
+}}
+.finding-update .stButton button * {{ color: inherit !important; }}
+
 /* ── Sidebar brand panel (circular GRACE symbol) ── */
 .grace-side-brand {{
   background: linear-gradient(140deg, #4EC6D9 0%, #2A7A8A 100%);
@@ -513,8 +561,16 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
   box-shadow: 0 0 8px #22C55E;
   animation: grace-pulse 2s ease-in-out infinite;
 }}
+.status-pill.degraded {{ color: #B45309; }}
+.status-pill.degraded::before {{
+  content: ""; width: 8px; height: 8px; border-radius: 50%; background: #F59E0B;
+  box-shadow: 0 0 8px #F59E0B;
+  animation: grace-pulse 2s ease-in-out infinite;
+}}
+.status-pill.offline {{ color: #991B1B; }}
 .status-pill.offline::before {{
   content: ""; width: 8px; height: 8px; border-radius: 50%; background: #DC2626;
+  box-shadow: 0 0 8px #DC2626;
 }}
 @keyframes grace-pulse {{
   0%, 100% {{ box-shadow: 0 0 0 0 rgba(34,197,94,0.55); }}
@@ -771,10 +827,10 @@ inject_css()
 
 # ─── Top bar (logo + language + theme) ───────────────────────────────
 
-LANG_OPTIONS = {"en": "🇬🇧 EN", "it": "🇮🇹 IT"}
+LANG_OPTIONS = {"en": "🇺🇸 EN", "it": "🇮🇹 IT"}
 
 # Build the top-bar as a single HTML block on the left + Streamlit widgets on the right
-top_left, top_mid, top_lang, top_theme = st.columns([5.5, 2, 1.4, 1.1])
+top_left, top_mid, top_lang, top_theme = st.columns([7, 2.4, 0.85, 0.55])
 
 with top_left:
     logo_html = (
@@ -801,6 +857,7 @@ with top_mid:
     st.markdown("")  # spacer
 
 with top_lang:
+    st.markdown('<div class="grace-lang-wrap">', unsafe_allow_html=True)
     st.selectbox(
         t("topbar.language"),
         options=list(LANG_OPTIONS.keys()),
@@ -808,13 +865,17 @@ with top_lang:
         key="language",
         label_visibility="collapsed",
     )
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with top_theme:
     is_dark = get_theme() == "dark"
     theme_label = "🌙" if not is_dark else "☀️"
-    if st.button(theme_label, use_container_width=True, help=t(f"topbar.theme.{'light' if is_dark else 'dark'}")):
+    st.markdown('<div class="grace-theme-wrap">', unsafe_allow_html=True)
+    if st.button(theme_label, help=t(f"topbar.theme.{'light' if is_dark else 'dark'}"),
+                 key="theme_toggle"):
         st.session_state["theme"] = "light" if is_dark else "dark"
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ─── Sidebar ─────────────────────────────────────────────────────────
@@ -857,10 +918,25 @@ with st.sidebar:
     st.session_state["current_page"] = page
 
     st.markdown("---")
-    health = api_get("/health")
-    if health:
+    # Fast health check (2s timeout) — degraded/offline now actually surface.
+    try:
+        _hr = requests.get(f"{API}/health", timeout=2)
+        if _hr.status_code == 200:
+            _h = _hr.json()
+            _hstate = _h.get("status", "ok")
+        else:
+            _hstate = "down"
+    except Exception:
+        _hstate = "down"
+
+    if _hstate == "ok":
         st.markdown(
             f'<span class="status-pill online">{t("sidebar.engine_online")}</span>',
+            unsafe_allow_html=True,
+        )
+    elif _hstate == "degraded":
+        st.markdown(
+            f'<span class="status-pill degraded">{t("sidebar.engine_degraded")}</span>',
             unsafe_allow_html=True,
         )
     else:
@@ -1361,7 +1437,7 @@ with _main_col:
             format_func=lambda v: t("all") if v == ALL else t(f"opstatus.{v}"),
         )
 
-        query = "/api/v1/findings?limit=100"
+        query = f"/api/v1/findings?limit=100&language={get_lang()}"
         if fw_filter != ALL:
             query += f"&framework={fw_filter}"
         if verdict_filter != ALL:
@@ -1401,20 +1477,14 @@ with _main_col:
                 with st.expander(f"📄  {doc_title}  ·  {summary}  ·  {t(f'severity.{worst_sev}')}"):
                     for f in doc_findings:
                         severity = f.get("severity","medium")
-                        finding_lang = f.get("language") or "en"
-                        lang_chip = ""
-                        if finding_lang != get_lang():
-                            lang_chip = (
-                                f"<span class='badge badge-blue' style='margin-left:8px;font-size:10px'>"
-                                f"{t('reg.lang_tag')} {LANG_FLAG.get(finding_lang, finding_lang.upper())}"
-                                f"</span>"
-                            )
+                        # The backend lazily translates the user-facing fields
+                        # to the requested UI language and caches the result,
+                        # so no "Generated in IT" chip is needed any more.
                         st.markdown(
                             f"<div class='finding-card {severity}'>"
                             f"<div style='display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap'>"
                             f"<div><span class='ctrl-id'>{f.get('control_id','')}</span>"
-                            f"<span class='ctrl-title'> · {f.get('control_title','')}</span>"
-                            f"{lang_chip}</div>"
+                            f"<span class='ctrl-title'> · {f.get('control_title','')}</span></div>"
                             f"<div style='display:flex;gap:6px'>"
                             f"{status_badge(f.get('compliance_status','no_evidence'))}"
                             f"{severity_badge(severity)}"
@@ -1427,6 +1497,7 @@ with _main_col:
                         )
 
                         op_st = f.get('operational_status','')
+                        st.markdown('<div class="finding-update">', unsafe_allow_html=True)
                         upd_cols = st.columns([3, 1])
                         new_status = upd_cols[0].selectbox(
                             f"{t('reg.update_op_status')} — {f.get('control_id','')}",
@@ -1436,8 +1507,13 @@ with _main_col:
                             key=f"status_{f['finding_id']}",
                             label_visibility="collapsed",
                         )
-                        if upd_cols[1].button(t("reg.update_button"), key=f"upd_{f['finding_id']}",
-                                              use_container_width=True):
+                        clicked_update = upd_cols[1].button(
+                            t("reg.update_button"),
+                            key=f"upd_{f['finding_id']}",
+                            use_container_width=True,
+                        )
+                        st.markdown('</div>', unsafe_allow_html=True)
+                        if clicked_update:
                             resp = requests.patch(
                                 f"{API}/api/v1/findings/{f['finding_id']}/status",
                                 json={"operational_status": new_status}

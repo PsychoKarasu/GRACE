@@ -535,7 +535,10 @@ def render_avatar(state: Optional[AvatarState] = None,
     resolved_message = message
     if resolved_message is None and page is not None:
         resolved_message = compose_message(page, s, lang)
-    speaking = bool(resolved_message)
+    # The mouth only animates during genuinely transient "working" states
+    # (analyzing the policy, drafting a document). On idle / success /
+    # warning / error the smile stays still — no jittery tremor.
+    speaking = s in (AvatarState.ANALYZING, AvatarState.THINKING, AvatarState.SPEAKING)
 
     bubble = (
         f'<div class="grace-avatar-bubble">{resolved_message}</div>'
