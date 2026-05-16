@@ -544,9 +544,8 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
     linear-gradient(160deg, var(--surface) 0%, var(--surface-alt) 100%);
   border: 1px solid var(--border);
   border-radius: 18px;
-  padding: 8px 18px;
+  padding: 12px 18px;
   margin: 14px 0 28px 0;
-  min-height: 220px;
   box-shadow: var(--shadow);
   position: relative; overflow: hidden;
 }}
@@ -558,19 +557,20 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
   padding: 1px; border-radius: 18px; pointer-events: none;
 }}
 .grace-topbar .brand {{
-  display: flex; align-items: center; justify-content: flex-start;
+  display: flex; align-items: center; justify-content: center;
   position: relative; z-index: 1;
   width: 100%; height: 100%;
 }}
 .grace-topbar .brand-logo {{
-  /* The logo image carries the wordmark and tagline natively.
-     Let it fill the entire topbar height (minus a touch of padding)
-     and grow proportionally on the horizontal axis. */
-  height: 200px;
-  width: auto;
-  max-width: 100%;
+  /* Fill the topbar horizontally. Aspect ratio is preserved, so the
+     topbar height grows proportionally with the page width.
+     max-height keeps it from getting silly on very wide screens. */
+  width: 100%;
+  height: auto;
+  max-height: 360px;
   object-fit: contain;
   filter: drop-shadow(0 3px 8px rgba(22,50,101,0.25));
+  display: block;
 }}
 
 /* ── Status pill ── */
