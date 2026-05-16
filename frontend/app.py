@@ -391,6 +391,27 @@ def inject_css():
   --font-mono:    'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
 }}
 
+/* ── Sidebar brand panel (circular GRACE symbol) ── */
+.grace-side-brand {{
+  background: linear-gradient(140deg, #4EC6D9 0%, #2A7A8A 100%);
+  border-radius: 16px;
+  padding: 22px 14px 18px;
+  text-align: center;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 24px rgba(22,50,101,0.22), inset 0 1px 0 rgba(255,255,255,0.10);
+  position: relative; overflow: hidden;
+}}
+.grace-side-brand::before {{
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.18) 0%, transparent 60%);
+  pointer-events: none;
+}}
+.grace-side-brand img {{
+  height: 96px; width: auto; display: block; margin: 0 auto;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.20));
+  position: relative; z-index: 1;
+}}
+
 /* ── Streamlit app chrome ── */
 .stApp {{
   background: var(--bg);
@@ -799,15 +820,19 @@ with top_theme:
 # ─── Sidebar ─────────────────────────────────────────────────────────
 
 with st.sidebar:
-    # GRACE virtual analyst avatar — rendered in an isolated iframe
-    # (st.components.v1.html bypasses Streamlit's HTML sanitizer, which
-    # otherwise strips <svg>/<style> and yields a TypeError in the React
-    # runtime when injected via st.markdown).
-    components.html(
-        render_avatar(get_avatar_state()),
-        height=AVATAR_FRAME_HEIGHT,
-        scrolling=False,
-    )
+    # GRACE circular brand symbol on a teal gradient card.
+    # (The animated GRC analyst avatar is rendered separately, in a
+    # column to the left of the main content area — see below.)
+    if SYMBOL_B64:
+        st.markdown(
+            f'<div class="grace-side-brand"><img src="data:image/png;base64,{SYMBOL_B64}" alt="GRACE"/></div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            '<div class="grace-side-brand"><div style="font-size:3.2rem">🛡️</div></div>',
+            unsafe_allow_html=True,
+        )
 
     PAGE_KEYS = ["gap_analysis", "doc_gen", "dashboard", "registry", "library"]
     # Streamlit purges widget state for widgets that did NOT render in
@@ -869,540 +894,608 @@ def page_hero(title: str, subtitle: str):
 # PAGE: GAP ANALYSIS
 # ════════════════════════════════════════════════════════════════
 
-if page == "gap_analysis":
-    page_hero(t("ga.header"), t("ga.intro"))
+# ── Avatar message resolution ─────────────────────────────────────
+# The bubble next to the avatar shows: (1) an explicit message set by a
+# page handler (st.session_state['avatar_message']) — flashes once, then
+# reverts to (2) the contextual default from compose_message().
 
-    col1, col2 = st.columns([1.2, 1])
+def _resolve_avatar_message() -> str:
+    explicit = st.session_state.pop("avatar_message", None)
+    if explicit:
+        return explicit
+    from avatar import compose_message as _cm
+    return _cm(page, get_avatar_state(), get_lang())
 
-    with col1:
-        st.markdown(f'<div class="section-sub">{t("ga.input")}</div>', unsafe_allow_html=True)
 
-        fw_data = api_get("/api/v1/frameworks")
-        fw_options = {}
-        if fw_data:
-            for fw in fw_data.get("frameworks", []):
-                if not fw.get("coming_soon"):
-                    fw_options[fw["name"]] = fw["id"]
-                else:
-                    fw_options[f"{fw['name']} *(coming soon)*"] = None
+# ── Layout: [avatar column | main content] ─────────────────────────
+# The avatar lives in the left column but is rendered LAST, at the
+# bottom of this file. That ordering matters: state changes triggered
+# by page handlers — set_avatar_state(…) and avatar_message in
+# session_state — must show up in the SAME rerun, which means we have
+# to defer the avatar render until after the page body has executed.
+_avatar_col, _main_col = st.columns([1, 6])
 
-        selected_fw_name = st.selectbox(t("ga.select_framework"), list(fw_options.keys()))
-        selected_fw_id   = fw_options.get(selected_fw_name)
+with _main_col:
+    if page == "gap_analysis":
+        page_hero(t("ga.header"), t("ga.intro"))
 
-        if not selected_fw_id:
-            st.info(t("ga.coming_soon_info"))
-            st.stop()
+        col1, col2 = st.columns([1.2, 1])
 
-        input_methods = {"paste": t("ga.opt_paste"), "upload": t("ga.opt_upload"), "example": t("ga.opt_example")}
-        input_method = st.radio(t("ga.doc_source"), list(input_methods.keys()),
-                                format_func=lambda k: input_methods[k], horizontal=True)
+        with col1:
+            st.markdown(f'<div class="section-sub">{t("ga.input")}</div>', unsafe_allow_html=True)
 
-        document_text = ""
-        document_title = ""
-        uploaded = None
+            fw_data = api_get("/api/v1/frameworks")
+            fw_options = {}
+            if fw_data:
+                for fw in fw_data.get("frameworks", []):
+                    if not fw.get("coming_soon"):
+                        fw_options[fw["name"]] = fw["id"]
+                    else:
+                        fw_options[f"{fw['name']} *(coming soon)*"] = None
 
-        if input_method == "paste":
-            document_title = st.text_input(t("ga.doc_title"), value="Security Policy v1.0")
-            document_text = st.text_area(t("ga.doc_content"), height=200, placeholder=t("ga.paste_placeholder"))
-        elif input_method == "upload":
-            uploaded = st.file_uploader(t("ga.upload_label"), type=["pdf","docx","txt"])
-            if uploaded:
-                document_title = uploaded.name
-        elif input_method == "example":
-            examples = {
-                "Access Control Policy (partial)": (
-                    "Access Control Policy v2.1\nOwner: IT Security\nVersion: 2.1\n\n"
-                    "1. PURPOSE\nThis policy defines the access control requirements for all information systems.\n\n"
-                    "2. SCOPE\nThis policy applies to all employees and contractors.\n\n"
-                    "3. ACCESS CONTROL REQUIREMENTS\n"
-                    "All users must authenticate with a username and password before accessing company systems. "
-                    "Remote access requires VPN. Administrators have elevated access for system management. "
-                    "New employees receive access based on their job role. "
-                    "When employees leave, their accounts are disabled.\n\n"
-                    "4. PASSWORD REQUIREMENTS\nPasswords must be at least 8 characters. "
-                    "Passwords must be changed every 90 days.\n\n"
-                    "5. RESPONSIBILITIES\nIT department is responsible for implementing access controls. "
-                    "Managers approve access requests."
-                ),
-                "Privacy Policy (GDPR)": (
-                    "Privacy Policy — Brightstar Ltd\nLast updated: January 2026\n\n"
-                    "We collect personal information when you use our services. "
-                    "This includes your name, email address, and usage data. "
-                    "We use your information to provide our services and improve user experience. "
-                    "We may share your data with third-party service providers who assist us. "
-                    "You can request deletion of your data by contacting privacy@brightstar.com. "
-                    "We retain data for 3 years after your last interaction. "
-                    "We use cookies to improve our website. "
-                    "For questions about your privacy, contact our Data Protection Officer at dpo@brightstar.com."
-                ),
-                "Incident Response Procedure": (
-                    "Incident Response Procedure v1.0\n"
-                    "1. DETECTION: Security incidents are detected via SIEM alerts and employee reports.\n"
-                    "2. TRIAGE: The Security Operations team assesses the severity of each incident.\n"
-                    "3. CONTAINMENT: Affected systems are isolated to prevent spread.\n"
-                    "4. INVESTIGATION: Root cause analysis is performed.\n"
-                    "5. RECOVERY: Systems are restored from clean backups.\n"
-                    "6. LESSONS LEARNED: Post-incident review is conducted within 30 days.\n"
-                    "Note: Critical incidents must be reported to senior management within 24 hours."
-                )
-            }
-            choice = st.selectbox(t("ga.choose_example"), list(examples.keys()))
-            document_title = choice
-            document_text  = examples[choice]
-            st.text_area(t("ga.doc_preview"), document_text, height=150, disabled=True)
+            selected_fw_name = st.selectbox(t("ga.select_framework"), list(fw_options.keys()))
+            selected_fw_id   = fw_options.get(selected_fw_name)
 
-        run_clicked = st.button(t("ga.run_button"), type="primary", use_container_width=True)
-
-    with col2:
-        st.markdown(f'<div class="section-sub">{t("ga.copilot_response")}</div>', unsafe_allow_html=True)
-        result_container = st.container()
-
-    if run_clicked:
-        if not document_text and input_method != "upload":
-            st.warning(t("ga.provide_content"))
-            st.stop()
-
-        with result_container:
-            with st.spinner(t("ga.registering")):
-                if input_method == "upload" and uploaded:
-                    files = {"file": (uploaded.name, uploaded.getvalue(), uploaded.type)}
-                    resp = requests.post(f"{API}/api/v1/documents/upload",
-                                         files=files, data={"owner":"demo"})
-                    doc_result = resp.json() if resp.ok else {}
-                else:
-                    doc_result = api_post("/api/v1/documents/text",
-                                          {"title": document_title, "content": document_text})
-
-                if "document_id" not in doc_result:
-                    st.error(t("ga.registration_failed", detail=str(doc_result)))
-                    st.stop()
-                doc_id = doc_result["document_id"]
-
-            set_avatar_state(AvatarState.ANALYZING)
-            with st.spinner(t("ga.analyzing")):
-                assessment = api_post("/api/v1/assessments/run-sync", {
-                    "document_id": doc_id,
-                    "framework": selected_fw_id,
-                    "channel": "web_demo",
-                    "language": get_lang(),
-                })
-
-            if "error" in assessment:
-                set_avatar_state(AvatarState.ERROR)
-                st.error(t("ga.assessment_failed", detail=assessment['error']))
+            if not selected_fw_id:
+                st.info(t("ga.coming_soon_info"))
                 st.stop()
 
-            result = assessment.get("result", {})
-            overall_score = result.get("overall_coverage_score", 0)
-            overall_status = result.get("overall_status","partial")
-            # Map result to avatar mood
-            if overall_score >= 80:
-                set_avatar_state(AvatarState.SUCCESS)
-            elif overall_score < 40:
-                set_avatar_state(AvatarState.WARNING)
-            else:
-                set_avatar_state(AvatarState.ATTENTIVE)
-            color = "#16A34A" if overall_score >= 80 else "#EA580C" if overall_score >= 40 else "#DC2626"
+            input_methods = {"paste": t("ga.opt_paste"), "upload": t("ga.opt_upload"), "example": t("ga.opt_example")}
+            input_method = st.radio(t("ga.doc_source"), list(input_methods.keys()),
+                                    format_func=lambda k: input_methods[k], horizontal=True)
 
-            st.markdown(f"""
-<div class="page-hero" style="margin-top:0">
-  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px">
-    <div>
-      <div style="font-weight:700;color:var(--primary);font-size:1.05rem">{selected_fw_name}</div>
-      <div style="color:var(--text-dim);font-size:0.85rem">{document_title}</div>
-    </div>
-    <div style="text-align:right">
-      <div style="font-size:2rem;font-weight:700;color:{color};line-height:1">{overall_score}%</div>
-      {status_badge(overall_status)}
-    </div>
-  </div>
-  {score_bar(overall_score, color)}
-  <div style="margin-top:10px;color:var(--text);font-size:0.9rem;line-height:1.5">
-    {result.get('executive_summary','Assessment completed.')}
-  </div>
-</div>
-""", unsafe_allow_html=True)
+            document_text = ""
+            document_title = ""
+            uploaded = None
 
-            controls = result.get("controls", [])
-            for ctrl in controls:
-                severity = ctrl.get("severity","medium")
+            if input_method == "paste":
+                document_title = st.text_input(t("ga.doc_title"), value="Security Policy v1.0")
+                document_text = st.text_area(t("ga.doc_content"), height=200, placeholder=t("ga.paste_placeholder"))
+            elif input_method == "upload":
+                uploaded = st.file_uploader(t("ga.upload_label"), type=["pdf","docx","txt"])
+                if uploaded:
+                    document_title = uploaded.name
+            elif input_method == "example":
+                examples = {
+                    "Access Control Policy (partial)": (
+                        "Access Control Policy v2.1\nOwner: IT Security\nVersion: 2.1\n\n"
+                        "1. PURPOSE\nThis policy defines the access control requirements for all information systems.\n\n"
+                        "2. SCOPE\nThis policy applies to all employees and contractors.\n\n"
+                        "3. ACCESS CONTROL REQUIREMENTS\n"
+                        "All users must authenticate with a username and password before accessing company systems. "
+                        "Remote access requires VPN. Administrators have elevated access for system management. "
+                        "New employees receive access based on their job role. "
+                        "When employees leave, their accounts are disabled.\n\n"
+                        "4. PASSWORD REQUIREMENTS\nPasswords must be at least 8 characters. "
+                        "Passwords must be changed every 90 days.\n\n"
+                        "5. RESPONSIBILITIES\nIT department is responsible for implementing access controls. "
+                        "Managers approve access requests."
+                    ),
+                    "Privacy Policy (GDPR)": (
+                        "Privacy Policy — Brightstar Ltd\nLast updated: January 2026\n\n"
+                        "We collect personal information when you use our services. "
+                        "This includes your name, email address, and usage data. "
+                        "We use your information to provide our services and improve user experience. "
+                        "We may share your data with third-party service providers who assist us. "
+                        "You can request deletion of your data by contacting privacy@brightstar.com. "
+                        "We retain data for 3 years after your last interaction. "
+                        "We use cookies to improve our website. "
+                        "For questions about your privacy, contact our Data Protection Officer at dpo@brightstar.com."
+                    ),
+                    "Incident Response Procedure": (
+                        "Incident Response Procedure v1.0\n"
+                        "1. DETECTION: Security incidents are detected via SIEM alerts and employee reports.\n"
+                        "2. TRIAGE: The Security Operations team assesses the severity of each incident.\n"
+                        "3. CONTAINMENT: Affected systems are isolated to prevent spread.\n"
+                        "4. INVESTIGATION: Root cause analysis is performed.\n"
+                        "5. RECOVERY: Systems are restored from clean backups.\n"
+                        "6. LESSONS LEARNED: Post-incident review is conducted within 30 days.\n"
+                        "Note: Critical incidents must be reported to senior management within 24 hours."
+                    )
+                }
+                choice = st.selectbox(t("ga.choose_example"), list(examples.keys()))
+                document_title = choice
+                document_text  = examples[choice]
+                st.text_area(t("ga.doc_preview"), document_text, height=150, disabled=True)
+
+            run_clicked = st.button(t("ga.run_button"), type="primary", use_container_width=True)
+
+        with col2:
+            st.markdown(f'<div class="section-sub">{t("ga.copilot_response")}</div>', unsafe_allow_html=True)
+            result_container = st.container()
+
+        if run_clicked:
+            if not document_text and input_method != "upload":
+                st.warning(t("ga.provide_content"))
+                st.stop()
+
+            with result_container:
+                with st.spinner(t("ga.registering")):
+                    if input_method == "upload" and uploaded:
+                        files = {"file": (uploaded.name, uploaded.getvalue(), uploaded.type)}
+                        resp = requests.post(f"{API}/api/v1/documents/upload",
+                                             files=files, data={"owner":"demo"})
+                        doc_result = resp.json() if resp.ok else {}
+                    else:
+                        doc_result = api_post("/api/v1/documents/text",
+                                              {"title": document_title, "content": document_text})
+
+                    if "document_id" not in doc_result:
+                        st.error(t("ga.registration_failed", detail=str(doc_result)))
+                        st.stop()
+                    doc_id = doc_result["document_id"]
+
+                set_avatar_state(AvatarState.ANALYZING)
+                with st.spinner(t("ga.analyzing")):
+                    assessment = api_post("/api/v1/assessments/run-sync", {
+                        "document_id": doc_id,
+                        "framework": selected_fw_id,
+                        "channel": "web_demo",
+                        "language": get_lang(),
+                    })
+
+                if "error" in assessment:
+                    set_avatar_state(AvatarState.ERROR)
+                    st.session_state["avatar_message"] = (
+                        "I couldn't complete the assessment. Check the document and try again."
+                        if get_lang() == "en" else
+                        "Non sono riuscita a completare l'analisi. Controlla il documento e riprova."
+                    )
+                    st.error(t("ga.assessment_failed", detail=assessment['error']))
+                    st.stop()
+
+                result = assessment.get("result", {})
+                overall_score = result.get("overall_coverage_score", 0)
+                overall_status = result.get("overall_status","partial")
+                # Map result → avatar mood + a dynamic, score-aware line.
+                _lang = get_lang()
+                if overall_score >= 80:
+                    set_avatar_state(AvatarState.SUCCESS)
+                    st.session_state["avatar_message"] = (
+                        f"Solid coverage at {overall_score}%. Let's review the strong points and the residual gaps."
+                        if _lang == "en" else
+                        f"Copertura solida al {overall_score}%. Vediamo i punti di forza e i gap residui."
+                    )
+                elif overall_score < 40:
+                    set_avatar_state(AvatarState.WARNING)
+                    st.session_state["avatar_message"] = (
+                        f"Only {overall_score}% coverage — several gaps to address. Open the findings below, critical-first."
+                        if _lang == "en" else
+                        f"Solo {overall_score}% di copertura — diversi gap da affrontare. Apri i finding qui sotto, partendo dai critici."
+                    )
+                else:
+                    set_avatar_state(AvatarState.ATTENTIVE)
+                    st.session_state["avatar_message"] = (
+                        f"Partial coverage at {overall_score}%. Plenty of room to harden — let's prioritise the medium/high severity items."
+                        if _lang == "en" else
+                        f"Copertura parziale al {overall_score}%. C'è margine — prioritizziamo i finding medi/alti."
+                    )
+                color = "#16A34A" if overall_score >= 80 else "#EA580C" if overall_score >= 40 else "#DC2626"
+
                 st.markdown(f"""
-<div class="finding-card {severity}">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-    <div>
-      <span class="ctrl-id">{ctrl.get('control_id','')}</span>
-      <span class="ctrl-title"> · {ctrl.get('control_title','')}</span>
+    <div class="page-hero" style="margin-top:0">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px">
+        <div>
+          <div style="font-weight:700;color:var(--primary);font-size:1.05rem">{selected_fw_name}</div>
+          <div style="color:var(--text-dim);font-size:0.85rem">{document_title}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:2rem;font-weight:700;color:{color};line-height:1">{overall_score}%</div>
+          {status_badge(overall_status)}
+        </div>
+      </div>
+      {score_bar(overall_score, color)}
+      <div style="margin-top:10px;color:var(--text);font-size:0.9rem;line-height:1.5">
+        {result.get('executive_summary','Assessment completed.')}
+      </div>
     </div>
-    <div style="display:flex;gap:6px">
-      {status_badge(ctrl.get('status','no_evidence'))}
-      {severity_badge(severity)}
-    </div>
-  </div>
-  <div class="finding-body">{ctrl.get('finding','')}</div>
-  <div class="rem">
-    <strong>{t('ga.remediation')}:</strong> {ctrl.get('remediation','')}
-    <div class="reg-ref" style="margin-top:4px">{ctrl.get('regulatory_reference','')}</div>
-  </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-            with st.expander(t("ga.evidence_required")):
+                controls = result.get("controls", [])
                 for ctrl in controls:
-                    if ctrl.get("evidence_required"):
-                        st.markdown(f"**{ctrl.get('control_id')} — {ctrl.get('control_title')}**")
-                        for ev in ctrl.get("evidence_required", []):
-                            st.markdown(f"  - {ev}")
+                    severity = ctrl.get("severity","medium")
+                    st.markdown(f"""
+    <div class="finding-card {severity}">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div>
+          <span class="ctrl-id">{ctrl.get('control_id','')}</span>
+          <span class="ctrl-title"> · {ctrl.get('control_title','')}</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          {status_badge(ctrl.get('status','no_evidence'))}
+          {severity_badge(severity)}
+        </div>
+      </div>
+      <div class="finding-body">{ctrl.get('finding','')}</div>
+      <div class="rem">
+        <strong>{t('ga.remediation')}:</strong> {ctrl.get('remediation','')}
+        <div class="reg-ref" style="margin-top:4px">{ctrl.get('regulatory_reference','')}</div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+                with st.expander(t("ga.evidence_required")):
+                    for ctrl in controls:
+                        if ctrl.get("evidence_required"):
+                            st.markdown(f"**{ctrl.get('control_id')} — {ctrl.get('control_title')}**")
+                            for ev in ctrl.get("evidence_required", []):
+                                st.markdown(f"  - {ev}")
 
 
-# ════════════════════════════════════════════════════════════════
-# PAGE: DOCUMENT GENERATION
-# ════════════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════════════
+    # PAGE: DOCUMENT GENERATION
+    # ════════════════════════════════════════════════════════════════
 
-elif page == "doc_gen":
-    page_hero(t("dg.header"), t("dg.intro"))
+    elif page == "doc_gen":
+        page_hero(t("dg.header"), t("dg.intro"))
 
-    col1, col2 = st.columns([1, 1.5])
+        col1, col2 = st.columns([1, 1.5])
 
-    with col1:
-        st.markdown(f'<div class="section-sub">{t("dg.configure")}</div>', unsafe_allow_html=True)
-        fw_data = api_get("/api/v1/frameworks")
-        fw_options = {}
-        if fw_data:
-            for fw in fw_data.get("frameworks", []):
-                if not fw.get("coming_soon"):
-                    fw_options[fw["name"]] = fw["id"]
+        with col1:
+            st.markdown(f'<div class="section-sub">{t("dg.configure")}</div>', unsafe_allow_html=True)
+            fw_data = api_get("/api/v1/frameworks")
+            fw_options = {}
+            if fw_data:
+                for fw in fw_data.get("frameworks", []):
+                    if not fw.get("coming_soon"):
+                        fw_options[fw["name"]] = fw["id"]
 
-        doc_types = {"policy": t("dg.type_policy"), "dpa": t("dg.type_dpa"), "soa": t("dg.type_soa")}
+            doc_types = {"policy": t("dg.type_policy"), "dpa": t("dg.type_dpa"), "soa": t("dg.type_soa")}
 
-        doc_type = st.selectbox(t("dg.doc_type"), list(doc_types.keys()),
-                                format_func=lambda k: doc_types[k])
-        doc_type_name = doc_types[doc_type]
-        fw_name       = st.selectbox(t("dg.framework"), list(fw_options.keys()))
-        fw_id         = fw_options[fw_name]
-        organization  = st.text_input(t("dg.organization"), "Brightstar Ltd")
+            doc_type = st.selectbox(t("dg.doc_type"), list(doc_types.keys()),
+                                    format_func=lambda k: doc_types[k])
+            doc_type_name = doc_types[doc_type]
+            fw_name       = st.selectbox(t("dg.framework"), list(fw_options.keys()))
+            fw_id         = fw_options[fw_name]
+            organization  = st.text_input(t("dg.organization"), "Brightstar Ltd")
 
-        context = {"organization": organization, "doc_type": doc_type}
-        if doc_type == "dpa":
-            context["controller"] = organization
-            context["processor"]  = st.text_input(t("dg.processor"), "CloudVendor Srl")
-            context["purpose"]    = st.text_input(t("dg.purpose"), "HR management system")
-        elif doc_type == "policy":
-            context["scope"] = st.text_input(t("dg.policy_scope"), "All employees and contractors")
-        elif doc_type == "soa":
-            context["scope"] = st.text_input(t("dg.isms_scope"), "All IT systems and data processing")
+            context = {"organization": organization, "doc_type": doc_type}
+            if doc_type == "dpa":
+                context["controller"] = organization
+                context["processor"]  = st.text_input(t("dg.processor"), "CloudVendor Srl")
+                context["purpose"]    = st.text_input(t("dg.purpose"), "HR management system")
+            elif doc_type == "policy":
+                context["scope"] = st.text_input(t("dg.policy_scope"), "All employees and contractors")
+            elif doc_type == "soa":
+                context["scope"] = st.text_input(t("dg.isms_scope"), "All IT systems and data processing")
 
-        gen_clicked = st.button(t("dg.generate_button"), type="primary", use_container_width=True)
+            gen_clicked = st.button(t("dg.generate_button"), type="primary", use_container_width=True)
 
-    with col2:
-        st.markdown(f'<div class="section-sub">{t("dg.generated")}</div>', unsafe_allow_html=True)
-        if gen_clicked:
-            set_avatar_state(AvatarState.THINKING)
-            with st.spinner(t("dg.spinner", kind=doc_type_name)):
-                resp = api_post("/api/v1/generate", {
-                    "framework_id": fw_id, "doc_type": doc_type,
-                    "context": context, "language": get_lang(),
-                })
+        with col2:
+            st.markdown(f'<div class="section-sub">{t("dg.generated")}</div>', unsafe_allow_html=True)
+            if gen_clicked:
+                set_avatar_state(AvatarState.THINKING)
+                _lang_dg = get_lang()
+                with st.spinner(t("dg.spinner", kind=doc_type_name)):
+                    resp = api_post("/api/v1/generate", {
+                        "framework_id": fw_id, "doc_type": doc_type,
+                        "context": context, "language": _lang_dg,
+                    })
 
-            if "error" in resp:
-                set_avatar_state(AvatarState.ERROR)
-                st.error(resp["error"])
-            else:
-                set_avatar_state(AvatarState.SUCCESS)
-                content = resp.get("content","")
-                st.success(t("dg.success"))
-                st.markdown(content)
-
-                file_base = f"GRACE_{doc_type}_{fw_id}"
-
-                pdf_bytes = None
-                docx_bytes = None
-                try:
-                    pdf_r = requests.post(f"{API}/api/v1/generate/export",
-                        json={"content": content, "format": "pdf", "filename": file_base},
-                        timeout=60)
-                    if pdf_r.ok:
-                        pdf_bytes = pdf_r.content
-                except Exception:
-                    pass
-                try:
-                    docx_r = requests.post(f"{API}/api/v1/generate/export",
-                        json={"content": content, "format": "docx", "filename": file_base},
-                        timeout=60)
-                    if docx_r.ok:
-                        docx_bytes = docx_r.content
-                except Exception:
-                    pass
-
-                dl1, dl2, dl3 = st.columns(3)
-                dl1.download_button(t("dg.download_md"),
-                    data=content, file_name=f"{file_base}.md", mime="text/markdown",
-                    use_container_width=True)
-                if pdf_bytes:
-                    dl2.download_button(t("dg.download_pdf"),
-                        data=pdf_bytes, file_name=f"{file_base}.pdf",
-                        mime="application/pdf", use_container_width=True)
+                if "error" in resp:
+                    set_avatar_state(AvatarState.ERROR)
+                    st.session_state["avatar_message"] = (
+                        "The generator hit an issue. Try again or simplify the context."
+                        if _lang_dg == "en" else
+                        "Il generatore ha riscontrato un problema. Riprova o semplifica il contesto."
+                    )
+                    st.error(resp["error"])
                 else:
-                    dl2.button(t("dg.download_pdf"), disabled=True, use_container_width=True)
-                if docx_bytes:
-                    dl3.download_button(t("dg.download_docx"),
-                        data=docx_bytes, file_name=f"{file_base}.docx",
-                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    set_avatar_state(AvatarState.SUCCESS)
+                    st.session_state["avatar_message"] = (
+                        f"Your {doc_type_name} draft is ready. Read it end-to-end and adapt it to your organisation before publishing."
+                        if _lang_dg == "en" else
+                        f"Il draft del {doc_type_name} è pronto. Rileggilo per intero e adattalo alla tua organizzazione prima di pubblicarlo."
+                    )
+                    content = resp.get("content","")
+                    st.success(t("dg.success"))
+                    st.markdown(content)
+
+                    file_base = f"GRACE_{doc_type}_{fw_id}"
+
+                    pdf_bytes = None
+                    docx_bytes = None
+                    try:
+                        pdf_r = requests.post(f"{API}/api/v1/generate/export",
+                            json={"content": content, "format": "pdf", "filename": file_base},
+                            timeout=60)
+                        if pdf_r.ok:
+                            pdf_bytes = pdf_r.content
+                    except Exception:
+                        pass
+                    try:
+                        docx_r = requests.post(f"{API}/api/v1/generate/export",
+                            json={"content": content, "format": "docx", "filename": file_base},
+                            timeout=60)
+                        if docx_r.ok:
+                            docx_bytes = docx_r.content
+                    except Exception:
+                        pass
+
+                    dl1, dl2, dl3 = st.columns(3)
+                    dl1.download_button(t("dg.download_md"),
+                        data=content, file_name=f"{file_base}.md", mime="text/markdown",
                         use_container_width=True)
-                else:
-                    dl3.button(t("dg.download_docx"), disabled=True, use_container_width=True)
+                    if pdf_bytes:
+                        dl2.download_button(t("dg.download_pdf"),
+                            data=pdf_bytes, file_name=f"{file_base}.pdf",
+                            mime="application/pdf", use_container_width=True)
+                    else:
+                        dl2.button(t("dg.download_pdf"), disabled=True, use_container_width=True)
+                    if docx_bytes:
+                        dl3.download_button(t("dg.download_docx"),
+                            data=docx_bytes, file_name=f"{file_base}.docx",
+                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            use_container_width=True)
+                    else:
+                        dl3.button(t("dg.download_docx"), disabled=True, use_container_width=True)
+            else:
+                st.info(t("dg.placeholder"))
+
+
+    # ════════════════════════════════════════════════════════════════
+    # PAGE: GOVERNANCE DASHBOARD
+    # ════════════════════════════════════════════════════════════════
+
+    elif page == "dashboard":
+        page_hero(t("db.header"), t("db.intro"))
+
+        kpi = api_get("/api/v1/kpi/summary")
+        if not kpi:
+            st.warning(t("db.no_data"))
+            st.stop()
+
+        cols = st.columns(5)
+        metrics = [
+            (t("db.kpi.open_findings"),  kpi.get("total_open_findings",0),            "📋"),
+            (t("db.kpi.documents"),       kpi.get("documents_registered",0),            "📄"),
+            (t("db.kpi.assessments"),     kpi.get("assessment_runs",0),                 "🧪"),
+            (t("db.kpi.avg_coverage"),   f"{kpi.get('avg_coverage_score',0):.0f}%",    "📈"),
+            (t("db.kpi.critical_open"),   kpi.get("by_severity",{}).get("critical",0), "🔴"),
+        ]
+        for i, (label, value, icon) in enumerate(metrics):
+            cols[i].markdown(f"""
+    <div class="kpi-card">
+      <div class="kpi-icon">{icon}</div>
+      <div class="kpi-value">{value}</div>
+      <div class="kpi-label">{label}</div>
+    </div>""", unsafe_allow_html=True)
+
+        st.markdown("&nbsp;", unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown(f'<div class="section-sub">{t("db.status_distribution")}</div>', unsafe_allow_html=True)
+            by_status = kpi.get("by_status",{})
+            if by_status:
+                for status, count in by_status.items():
+                    label = t(f"verdict_emoji.{status}") if status in ("compliant","partial","non_compliant","no_evidence") else status
+                    st.markdown(f"<div class='recent-row'><span class='doc-name'>{label}</span><span class='meta'>{count}</span></div>",
+                                unsafe_allow_html=True)
+            else:
+                st.info(t("db.no_findings"))
+
+        with col2:
+            st.markdown(f'<div class="section-sub">{t("db.coverage_framework")}</div>', unsafe_allow_html=True)
+            by_fw = kpi.get("by_framework",{})
+            if by_fw:
+                for fw, data in by_fw.items():
+                    score = data.get("avg_score",0) or 0
+                    color = "#16A34A" if score >= 80 else "#EA580C" if score >= 40 else "#DC2626"
+                    st.markdown(
+                        f"<div style='margin-bottom:10px'>"
+                        f"<div style='display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:4px'>"
+                        f"<span style='font-weight:600;color:var(--primary)'>{fw}</span>"
+                        f"<span style='color:var(--text-dim)'>" + t("db.findings_avg", count=data.get('count',0), score=f"{score:.0f}") + "</span>"
+                        f"</div>"
+                        f"{score_bar(score, color)}"
+                        f"</div>",
+                        unsafe_allow_html=True
+                    )
+            else:
+                st.info(t("db.no_framework_data"))
+
+        st.markdown("&nbsp;", unsafe_allow_html=True)
+        st.markdown(f'<div class="section-sub">{t("db.severity_breakdown")}</div>', unsafe_allow_html=True)
+        by_sev = kpi.get("by_severity",{})
+        sev_order = ["critical","high","medium","low"]
+        sev_colors = {"critical":"#DC2626","high":"#EA580C","medium":"#EAB308","low":"#6B7280"}
+        if by_sev:
+            cols = st.columns(len(sev_order))
+            for i, sev in enumerate(sev_order):
+                count = by_sev.get(sev,0)
+                cols[i].markdown(f"""
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:{sev_colors[sev]}">{count}</div>
+      <div class="kpi-label">{t(f"severity.{sev}")}</div>
+    </div>""", unsafe_allow_html=True)
         else:
-            st.info(t("dg.placeholder"))
+            st.info(t("db.no_severity_data"))
 
-
-# ════════════════════════════════════════════════════════════════
-# PAGE: GOVERNANCE DASHBOARD
-# ════════════════════════════════════════════════════════════════
-
-elif page == "dashboard":
-    page_hero(t("db.header"), t("db.intro"))
-
-    kpi = api_get("/api/v1/kpi/summary")
-    if not kpi:
-        st.warning(t("db.no_data"))
-        st.stop()
-
-    cols = st.columns(5)
-    metrics = [
-        (t("db.kpi.open_findings"),  kpi.get("total_open_findings",0),            "📋"),
-        (t("db.kpi.documents"),       kpi.get("documents_registered",0),            "📄"),
-        (t("db.kpi.assessments"),     kpi.get("assessment_runs",0),                 "🧪"),
-        (t("db.kpi.avg_coverage"),   f"{kpi.get('avg_coverage_score',0):.0f}%",    "📈"),
-        (t("db.kpi.critical_open"),   kpi.get("by_severity",{}).get("critical",0), "🔴"),
-    ]
-    for i, (label, value, icon) in enumerate(metrics):
-        cols[i].markdown(f"""
-<div class="kpi-card">
-  <div class="kpi-icon">{icon}</div>
-  <div class="kpi-value">{value}</div>
-  <div class="kpi-label">{label}</div>
-</div>""", unsafe_allow_html=True)
-
-    st.markdown("&nbsp;", unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown(f'<div class="section-sub">{t("db.status_distribution")}</div>', unsafe_allow_html=True)
-        by_status = kpi.get("by_status",{})
-        if by_status:
-            for status, count in by_status.items():
-                label = t(f"verdict_emoji.{status}") if status in ("compliant","partial","non_compliant","no_evidence") else status
-                st.markdown(f"<div class='recent-row'><span class='doc-name'>{label}</span><span class='meta'>{count}</span></div>",
-                            unsafe_allow_html=True)
-        else:
-            st.info(t("db.no_findings"))
-
-    with col2:
-        st.markdown(f'<div class="section-sub">{t("db.coverage_framework")}</div>', unsafe_allow_html=True)
-        by_fw = kpi.get("by_framework",{})
-        if by_fw:
-            for fw, data in by_fw.items():
-                score = data.get("avg_score",0) or 0
-                color = "#16A34A" if score >= 80 else "#EA580C" if score >= 40 else "#DC2626"
+        st.markdown("&nbsp;", unsafe_allow_html=True)
+        st.markdown(f'<div class="section-sub">{t("db.recent_docs")}</div>', unsafe_allow_html=True)
+        runs = api_get("/api/v1/assessments")
+        completed_runs = [r for r in (runs or {}).get("runs", []) if r.get("status") == "completed"][:10]
+        if completed_runs:
+            for r in completed_runs:
+                ts = r.get("started_at","")
+                ts_short = ts[:19].replace("T", " ") if ts else ""
+                doc = r.get("document_title") or t("db.no_document")
+                fw = r.get("framework","")
                 st.markdown(
-                    f"<div style='margin-bottom:10px'>"
-                    f"<div style='display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:4px'>"
-                    f"<span style='font-weight:600;color:var(--primary)'>{fw}</span>"
-                    f"<span style='color:var(--text-dim)'>" + t("db.findings_avg", count=data.get('count',0), score=f"{score:.0f}") + "</span>"
-                    f"</div>"
-                    f"{score_bar(score, color)}"
+                    f"<div class='recent-row'>"
+                    f"<span style='color:#16A34A'>✅</span>"
+                    f"<span class='doc-name'>{doc}</span>"
+                    f"<span class='fw-tag'>{fw}</span>"
+                    f"<span class='meta'>{ts_short} UTC</span>"
                     f"</div>",
                     unsafe_allow_html=True
                 )
         else:
-            st.info(t("db.no_framework_data"))
-
-    st.markdown("&nbsp;", unsafe_allow_html=True)
-    st.markdown(f'<div class="section-sub">{t("db.severity_breakdown")}</div>', unsafe_allow_html=True)
-    by_sev = kpi.get("by_severity",{})
-    sev_order = ["critical","high","medium","low"]
-    sev_colors = {"critical":"#DC2626","high":"#EA580C","medium":"#EAB308","low":"#6B7280"}
-    if by_sev:
-        cols = st.columns(len(sev_order))
-        for i, sev in enumerate(sev_order):
-            count = by_sev.get(sev,0)
-            cols[i].markdown(f"""
-<div class="kpi-card">
-  <div class="kpi-value" style="color:{sev_colors[sev]}">{count}</div>
-  <div class="kpi-label">{t(f"severity.{sev}")}</div>
-</div>""", unsafe_allow_html=True)
-    else:
-        st.info(t("db.no_severity_data"))
-
-    st.markdown("&nbsp;", unsafe_allow_html=True)
-    st.markdown(f'<div class="section-sub">{t("db.recent_docs")}</div>', unsafe_allow_html=True)
-    runs = api_get("/api/v1/assessments")
-    completed_runs = [r for r in (runs or {}).get("runs", []) if r.get("status") == "completed"][:10]
-    if completed_runs:
-        for r in completed_runs:
-            ts = r.get("started_at","")
-            ts_short = ts[:19].replace("T", " ") if ts else ""
-            doc = r.get("document_title") or t("db.no_document")
-            fw = r.get("framework","")
-            st.markdown(
-                f"<div class='recent-row'>"
-                f"<span style='color:#16A34A'>✅</span>"
-                f"<span class='doc-name'>{doc}</span>"
-                f"<span class='fw-tag'>{fw}</span>"
-                f"<span class='meta'>{ts_short} UTC</span>"
-                f"</div>",
-                unsafe_allow_html=True
-            )
-    else:
-        st.info(t("db.no_assessments"))
+            st.info(t("db.no_assessments"))
 
 
-# ════════════════════════════════════════════════════════════════
-# PAGE: FINDING REGISTRY
-# ════════════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════════════
+    # PAGE: FINDING REGISTRY
+    # ════════════════════════════════════════════════════════════════
 
-elif page == "registry":
-    page_hero(t("reg.header"), t("reg.intro"))
+    elif page == "registry":
+        page_hero(t("reg.header"), t("reg.intro"))
 
-    OP_STATUSES = ["new","acknowledged","in_progress","resolved","accepted_risk","closed","dismissed"]
-    VERDICTS = ["non_compliant","partial","compliant","no_evidence","not_applicable"]
-    FRAMEWORKS = ["ISO27001:2022","GDPR","SOC2","NIS2"]
-    ALL = "__ALL__"
+        OP_STATUSES = ["new","acknowledged","in_progress","resolved","accepted_risk","closed","dismissed"]
+        VERDICTS = ["non_compliant","partial","compliant","no_evidence","not_applicable"]
+        FRAMEWORKS = ["ISO27001:2022","GDPR","SOC2","NIS2"]
+        ALL = "__ALL__"
 
-    col1, col2, col3 = st.columns(3)
-    fw_filter = col1.selectbox(
-        t("reg.framework"), [ALL] + FRAMEWORKS,
-        format_func=lambda v: t("all") if v == ALL else v,
-    )
-    verdict_filter = col2.selectbox(
-        t("reg.verdict"), [ALL] + VERDICTS,
-        format_func=lambda v: t("all") if v == ALL else t(f"verdict.{v}"),
-    )
-    op_status_filter = col3.selectbox(
-        t("reg.operational_status"), [ALL] + OP_STATUSES,
-        format_func=lambda v: t("all") if v == ALL else t(f"opstatus.{v}"),
-    )
+        col1, col2, col3 = st.columns(3)
+        fw_filter = col1.selectbox(
+            t("reg.framework"), [ALL] + FRAMEWORKS,
+            format_func=lambda v: t("all") if v == ALL else v,
+        )
+        verdict_filter = col2.selectbox(
+            t("reg.verdict"), [ALL] + VERDICTS,
+            format_func=lambda v: t("all") if v == ALL else t(f"verdict.{v}"),
+        )
+        op_status_filter = col3.selectbox(
+            t("reg.operational_status"), [ALL] + OP_STATUSES,
+            format_func=lambda v: t("all") if v == ALL else t(f"opstatus.{v}"),
+        )
 
-    query = "/api/v1/findings?limit=100"
-    if fw_filter != ALL:
-        query += f"&framework={fw_filter}"
-    if verdict_filter != ALL:
-        query += f"&status={verdict_filter}"
-    if op_status_filter != ALL:
-        query += f"&operational_status={op_status_filter}"
+        query = "/api/v1/findings?limit=100"
+        if fw_filter != ALL:
+            query += f"&framework={fw_filter}"
+        if verdict_filter != ALL:
+            query += f"&status={verdict_filter}"
+        if op_status_filter != ALL:
+            query += f"&operational_status={op_status_filter}"
 
-    findings = api_get(query)
+        findings = api_get(query)
 
-    if not findings or not findings.get("findings"):
-        st.info(t("reg.no_findings"))
-    else:
-        items = findings["findings"]
+        if not findings or not findings.get("findings"):
+            st.info(t("reg.no_findings"))
+        else:
+            items = findings["findings"]
 
-        # Group by document
-        from collections import OrderedDict
-        groups = OrderedDict()
-        for f in items:
-            key = f.get("document_title") or t("reg.unknown_doc")
-            groups.setdefault(key, []).append(f)
+            # Group by document
+            from collections import OrderedDict
+            groups = OrderedDict()
+            for f in items:
+                key = f.get("document_title") or t("reg.unknown_doc")
+                groups.setdefault(key, []).append(f)
 
-        st.markdown(t("reg.findings_count", n=len(items), d=len(groups)))
+            st.markdown(t("reg.findings_count", n=len(items), d=len(groups)))
 
-        LANG_FLAG = {"en": "🇬🇧 EN", "it": "🇮🇹 IT"}
+            LANG_FLAG = {"en": "🇬🇧 EN", "it": "🇮🇹 IT"}
 
-        for doc_title, doc_findings in groups.items():
-            # Document-level meta: latest framework, latest created_at, count
-            latest = max(doc_findings, key=lambda x: x.get("created_at",""))
-            doc_framework = latest.get("framework","")
-            doc_date = (latest.get("created_at","") or "")[:10]
-            summary = t("reg.doc_summary", n=len(doc_findings), framework=doc_framework, date=doc_date)
-            # Worst severity for the document (drives chip)
-            sev_rank = {"critical":4,"high":3,"medium":2,"low":1}
-            worst_sev = max((f.get("severity","medium") for f in doc_findings),
-                            key=lambda s: sev_rank.get(s, 0))
+            for doc_title, doc_findings in groups.items():
+                # Document-level meta: latest framework, latest created_at, count
+                latest = max(doc_findings, key=lambda x: x.get("created_at",""))
+                doc_framework = latest.get("framework","")
+                doc_date = (latest.get("created_at","") or "")[:10]
+                summary = t("reg.doc_summary", n=len(doc_findings), framework=doc_framework, date=doc_date)
+                # Worst severity for the document (drives chip)
+                sev_rank = {"critical":4,"high":3,"medium":2,"low":1}
+                worst_sev = max((f.get("severity","medium") for f in doc_findings),
+                                key=lambda s: sev_rank.get(s, 0))
 
-            with st.expander(f"📄  {doc_title}  ·  {summary}  ·  {t(f'severity.{worst_sev}')}"):
-                for f in doc_findings:
-                    severity = f.get("severity","medium")
-                    finding_lang = f.get("language") or "en"
-                    lang_chip = ""
-                    if finding_lang != get_lang():
-                        lang_chip = (
-                            f"<span class='badge badge-blue' style='margin-left:8px;font-size:10px'>"
-                            f"{t('reg.lang_tag')} {LANG_FLAG.get(finding_lang, finding_lang.upper())}"
-                            f"</span>"
+                with st.expander(f"📄  {doc_title}  ·  {summary}  ·  {t(f'severity.{worst_sev}')}"):
+                    for f in doc_findings:
+                        severity = f.get("severity","medium")
+                        finding_lang = f.get("language") or "en"
+                        lang_chip = ""
+                        if finding_lang != get_lang():
+                            lang_chip = (
+                                f"<span class='badge badge-blue' style='margin-left:8px;font-size:10px'>"
+                                f"{t('reg.lang_tag')} {LANG_FLAG.get(finding_lang, finding_lang.upper())}"
+                                f"</span>"
+                            )
+                        st.markdown(
+                            f"<div class='finding-card {severity}'>"
+                            f"<div style='display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap'>"
+                            f"<div><span class='ctrl-id'>{f.get('control_id','')}</span>"
+                            f"<span class='ctrl-title'> · {f.get('control_title','')}</span>"
+                            f"{lang_chip}</div>"
+                            f"<div style='display:flex;gap:6px'>"
+                            f"{status_badge(f.get('compliance_status','no_evidence'))}"
+                            f"{severity_badge(severity)}"
+                            f"</div></div>"
+                            f"<div class='finding-body'>{f.get('description','')}</div>"
+                            f"<div class='rem'><strong>{t('reg.remediation')}:</strong> {f.get('recommended_action','')}"
+                            f"<div class='reg-ref' style='margin-top:4px'>{f.get('regulatory_reference','')}</div>"
+                            f"</div></div>",
+                            unsafe_allow_html=True,
                         )
-                    st.markdown(
-                        f"<div class='finding-card {severity}'>"
-                        f"<div style='display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap'>"
-                        f"<div><span class='ctrl-id'>{f.get('control_id','')}</span>"
-                        f"<span class='ctrl-title'> · {f.get('control_title','')}</span>"
-                        f"{lang_chip}</div>"
-                        f"<div style='display:flex;gap:6px'>"
-                        f"{status_badge(f.get('compliance_status','no_evidence'))}"
-                        f"{severity_badge(severity)}"
-                        f"</div></div>"
-                        f"<div class='finding-body'>{f.get('description','')}</div>"
-                        f"<div class='rem'><strong>{t('reg.remediation')}:</strong> {f.get('recommended_action','')}"
-                        f"<div class='reg-ref' style='margin-top:4px'>{f.get('regulatory_reference','')}</div>"
-                        f"</div></div>",
-                        unsafe_allow_html=True,
-                    )
 
-                    op_st = f.get('operational_status','')
-                    upd_cols = st.columns([3, 1])
-                    new_status = upd_cols[0].selectbox(
-                        f"{t('reg.update_op_status')} — {f.get('control_id','')}",
-                        OP_STATUSES,
-                        index=OP_STATUSES.index(op_st) if op_st in OP_STATUSES else 0,
-                        format_func=lambda v: t(f"opstatus.{v}"),
-                        key=f"status_{f['finding_id']}",
-                        label_visibility="collapsed",
-                    )
-                    if upd_cols[1].button(t("reg.update_button"), key=f"upd_{f['finding_id']}",
-                                          use_container_width=True):
-                        resp = requests.patch(
-                            f"{API}/api/v1/findings/{f['finding_id']}/status",
-                            json={"operational_status": new_status}
+                        op_st = f.get('operational_status','')
+                        upd_cols = st.columns([3, 1])
+                        new_status = upd_cols[0].selectbox(
+                            f"{t('reg.update_op_status')} — {f.get('control_id','')}",
+                            OP_STATUSES,
+                            index=OP_STATUSES.index(op_st) if op_st in OP_STATUSES else 0,
+                            format_func=lambda v: t(f"opstatus.{v}"),
+                            key=f"status_{f['finding_id']}",
+                            label_visibility="collapsed",
                         )
-                        if resp.ok:
-                            st.success(t("reg.status_updated"))
-                            st.rerun()
+                        if upd_cols[1].button(t("reg.update_button"), key=f"upd_{f['finding_id']}",
+                                              use_container_width=True):
+                            resp = requests.patch(
+                                f"{API}/api/v1/findings/{f['finding_id']}/status",
+                                json={"operational_status": new_status}
+                            )
+                            if resp.ok:
+                                st.success(t("reg.status_updated"))
+                                st.rerun()
 
 
-# ════════════════════════════════════════════════════════════════
-# PAGE: FRAMEWORK LIBRARY
-# ════════════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════════════
+    # PAGE: FRAMEWORK LIBRARY
+    # ════════════════════════════════════════════════════════════════
 
-elif page == "library":
-    page_hero(t("lib.header"), t("lib.intro"))
+    elif page == "library":
+        page_hero(t("lib.header"), t("lib.intro"))
 
-    fw_data = api_get("/api/v1/frameworks")
-    if not fw_data:
-        st.error(t("lib.cannot_reach"))
-        st.stop()
+        fw_data = api_get("/api/v1/frameworks")
+        if not fw_data:
+            st.error(t("lib.cannot_reach"))
+            st.stop()
 
-    for fw in fw_data.get("frameworks",[]):
-        coming_soon = fw.get("coming_soon", False)
-        status_tag = t("lib.coming_phase3") if coming_soon else t("lib.active")
-        with st.expander(t("lib.framework_entry", name=fw['name'], controls=fw['controls'], tag=status_tag)):
-            col1, col2 = st.columns([2,1])
-            col1.markdown(f"**{t('lib.category')}:** {fw['category']}  \n**{t('lib.priority')}:** {fw['priority']}")
-            col2.markdown(f"**{t('lib.controls')}:** {fw['controls']}")
+        for fw in fw_data.get("frameworks",[]):
+            coming_soon = fw.get("coming_soon", False)
+            status_tag = t("lib.coming_phase3") if coming_soon else t("lib.active")
+            with st.expander(t("lib.framework_entry", name=fw['name'], controls=fw['controls'], tag=status_tag)):
+                col1, col2 = st.columns([2,1])
+                col1.markdown(f"**{t('lib.category')}:** {fw['category']}  \n**{t('lib.priority')}:** {fw['priority']}")
+                col2.markdown(f"**{t('lib.controls')}:** {fw['controls']}")
 
-            if not coming_soon:
-                ctrl_data = api_get(f"/api/v1/frameworks/{fw['id']}/controls")
-                if ctrl_data:
-                    controls = ctrl_data.get("controls",[])
-                    st.markdown(t("lib.controls_loaded", n=len(controls)))
-                    for ctrl in controls[:5]:
-                        st.markdown(f"- **{ctrl['control_id']}** · {ctrl['title']}")
-                    if len(controls) > 5:
-                        st.caption(t("lib.more_controls", n=len(controls)-5))
+                if not coming_soon:
+                    ctrl_data = api_get(f"/api/v1/frameworks/{fw['id']}/controls")
+                    if ctrl_data:
+                        controls = ctrl_data.get("controls",[])
+                        st.markdown(t("lib.controls_loaded", n=len(controls)))
+                        for ctrl in controls[:5]:
+                            st.markdown(f"- **{ctrl['control_id']}** · {ctrl['title']}")
+                        if len(controls) > 5:
+                            st.caption(t("lib.more_controls", n=len(controls)-5))
 
-                    st.markdown("---")
-                    ctrl_ids = [c["control_id"] for c in controls]
-                    selected_ctrl = st.selectbox(t("lib.explain_ctrl"), ctrl_ids, key=f"ctrl_{fw['id']}")
-                    if st.button(t("lib.explain_button"), key=f"exp_{fw['id']}"):
-                        with st.spinner(t("lib.explain_spinner")):
-                            result = api_get(f"/api/v1/frameworks/{fw['id']}/controls/{selected_ctrl}/explain?language={get_lang()}")
-                            if result:
-                                st.markdown(result.get("explanation",""))
+                        st.markdown("---")
+                        ctrl_ids = [c["control_id"] for c in controls]
+                        selected_ctrl = st.selectbox(t("lib.explain_ctrl"), ctrl_ids, key=f"ctrl_{fw['id']}")
+                        if st.button(t("lib.explain_button"), key=f"exp_{fw['id']}"):
+                            with st.spinner(t("lib.explain_spinner")):
+                                result = api_get(f"/api/v1/frameworks/{fw['id']}/controls/{selected_ctrl}/explain?language={get_lang()}")
+                                if result:
+                                    st.markdown(result.get("explanation",""))
+
+
+# ── Render the avatar (last, so it reflects state changes from page handlers) ──
+with _avatar_col:
+    components.html(
+        render_avatar(
+            get_avatar_state(),
+            message=_resolve_avatar_message(),
+            page=page,
+            lang=get_lang(),
+        ),
+        height=AVATAR_FRAME_HEIGHT,
+        scrolling=False,
+    )
