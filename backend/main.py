@@ -284,11 +284,17 @@ def get_findings(framework: Optional[str] = None, status: Optional[str] = None,
     if not language or language not in ("en", "it"):
         return {"findings": findings}
 
+    # We deliberately do NOT short-circuit on (stored_language == requested
+    # language). The stored language column reflects the language passed to
+    # the run when the finding was created, but Claude's output can still
+    # come back in a different language (e.g. if the source document was
+    # Italian and the prompt only weakly steered output to English). The
+    # only reliable contract is: for every (finding × ui_language) we serve
+    # from cache or ask Claude to translate. The first call per pair is one
+    # Claude round-trip (cheap, Haiku) — subsequent views are zero-cost.
     for f in findings:
-        src = (f.get("language") or "en").lower()
-        if src == language:
-            continue
-        cached = get_finding_translation(f["finding_id"], language)
+        fid = f["finding_id"]
+        cached = get_finding_translation(fid, language)
         if cached:
             f["description"]          = cached["description"]
             f["recommended_action"]   = cached["recommended_action"]
@@ -301,7 +307,7 @@ def get_findings(framework: Optional[str] = None, status: Optional[str] = None,
                 language,
             )
             save_finding_translation(
-                f["finding_id"], language,
+                fid, language,
                 translated["description"],
                 translated["recommended_action"],
                 translated["regulatory_reference"],
