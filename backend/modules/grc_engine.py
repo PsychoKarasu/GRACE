@@ -10,7 +10,8 @@ from pathlib import Path
 from typing import Optional
 import anthropic
 
-PROMPT_DIR   = Path(__file__).parent.parent.parent / "prompt-library"
+PROMPT_DIR = Path("/prompt-library") if Path("/prompt-library").exists() \
+             else Path(__file__).parent.parent.parent / "prompt-library"
 FRAMEWORK_DIR = Path(__file__).parent.parent / "data" / "frameworks"
 
 # Anthropic client — reads ANTHROPIC_API_KEY from environment
