@@ -460,15 +460,16 @@ h2 {{ font-weight: 600; }}
 h3 {{ font-weight: 600; }}
 code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
 
-/* ── Top bar ── */
+/* ── Top bar (enlarged ~2cm on both axes per design feedback) ── */
 .grace-topbar {{
   display: flex; align-items: center; justify-content: space-between;
   background:
     linear-gradient(160deg, var(--surface) 0%, var(--surface-alt) 100%);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 14px 22px;
-  margin: 4px 0 22px 0;
+  border-radius: 18px;
+  padding: 32px 38px;
+  margin: 14px 0 28px 0;
+  min-height: 130px;
   box-shadow: var(--shadow);
   position: relative; overflow: hidden;
 }}
@@ -477,26 +478,26 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
   background: linear-gradient(120deg, transparent 0%, rgba(78,198,217,0.30) 40%, transparent 80%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude;
-  padding: 1px; border-radius: 16px; pointer-events: none;
+  padding: 1px; border-radius: 18px; pointer-events: none;
 }}
 .grace-topbar .brand {{
-  display: flex; align-items: center; gap: 16px; position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 22px; position: relative; z-index: 1;
 }}
 .grace-topbar .brand-logo {{
-  height: 50px; width: auto;
-  filter: drop-shadow(0 2px 4px rgba(22,50,101,0.18));
+  height: 78px; width: auto;
+  filter: drop-shadow(0 2px 6px rgba(22,50,101,0.22));
 }}
 .grace-topbar .brand-text {{
-  display: flex; flex-direction: column; line-height: 1.15;
+  display: flex; flex-direction: column; line-height: 1.18;
 }}
 .grace-topbar .brand-name {{
   font-family: var(--font-display);
-  font-size: 1.35rem; font-weight: 700; color: var(--primary);
-  letter-spacing: 1px;
+  font-size: 1.95rem; font-weight: 700; color: var(--primary);
+  letter-spacing: 1.4px;
 }}
 .grace-topbar .brand-tagline {{
-  font-size: 0.74rem; color: var(--text-dim); margin-top: 3px;
-  letter-spacing: 0.6px;
+  font-size: 0.95rem; color: var(--text-dim); margin-top: 5px;
+  letter-spacing: 0.7px;
 }}
 
 /* ── Status pill ── */
@@ -846,6 +847,8 @@ with st.sidebar:
     current = st.session_state.get("current_page", PAGE_KEYS[0])
     if current not in PAGE_KEYS:
         current = PAGE_KEYS[0]
+    # Extra breathing room above the navigation, per design feedback.
+    st.markdown('<div style="height:26px"></div>', unsafe_allow_html=True)
     page = st.radio(
         t("sidebar.navigation"),
         PAGE_KEYS,
@@ -1489,6 +1492,8 @@ with _main_col:
 
 # ── Render the avatar (last, so it reflects state changes from page handlers) ──
 with _avatar_col:
+    # Drop the avatar frame ~40px below the enlarged topbar baseline.
+    st.markdown('<div style="height:40px"></div>', unsafe_allow_html=True)
     components.html(
         render_avatar(
             get_avatar_state(),
