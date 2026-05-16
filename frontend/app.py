@@ -508,16 +508,17 @@ h2 {{ font-weight: 600; }}
 h3 {{ font-weight: 600; }}
 code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
 
-/* ── Top bar (enlarged ~2cm on both axes per design feedback) ── */
+/* ── Top bar: full-width header dominated by the GRACE logo image
+   (the image itself carries the wordmark + tagline, no duplicate text). ── */
 .grace-topbar {{
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; justify-content: flex-start;
   background:
     linear-gradient(160deg, var(--surface) 0%, var(--surface-alt) 100%);
   border: 1px solid var(--border);
   border-radius: 18px;
-  padding: 32px 38px;
+  padding: 18px 28px;
   margin: 14px 0 28px 0;
-  min-height: 130px;
+  min-height: 150px;
   box-shadow: var(--shadow);
   position: relative; overflow: hidden;
 }}
@@ -529,23 +530,13 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
   padding: 1px; border-radius: 18px; pointer-events: none;
 }}
 .grace-topbar .brand {{
-  display: flex; align-items: center; gap: 22px; position: relative; z-index: 1;
+  display: flex; align-items: center; position: relative; z-index: 1;
+  width: 100%;
 }}
 .grace-topbar .brand-logo {{
-  height: 78px; width: auto;
-  filter: drop-shadow(0 2px 6px rgba(22,50,101,0.22));
-}}
-.grace-topbar .brand-text {{
-  display: flex; flex-direction: column; line-height: 1.18;
-}}
-.grace-topbar .brand-name {{
-  font-family: var(--font-display);
-  font-size: 1.95rem; font-weight: 700; color: var(--primary);
-  letter-spacing: 1.4px;
-}}
-.grace-topbar .brand-tagline {{
-  font-size: 0.95rem; color: var(--text-dim); margin-top: 5px;
-  letter-spacing: 0.7px;
+  height: 124px; width: auto; max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 8px rgba(22,50,101,0.25));
 }}
 
 /* ── Status pill ── */
@@ -834,20 +825,20 @@ LANG_OPTIONS = {"en": "🇺🇸 EN", "it": "🇮🇹 IT"}
 top_left, top_mid, top_lang, top_theme = st.columns([7, 2.4, 0.85, 0.55])
 
 with top_left:
+    # The logo image already carries the GRACE wordmark and the tagline
+    # ("Governance · Risk · Assurance · Compliance Engine"), so we display
+    # only the image — no duplicate text — and let it fill the topbar
+    # height as the visual header of the whole interface.
     logo_html = (
-        f'<img class="brand-logo" src="data:image/png;base64,{LOGO_B64}" alt="GRACE">'
+        f'<img class="brand-logo" src="data:image/png;base64,{LOGO_B64}" alt="GRACE — Governance, Risk, Assurance & Compliance Engine">'
         if LOGO_B64
-        else '<div style="font-size:2rem">🛡️</div>'
+        else '<div style="font-size:3rem">🛡️ GRACE</div>'
     )
     st.markdown(
         f"""
 <div class="grace-topbar" style="margin-right:6px">
   <div class="brand">
     {logo_html}
-    <div class="brand-text">
-      <span class="brand-name">GRACE</span>
-      <span class="brand-tagline">{t('topbar.tagline')}</span>
-    </div>
   </div>
 </div>
 """,
@@ -1533,37 +1524,61 @@ with _main_col:
     elif page == "library":
         page_hero(t("lib.header"), t("lib.intro"))
 
-        fw_data = api_get("/api/v1/frameworks")
+        # Frameworks list + per-framework controls are cached for 5
+        # minutes. Without this, each rerun (a click, a theme switch,
+        # an expander toggle) re-fired 1 + N API calls — which made
+        # the page feel half-rendered until 3-4 retries warmed it up.
+        @st.cache_data(ttl=300, show_spinner=False)
+        def _cached_frameworks_list():
+            return api_get("/api/v1/frameworks")
+
+        @st.cache_data(ttl=300, show_spinner=False)
+        def _cached_framework_controls(framework_id: str):
+            return api_get(f"/api/v1/frameworks/{framework_id}/controls")
+
+        fw_data = _cached_frameworks_list()
         if not fw_data:
-            st.error(t("lib.cannot_reach"))
-            st.stop()
+            st.warning(t("lib.cannot_reach"))
+            if st.button("↻ Retry", key="lib_retry"):
+                _cached_frameworks_list.clear()
+                st.rerun()
+        else:
+            for fw in fw_data.get("frameworks", []):
+                coming_soon = fw.get("coming_soon", False)
+                status_tag = t("lib.coming_phase3") if coming_soon else t("lib.active")
+                with st.expander(t("lib.framework_entry", name=fw['name'],
+                                    controls=fw['controls'], tag=status_tag)):
+                    col1, col2 = st.columns([2, 1])
+                    col1.markdown(
+                        f"**{t('lib.category')}:** {fw['category']}  \n"
+                        f"**{t('lib.priority')}:** {fw['priority']}"
+                    )
+                    col2.markdown(f"**{t('lib.controls')}:** {fw['controls']}")
 
-        for fw in fw_data.get("frameworks",[]):
-            coming_soon = fw.get("coming_soon", False)
-            status_tag = t("lib.coming_phase3") if coming_soon else t("lib.active")
-            with st.expander(t("lib.framework_entry", name=fw['name'], controls=fw['controls'], tag=status_tag)):
-                col1, col2 = st.columns([2,1])
-                col1.markdown(f"**{t('lib.category')}:** {fw['category']}  \n**{t('lib.priority')}:** {fw['priority']}")
-                col2.markdown(f"**{t('lib.controls')}:** {fw['controls']}")
+                    if not coming_soon:
+                        ctrl_data = _cached_framework_controls(fw['id'])
+                        if ctrl_data:
+                            controls = ctrl_data.get("controls", [])
+                            st.markdown(t("lib.controls_loaded", n=len(controls)))
+                            for ctrl in controls[:5]:
+                                st.markdown(f"- **{ctrl['control_id']}** · {ctrl['title']}")
+                            if len(controls) > 5:
+                                st.caption(t("lib.more_controls", n=len(controls) - 5))
 
-                if not coming_soon:
-                    ctrl_data = api_get(f"/api/v1/frameworks/{fw['id']}/controls")
-                    if ctrl_data:
-                        controls = ctrl_data.get("controls",[])
-                        st.markdown(t("lib.controls_loaded", n=len(controls)))
-                        for ctrl in controls[:5]:
-                            st.markdown(f"- **{ctrl['control_id']}** · {ctrl['title']}")
-                        if len(controls) > 5:
-                            st.caption(t("lib.more_controls", n=len(controls)-5))
-
-                        st.markdown("---")
-                        ctrl_ids = [c["control_id"] for c in controls]
-                        selected_ctrl = st.selectbox(t("lib.explain_ctrl"), ctrl_ids, key=f"ctrl_{fw['id']}")
-                        if st.button(t("lib.explain_button"), key=f"exp_{fw['id']}"):
-                            with st.spinner(t("lib.explain_spinner")):
-                                result = api_get(f"/api/v1/frameworks/{fw['id']}/controls/{selected_ctrl}/explain?language={get_lang()}")
-                                if result:
-                                    st.markdown(result.get("explanation",""))
+                            st.markdown("---")
+                            ctrl_ids = [c["control_id"] for c in controls]
+                            selected_ctrl = st.selectbox(
+                                t("lib.explain_ctrl"), ctrl_ids,
+                                key=f"ctrl_{fw['id']}",
+                            )
+                            if st.button(t("lib.explain_button"), key=f"exp_{fw['id']}"):
+                                with st.spinner(t("lib.explain_spinner")):
+                                    result = api_get(
+                                        f"/api/v1/frameworks/{fw['id']}/controls/"
+                                        f"{selected_ctrl}/explain?language={get_lang()}"
+                                    )
+                                    if result:
+                                        st.markdown(result.get("explanation", ""))
 
 
 # ── Render the avatar (last, so it reflects state changes from page handlers) ──
