@@ -393,49 +393,70 @@ def inject_css():
   --font-mono:    'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
 }}
 
-/* ── Compact language buttons with inline SVG flags ── */
-.grace-lang-row [data-testid="column"] {{ padding: 0 2px !important; }}
-.lang-btn-wrap .stButton button {{
-  min-height: 36px !important; height: 36px !important;
+/* ── Compact language dropdown with inline SVG flag icons ── */
+/* Both language and theme controls live in a flex container forced to
+   the same baseline height (38 px) so their visual rectangles align. */
+.grace-lang-wrap, .grace-theme-wrap {{
+  display: flex; align-items: center;
+  height: 38px;
+}}
+/* Streamlit wraps each widget in a container with vertical padding;
+   strip it inside our wraps so the rectangles align on the same y. */
+.grace-lang-wrap [data-testid="stSelectbox"],
+.grace-theme-wrap [data-testid="stButton"] {{
+  margin: 0 !important;
   width: 100% !important;
-  padding: 0 8px 0 26px !important;
+}}
+.grace-lang-wrap [data-baseweb="select"] {{
+  min-height: 38px !important;
+  height: 38px !important;
+}}
+.grace-lang-wrap [data-baseweb="select"] > div {{
+  min-height: 38px !important;
+  height: 38px !important;
+  padding-left: 32px !important;
+  padding-right: 30px !important;
   border-radius: 10px !important;
-  font-family: var(--font-display) !important;
-  font-weight: 700 !important; font-size: 0.78rem !important;
-  letter-spacing: 0.8px !important;
-  background: var(--surface) !important;
-  color: var(--text) !important;
+  background-color: var(--surface) !important;
   border: 1px solid var(--border) !important;
-  box-shadow: var(--shadow);
-  position: relative; overflow: hidden;
   background-repeat: no-repeat !important;
-  background-position: 6px center !important;
+  background-position: 8px center !important;
   background-size: 18px 12px !important;
+  font-family: var(--font-display) !important;
+  font-weight: 700 !important;
+  font-size: 0.82rem !important;
+  letter-spacing: 0.8px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-shadow: var(--shadow);
 }}
-.lang-btn-wrap .stButton button p {{ color: inherit !important; }}
-.lang-btn-wrap .stButton button:hover {{
-  border-color: var(--accent) !important;
-  transform: translateY(-1px);
-}}
-.lang-btn-wrap.active .stButton button {{
-  background-color: var(--accent-soft) !important;
-  border-color: var(--accent) !important;
-  color: var(--primary) !important;
-  box-shadow: 0 2px 10px rgba(78,198,217,0.30);
-}}
-/* USA flag — 13 stripes (simplified to 4 visible) + blue canton */
-.lang-en .stButton button {{
+.grace-lang-wrap.lang-selected-en [data-baseweb="select"] > div {{
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40'><rect width='60' height='40' fill='%23B22234'/><rect y='3.1' width='60' height='3.1' fill='%23fff'/><rect y='9.3' width='60' height='3.1' fill='%23fff'/><rect y='15.5' width='60' height='3.1' fill='%23fff'/><rect y='21.7' width='60' height='3.1' fill='%23fff'/><rect y='27.9' width='60' height='3.1' fill='%23fff'/><rect y='34.1' width='60' height='3.1' fill='%23fff'/><rect width='24' height='21.5' fill='%233C3B6E'/></svg>") !important;
 }}
-/* Italy flag — 3 vertical bands green/white/red */
-.lang-it .stButton button {{
+.grace-lang-wrap.lang-selected-it [data-baseweb="select"] > div {{
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'><rect width='1' height='2' x='0' fill='%23009246'/><rect width='1' height='2' x='1' fill='%23fff'/><rect width='1' height='2' x='2' fill='%23CE2B37'/></svg>") !important;
+}}
+/* Open-state dropdown items: flag-by-position (1st option = EN, 2nd = IT). */
+[data-baseweb="popover"] li {{
+  background-repeat: no-repeat !important;
+  background-position: 12px center !important;
+  background-size: 18px 12px !important;
+  padding-left: 38px !important;
+  font-family: var(--font-display) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.6px !important;
+}}
+[data-baseweb="popover"] li:nth-child(1) {{
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40'><rect width='60' height='40' fill='%23B22234'/><rect y='3.1' width='60' height='3.1' fill='%23fff'/><rect y='9.3' width='60' height='3.1' fill='%23fff'/><rect y='15.5' width='60' height='3.1' fill='%23fff'/><rect y='21.7' width='60' height='3.1' fill='%23fff'/><rect y='27.9' width='60' height='3.1' fill='%23fff'/><rect y='34.1' width='60' height='3.1' fill='%23fff'/><rect width='24' height='21.5' fill='%233C3B6E'/></svg>") !important;
+}}
+[data-baseweb="popover"] li:nth-child(2) {{
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'><rect width='1' height='2' x='0' fill='%23009246'/><rect width='1' height='2' x='1' fill='%23fff'/><rect width='1' height='2' x='2' fill='%23CE2B37'/></svg>") !important;
 }}
 
 .grace-theme-wrap .stButton button {{
-  min-height: 36px !important;
-  height: 36px !important;
-  width: 42px !important;
+  min-height: 38px !important;
+  height: 38px !important;
+  width: 44px !important;
   padding: 0 !important;
   border-radius: 10px !important;
   font-size: 1.1rem !important;
@@ -886,27 +907,20 @@ with top_mid:
     st.markdown("")  # spacer
 
 with top_lang:
-    # Two compact language buttons with inline SVG flags rendered via CSS
-    # background-image (data URLs). Unicode flag emojis don't render on
-    # every OS/browser combo (Windows in particular falls back to letter
-    # codes); inline SVG is universally reliable.
+    # Single dropdown with inline-SVG flag icons (Unicode flag emojis
+    # don't render reliably on Windows). The wrapper carries a class
+    # that signals the active language to CSS, which then paints the
+    # correct flag onto the selectbox's closed-state value.
     current_lang = st.session_state.get("language", "en")
-    st.markdown('<div class="grace-lang-row">', unsafe_allow_html=True)
-    lcol_en, lcol_it = st.columns(2)
-    with lcol_en:
-        cls_en = "lang-btn-wrap lang-en" + (" active" if current_lang == "en" else "")
-        st.markdown(f'<div class="{cls_en}">', unsafe_allow_html=True)
-        if st.button("EN", key="lang_btn_en", help="English"):
-            st.session_state["language"] = "en"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-    with lcol_it:
-        cls_it = "lang-btn-wrap lang-it" + (" active" if current_lang == "it" else "")
-        st.markdown(f'<div class="{cls_it}">', unsafe_allow_html=True)
-        if st.button("IT", key="lang_btn_it", help="Italiano"):
-            st.session_state["language"] = "it"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+    wrap_cls = f"grace-lang-wrap lang-selected-{current_lang}"
+    st.markdown(f'<div class="{wrap_cls}">', unsafe_allow_html=True)
+    st.selectbox(
+        t("topbar.language"),
+        options=["en", "it"],
+        format_func=lambda k: "EN" if k == "en" else "IT",
+        key="language",
+        label_visibility="collapsed",
+    )
     st.markdown('</div>', unsafe_allow_html=True)
 
 with top_theme:
