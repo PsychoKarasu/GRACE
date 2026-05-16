@@ -155,7 +155,7 @@ def run_gap_analysis(document_text: str, document_title: str,
         "keywords":      c["keywords"][:5],
     } for c in controls], indent=2)
 
-    doc_excerpt = document_text[:6000]  # stay well within context
+    doc_excerpt = document_text[:60000]  # ~20K tokens, well within 200K context
 
     user_content = f"""Analyze the following document for compliance with {framework_id}.
 
@@ -176,7 +176,7 @@ Remember: find what IS present AND what is MISSING. Be specific to this document
     client = get_client()
     with client.messages.stream(
         model="claude-sonnet-4-6",
-        max_tokens=8192,
+        max_tokens=32768,
         system=system,
         messages=[{"role": "user", "content": user_content}]
     ) as stream:
