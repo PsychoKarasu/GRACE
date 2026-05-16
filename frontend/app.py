@@ -393,16 +393,44 @@ def inject_css():
   --font-mono:    'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
 }}
 
-/* ── Compact language selector + theme toggle in the topbar ── */
-.grace-lang-wrap [data-testid="stSelectbox"] > div > div {{
-  min-height: 36px !important;
-  padding: 2px 8px !important;
+/* ── Compact language buttons with inline SVG flags ── */
+.grace-lang-row [data-testid="column"] {{ padding: 0 2px !important; }}
+.lang-btn-wrap .stButton button {{
+  min-height: 36px !important; height: 36px !important;
+  width: 100% !important;
+  padding: 0 8px 0 26px !important;
   border-radius: 10px !important;
   font-family: var(--font-display) !important;
-  font-weight: 600 !important;
-  font-size: 0.82rem !important;
+  font-weight: 700 !important; font-size: 0.78rem !important;
+  letter-spacing: 0.8px !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow);
+  position: relative; overflow: hidden;
+  background-repeat: no-repeat !important;
+  background-position: 6px center !important;
+  background-size: 18px 12px !important;
 }}
-.grace-lang-wrap [data-testid="stSelectbox"] svg {{ height: 16px; width: 16px; }}
+.lang-btn-wrap .stButton button p {{ color: inherit !important; }}
+.lang-btn-wrap .stButton button:hover {{
+  border-color: var(--accent) !important;
+  transform: translateY(-1px);
+}}
+.lang-btn-wrap.active .stButton button {{
+  background-color: var(--accent-soft) !important;
+  border-color: var(--accent) !important;
+  color: var(--primary) !important;
+  box-shadow: 0 2px 10px rgba(78,198,217,0.30);
+}}
+/* USA flag — 13 stripes (simplified to 4 visible) + blue canton */
+.lang-en .stButton button {{
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40'><rect width='60' height='40' fill='%23B22234'/><rect y='3.1' width='60' height='3.1' fill='%23fff'/><rect y='9.3' width='60' height='3.1' fill='%23fff'/><rect y='15.5' width='60' height='3.1' fill='%23fff'/><rect y='21.7' width='60' height='3.1' fill='%23fff'/><rect y='27.9' width='60' height='3.1' fill='%23fff'/><rect y='34.1' width='60' height='3.1' fill='%23fff'/><rect width='24' height='21.5' fill='%233C3B6E'/></svg>") !important;
+}}
+/* Italy flag — 3 vertical bands green/white/red */
+.lang-it .stButton button {{
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'><rect width='1' height='2' x='0' fill='%23009246'/><rect width='1' height='2' x='1' fill='%23fff'/><rect width='1' height='2' x='2' fill='%23CE2B37'/></svg>") !important;
+}}
 
 .grace-theme-wrap .stButton button {{
   min-height: 36px !important;
@@ -511,14 +539,14 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
 /* ── Top bar: full-width header dominated by the GRACE logo image
    (the image itself carries the wordmark + tagline, no duplicate text). ── */
 .grace-topbar {{
-  display: flex; align-items: center; justify-content: flex-start;
+  display: flex; align-items: stretch; justify-content: flex-start;
   background:
     linear-gradient(160deg, var(--surface) 0%, var(--surface-alt) 100%);
   border: 1px solid var(--border);
   border-radius: 18px;
-  padding: 18px 28px;
+  padding: 10px 20px;
   margin: 14px 0 28px 0;
-  min-height: 150px;
+  min-height: 170px;
   box-shadow: var(--shadow);
   position: relative; overflow: hidden;
 }}
@@ -530,13 +558,17 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
   padding: 1px; border-radius: 18px; pointer-events: none;
 }}
 .grace-topbar .brand {{
-  display: flex; align-items: center; position: relative; z-index: 1;
-  width: 100%;
+  display: flex; align-items: center; justify-content: flex-start;
+  position: relative; z-index: 1;
+  width: 100%; height: 100%;
 }}
 .grace-topbar .brand-logo {{
-  height: 124px; width: auto; max-width: 100%;
+  height: auto; width: auto;
+  max-height: 200px;
+  max-width: 100%;
   object-fit: contain;
   filter: drop-shadow(0 3px 8px rgba(22,50,101,0.25));
+  flex-grow: 0;
 }}
 
 /* ── Status pill ── */
@@ -819,10 +851,13 @@ inject_css()
 
 # ─── Top bar (logo + language + theme) ───────────────────────────────
 
-LANG_OPTIONS = {"en": "🇺🇸 EN", "it": "🇮🇹 IT"}
+# Language dropdown was replaced by two flag-buttons (see top_lang block);
+# LANG_OPTIONS is no longer referenced. Keep the keys list for any future
+# integration that might need to enumerate the available locales.
+LANG_KEYS = ("en", "it")
 
 # Build the top-bar as a single HTML block on the left + Streamlit widgets on the right
-top_left, top_mid, top_lang, top_theme = st.columns([7, 2.4, 0.85, 0.55])
+top_left, top_mid, top_lang, top_theme = st.columns([7, 1.8, 1.3, 0.55])
 
 with top_left:
     # The logo image already carries the GRACE wordmark and the tagline
@@ -849,14 +884,27 @@ with top_mid:
     st.markdown("")  # spacer
 
 with top_lang:
-    st.markdown('<div class="grace-lang-wrap">', unsafe_allow_html=True)
-    st.selectbox(
-        t("topbar.language"),
-        options=list(LANG_OPTIONS.keys()),
-        format_func=lambda k: LANG_OPTIONS[k],
-        key="language",
-        label_visibility="collapsed",
-    )
+    # Two compact language buttons with inline SVG flags rendered via CSS
+    # background-image (data URLs). Unicode flag emojis don't render on
+    # every OS/browser combo (Windows in particular falls back to letter
+    # codes); inline SVG is universally reliable.
+    current_lang = st.session_state.get("language", "en")
+    st.markdown('<div class="grace-lang-row">', unsafe_allow_html=True)
+    lcol_en, lcol_it = st.columns(2)
+    with lcol_en:
+        cls_en = "lang-btn-wrap lang-en" + (" active" if current_lang == "en" else "")
+        st.markdown(f'<div class="{cls_en}">', unsafe_allow_html=True)
+        if st.button("EN", key="lang_btn_en", help="English"):
+            st.session_state["language"] = "en"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+    with lcol_it:
+        cls_it = "lang-btn-wrap lang-it" + (" active" if current_lang == "it" else "")
+        st.markdown(f'<div class="{cls_it}">', unsafe_allow_html=True)
+        if st.button("IT", key="lang_btn_it", help="Italiano"):
+            st.session_state["language"] = "it"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 with top_theme:
@@ -901,6 +949,15 @@ with st.sidebar:
         current = PAGE_KEYS[0]
     # Extra breathing room above the navigation, per design feedback.
     st.markdown('<div style="height:26px"></div>', unsafe_allow_html=True)
+
+    def _on_nav_change():
+        # Fires the moment the user picks a different page. Mirroring
+        # into current_page in the same callback (instead of after the
+        # widget render) guarantees the selection is committed BEFORE
+        # any downstream page handler reads it — fixes the perception
+        # of "needs 2-3 clicks to switch".
+        st.session_state["current_page"] = st.session_state["nav_page"]
+
     page = st.radio(
         t("sidebar.navigation"),
         PAGE_KEYS,
@@ -908,6 +965,7 @@ with st.sidebar:
         format_func=lambda k: t(f"nav.{k}"),
         label_visibility="collapsed",
         key="nav_page",
+        on_change=_on_nav_change,
     )
     st.session_state["current_page"] = page
 
