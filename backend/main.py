@@ -285,13 +285,20 @@ def get_findings(framework: Optional[str] = None, status: Optional[str] = None,
         return {"findings": findings}
 
     # We deliberately do NOT short-circuit on (stored_language == requested
-    # language). The stored language column reflects the language passed to
-    # the run when the finding was created, but Claude's output can still
-    # come back in a different language (e.g. if the source document was
-    # Italian and the prompt only weakly steered output to English). The
-    # only reliable contract is: for every (finding × ui_language) we serve
-    # from cache or ask Claude to translate. The first call per pair is one
-    # Claude round-trip (cheap, Haiku) — subsequent views are zero-cost.
+    # language). The stored language column reflects the language passed
+    # to the run, but Claude's output can still come back in a different
+    # language (e.g. if the source document was Italian and the prompt
+    # only weakly steered output to English). For every (finding ×
+    # ui_language) we serve from cache or ask Claude.
+    #
+    # The first view per pair triggers one Haiku round-trip per finding.
+    # We run those Claude calls in PARALLEL via a ThreadPoolExecutor so a
+    # 10-finding page costs ~one Haiku-call wall-clock, not ten — the
+    # frontend no longer freezes for 30 s on the first Registry visit.
+    import concurrent.futures as _cf
+    from threading import Lock
+
+    pending = []        # findings that need a Claude call
     for f in findings:
         fid = f["finding_id"]
         cached = get_finding_translation(fid, language)
@@ -299,23 +306,31 @@ def get_findings(framework: Optional[str] = None, status: Optional[str] = None,
             f["description"]          = cached["description"]
             f["recommended_action"]   = cached["recommended_action"]
             f["regulatory_reference"] = cached["regulatory_reference"]
+            f["language"]             = language
         else:
-            translated = translate_finding_fields(
+            pending.append(f)
+
+    if pending:
+        def _translate_one(f):
+            return f, translate_finding_fields(
                 f.get("description", ""),
                 f.get("recommended_action", ""),
                 f.get("regulatory_reference", ""),
                 language,
             )
-            save_finding_translation(
-                fid, language,
-                translated["description"],
-                translated["recommended_action"],
-                translated["regulatory_reference"],
-            )
-            f["description"]          = translated["description"]
-            f["recommended_action"]   = translated["recommended_action"]
-            f["regulatory_reference"] = translated["regulatory_reference"]
-        f["language"] = language
+
+        with _cf.ThreadPoolExecutor(max_workers=min(8, len(pending))) as ex:
+            for f, translated in ex.map(_translate_one, pending):
+                save_finding_translation(
+                    f["finding_id"], language,
+                    translated["description"],
+                    translated["recommended_action"],
+                    translated["regulatory_reference"],
+                )
+                f["description"]          = translated["description"]
+                f["recommended_action"]   = translated["recommended_action"]
+                f["regulatory_reference"] = translated["regulatory_reference"]
+                f["language"]             = language
 
     return {"findings": findings}
 

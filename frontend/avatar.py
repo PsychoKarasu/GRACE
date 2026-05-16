@@ -185,26 +185,30 @@ def _css() -> str:
 .grace-avatar-frame {{
   display: flex; flex-direction: column; align-items: center;
   padding: 14px 6px 12px;
-  background: linear-gradient(160deg, rgba(46,123,138,0.18) 0%, rgba(22,50,101,0.28) 100%);
-  border: 1px solid rgba(78,198,217,0.25);
+  /* Slightly deeper navy so light-theme contrast for the name+role
+     labels below is guaranteed (the surrounding page can be cream). */
+  background: linear-gradient(160deg, rgba(28,80,98,0.92) 0%, rgba(15,33,72,0.95) 100%);
+  border: 1px solid rgba(78,198,217,0.35);
   border-radius: 16px;
   position: relative; overflow: hidden;
   margin-bottom: 14px;
-  box-shadow: 0 6px 22px rgba(10,25,41,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+  box-shadow: 0 6px 22px rgba(10,25,41,0.30), inset 0 1px 0 rgba(255,255,255,0.06);
 }}
 .grace-avatar-frame::before {{
   content: ""; position: absolute; inset: 0;
-  background: radial-gradient(circle at 50% 25%, rgba(78,198,217,0.22) 0%, transparent 55%);
+  background: radial-gradient(circle at 50% 25%, rgba(78,198,217,0.30) 0%, transparent 55%);
   pointer-events: none;
 }}
 .grace-avatar-name {{
-  font-size: 0.74rem; letter-spacing: 1.4px; font-weight: 700;
-  color: #DCEFF3; text-transform: uppercase; margin-top: 8px;
+  font-size: 0.82rem; letter-spacing: 1.6px; font-weight: 800;
+  color: #FFFFFF; text-transform: uppercase; margin-top: 10px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
   font-family: "Space Grotesk", -apple-system, sans-serif;
 }}
 .grace-avatar-role {{
-  font-size: 0.62rem; color: #94BAC2;
-  text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;
+  font-size: 0.66rem; color: #D4ECF1; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1.2px; margin-top: 3px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
 }}
 .grace-avatar-status {{
   display: inline-flex; align-items: center; gap: 5px;
