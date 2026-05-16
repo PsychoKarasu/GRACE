@@ -93,6 +93,64 @@ PAGE_DEFAULT_STATE = {
     "library":      AvatarState.IDLE,
 }
 
+# Contextual lines spoken by the avatar — keyed by (page, state, lang).
+# `compose_message()` resolves the right one, with progressive fallback:
+# (page, state, lang) → (page, IDLE, lang) → ("*", state, lang) → "".
+MESSAGES = {
+    # ─── English ────────────────────────────────────────────────
+    ("gap_analysis", AvatarState.IDLE,      "en"): "Pick a framework, drop in your policy — I'll map every control and surface the gaps.",
+    ("gap_analysis", AvatarState.ATTENTIVE, "en"): "Ready when you are. Choose a framework and paste or upload the document.",
+    ("gap_analysis", AvatarState.ANALYZING, "en"): "Reading your policy now and matching it to the control catalog… give me a moment.",
+    ("gap_analysis", AvatarState.SUCCESS,   "en"): "Strong coverage. Let's review what's working and where to harden further.",
+    ("gap_analysis", AvatarState.WARNING,   "en"): "Several gaps detected — let's walk through them together, severity-first.",
+    ("gap_analysis", AvatarState.ERROR,     "en"): "I couldn't complete the assessment. Check the document and try again.",
+
+    ("doc_gen",      AvatarState.IDLE,      "en"): "Tell me the framework and the document type — I'll draft it audit-ready.",
+    ("doc_gen",      AvatarState.ATTENTIVE, "en"): "Add a few words of context (scope, sector, tools) to make the draft more accurate.",
+    ("doc_gen",      AvatarState.THINKING,  "en"): "Drafting your document — selecting clauses, citing references…",
+    ("doc_gen",      AvatarState.SUCCESS,   "en"): "Draft ready. Read it end-to-end and adapt to your organisation before publishing.",
+    ("doc_gen",      AvatarState.ERROR,     "en"): "The generator hit an issue. Try again or simplify the context.",
+
+    ("dashboard",    AvatarState.IDLE,      "en"): "Here's the live picture of your compliance posture. Click any framework for the detail.",
+    ("registry",     AvatarState.IDLE,      "en"): "Findings grouped by source document. Update the operational status as you triage.",
+    ("library",      AvatarState.IDLE,      "en"): "Pick a framework to explore its controls. Ask me to explain any of them in plain language.",
+
+    # ─── Italiano ───────────────────────────────────────────────
+    ("gap_analysis", AvatarState.IDLE,      "it"): "Scegli un framework e carica la tua policy — mappo ogni controllo e ti mostro i gap.",
+    ("gap_analysis", AvatarState.ATTENTIVE, "it"): "Sono pronta. Scegli framework e incolla o carica il documento.",
+    ("gap_analysis", AvatarState.ANALYZING, "it"): "Sto leggendo la policy e confrontandola con il catalogo dei controlli… un attimo.",
+    ("gap_analysis", AvatarState.SUCCESS,   "it"): "Copertura solida. Vediamo cosa funziona e dove rafforzare.",
+    ("gap_analysis", AvatarState.WARNING,   "it"): "Ho trovato diversi gap — li affrontiamo per severità, partendo dai critici.",
+    ("gap_analysis", AvatarState.ERROR,     "it"): "Non sono riuscita a completare l'analisi. Controlla il documento e riprova.",
+
+    ("doc_gen",      AvatarState.IDLE,      "it"): "Dimmi framework e tipo di documento — lo redigo audit-ready.",
+    ("doc_gen",      AvatarState.ATTENTIVE, "it"): "Aggiungi qualche riga di contesto (scope, settore, tool) per rendere il draft più accurato.",
+    ("doc_gen",      AvatarState.THINKING,  "it"): "Sto redigendo — seleziono le clausole, cito i riferimenti…",
+    ("doc_gen",      AvatarState.SUCCESS,   "it"): "Draft pronto. Rileggilo per intero e adattalo alla tua organizzazione prima della pubblicazione.",
+    ("doc_gen",      AvatarState.ERROR,     "it"): "Il generatore ha riscontrato un problema. Riprova o semplifica il contesto.",
+
+    ("dashboard",    AvatarState.IDLE,      "it"): "Ecco la fotografia live della tua compliance. Clicca un framework per il dettaglio.",
+    ("registry",     AvatarState.IDLE,      "it"): "Finding raggruppati per documento sorgente. Aggiorna lo stato operativo durante il triage.",
+    ("library",      AvatarState.IDLE,      "it"): "Scegli un framework per esplorarne i controlli. Posso spiegartene uno qualsiasi a parole semplici.",
+}
+
+
+def compose_message(page: Optional[str], state: AvatarState, lang: str = "en") -> str:
+    """Resolve the right line for the current (page, state, lang).
+
+    Falls back to (page, IDLE) then to an empty string if nothing matches —
+    callers can also override with an explicit `message=` to render_avatar.
+    """
+    lang = lang if lang in ("en", "it") else "en"
+    candidates = [
+        (page, state, lang),
+        (page, AvatarState.IDLE, lang),
+    ]
+    for c in candidates:
+        if c in MESSAGES:
+            return MESSAGES[c]
+    return ""
+
 
 def state_for_page(page_key: str) -> AvatarState:
     return PAGE_DEFAULT_STATE.get(page_key, AvatarState.IDLE)
@@ -265,9 +323,39 @@ def _css() -> str:
   50%      {{ transform: scaleY(0.7); }}
   75%      {{ transform: scaleY(1.4) translateY(0.5px); }}
 }}
-.grace-avatar.state-speaking .mouth-group {{
+.grace-avatar.state-speaking .mouth-group,
+.grace-avatar.is-speaking .mouth-group {{
   transform-box: fill-box; transform-origin: center;
   animation: grace-speak 0.45s ease-in-out infinite;
+}}
+
+/* ── Speech bubble ── */
+.grace-avatar-bubble {{
+  margin: 12px 6px 4px;
+  position: relative;
+  background: linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.04) 100%);
+  border: 1px solid rgba(78,198,217,0.35);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: #E4F2F5;
+  font-family: "Inter", -apple-system, sans-serif;
+  font-size: 0.78rem; line-height: 1.45;
+  text-align: left;
+  box-shadow: 0 4px 16px rgba(10,25,41,0.30);
+  animation: grace-bubble-in 0.45s ease-out;
+}}
+.grace-avatar-bubble::before {{
+  content: ""; position: absolute;
+  top: -7px; left: 50%; transform: translateX(-50%) rotate(45deg);
+  width: 12px; height: 12px;
+  background: linear-gradient(135deg, rgba(78,198,217,0.35) 0%, rgba(255,255,255,0.07) 60%);
+  border-left: 1px solid rgba(78,198,217,0.35);
+  border-top: 1px solid rgba(78,198,217,0.35);
+  border-radius: 2px;
+}}
+@keyframes grace-bubble-in {{
+  0%   {{ opacity: 0; transform: translateY(-4px); }}
+  100% {{ opacity: 1; transform: translateY(0); }}
 }}
 </style>
 """
@@ -275,12 +363,13 @@ def _css() -> str:
 
 # ─── [RENDERER] ───────────────────────────────────────────────────────
 
-def _svg(state: AvatarState) -> str:
+def _svg(state: AvatarState, speaking: bool = False) -> str:
     """Return the layered SVG markup. All visual primitives live here."""
     t = TOKENS
     state_class = f"state-{state.value}"
+    speak_class = " is-speaking" if speaking else ""
     return f"""
-<svg class="grace-avatar {state_class}" viewBox="0 0 200 240"
+<svg class="grace-avatar {state_class}{speak_class}" viewBox="0 0 200 240"
      xmlns="http://www.w3.org/2000/svg" aria-label="GRACE Virtual Analyst">
   <defs>
     <radialGradient id="ga-halo" cx="50%" cy="40%" r="65%">
@@ -426,19 +515,32 @@ def _svg(state: AvatarState) -> str:
 
 
 def render_avatar(state: Optional[AvatarState] = None,
-                  show_status_pill: bool = True) -> str:
+                  show_status_pill: bool = True,
+                  message: Optional[str] = None,
+                  page: Optional[str] = None,
+                  lang: str = "en") -> str:
     """
     Return a self-contained HTML document with the GRACE avatar.
 
     Designed to be injected via `st.components.v1.html(..., height=...)`,
     which sandboxes the content in an iframe and bypasses Streamlit's
-    HTML sanitizer (which strips/mangles <svg>, <style>, <link> etc.).
+    HTML sanitizer.
 
-    The returned document is fully standalone: includes <!DOCTYPE>,
-    transparent body background, the frame CSS, the SVG with all
-    layered groups, and the name/role/status pill.
+    If `message` is provided, the avatar speaks it via a bubble below
+    the bust and plays the speaking-mouth animation regardless of state.
+    If `message` is None and `page` is provided, a contextual default is
+    composed from the (page, state, lang) lookup.
     """
     s = state if state is not None else get_state()
+    resolved_message = message
+    if resolved_message is None and page is not None:
+        resolved_message = compose_message(page, s, lang)
+    speaking = bool(resolved_message)
+
+    bubble = (
+        f'<div class="grace-avatar-bubble">{resolved_message}</div>'
+        if resolved_message else ""
+    )
     status_label = s.value.capitalize()
     pill = (
         f'<div class="grace-avatar-status">{status_label}</div>'
@@ -453,14 +555,16 @@ def render_avatar(state: Optional[AvatarState] = None,
         + _css()
         + '</head><body>'
         + '<div class="grace-avatar-frame">'
-        + _svg(s)
+        + _svg(s, speaking=speaking)
         + '<div class="grace-avatar-name">GRACE</div>'
         + '<div class="grace-avatar-role">GRC Virtual Analyst</div>'
         + pill
+        + bubble
         + '</div>'
         + '</body></html>'
     )
 
 
 # Recommended iframe height for st.components.v1.html callers.
-AVATAR_FRAME_HEIGHT = 340
+# Bumped to fit the contextual speech bubble below the bust.
+AVATAR_FRAME_HEIGHT = 480
