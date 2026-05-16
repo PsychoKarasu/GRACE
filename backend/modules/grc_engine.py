@@ -155,7 +155,7 @@ def run_gap_analysis(document_text: str, document_title: str,
         "keywords":      c["keywords"][:5],
     } for c in controls], indent=2)
 
-    doc_excerpt = document_text[:6000]  # stay well within context
+    doc_excerpt = document_text[:60000]  # ~20K tokens, well within 200K context
 
     user_content = f"""Analyze the following document for compliance with {framework_id}.
 
@@ -176,7 +176,7 @@ Remember: find what IS present AND what is MISSING. Be specific to this document
     client = get_client()
     with client.messages.stream(
         model="claude-sonnet-4-6",
-        max_tokens=4096,
+        max_tokens=32768,
         system=system,
         messages=[{"role": "user", "content": user_content}]
     ) as stream:
@@ -204,10 +204,15 @@ def _parse_and_validate(raw: str, framework_id: str, document_title: str) -> dic
     if start == -1 or end == 0:
         raise ValueError("No JSON object found in LLM response")
 
+    candidate = cleaned[start:end]
     try:
-        data = json.loads(cleaned[start:end])
-    except json.JSONDecodeError as e:
-        raise ValueError(f"JSON parse error: {e}")
+        data = json.loads(candidate)
+    except json.JSONDecodeError:
+        # LLM output may be truncated mid-array (max_tokens hit). Try to
+        # recover by closing the last complete control entry.
+        data = _try_recover_truncated_json(candidate)
+        if data is None:
+            raise ValueError("JSON parse error and recovery failed")
 
     # Validate required fields and normalise
     if "controls" not in data:
@@ -237,6 +242,55 @@ def _parse_and_validate(raw: str, framework_id: str, document_title: str) -> dic
         ctrl.setdefault("remediation", "Review and address the identified gap.")
 
     return data
+
+
+def _try_recover_truncated_json(candidate: str) -> Optional[dict]:
+    """
+    Attempt to parse JSON that was truncated mid-output (e.g. max_tokens hit).
+    Strategy: walk the JSON tracking bracket depth, then trim back to the
+    last position where the outer object/array can be closed cleanly.
+    """
+    depth_curly = 0
+    depth_square = 0
+    in_string = False
+    escape = False
+    # Track the position just after each `},` at depth 2 inside a "controls" array
+    # (a finished control entry). Last such position is our safe cut point.
+    safe_cut = -1
+    for i, c in enumerate(candidate):
+        if escape:
+            escape = False
+            continue
+        if in_string:
+            if c == "\\":
+                escape = True
+            elif c == '"':
+                in_string = False
+            continue
+        if c == '"':
+            in_string = True
+        elif c == '{':
+            depth_curly += 1
+        elif c == '}':
+            depth_curly -= 1
+            # finished a control entry if we're back to depth 1 (inside the
+            # outer object) and inside the controls array (depth_square == 1)
+            if depth_curly == 1 and depth_square == 1:
+                safe_cut = i + 1
+        elif c == '[':
+            depth_square += 1
+        elif c == ']':
+            depth_square -= 1
+
+    if safe_cut == -1:
+        return None
+    # Trim and close: ... },  →  ... } ] }
+    trimmed = candidate[:safe_cut].rstrip().rstrip(",")
+    repaired = trimmed + "]}"
+    try:
+        return json.loads(repaired)
+    except json.JSONDecodeError:
+        return None
 
 
 def _compute_overall_score(controls: list) -> int:
