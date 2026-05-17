@@ -337,38 +337,51 @@ def t(key: str, **kwargs) -> str:
 
 THEMES = {
     "light": {
-        # Soft, warm "paper" palette — the previous near-pure white was
-        # too glaring next to the navy brand and the dark-theme contrast
-        # made the eye work harder. Beige/cream surfaces feel calmer and
-        # echo the cream backdrop already inside the GRACE logo.
-        "bg":          "#F1EBDC",
-        "surface":     "#FAF6EB",
-        "surface_alt": "#EBE4D2",
-        "text":        "#163265",
-        "text_dim":    "#5A6F8C",
-        "primary":     "#163265",
-        "accent":      "#2A7A8A",
-        "accent_soft": "#D5EDF2",
-        "border":      "#DCD3BD",
-        "sidebar_bg":  "#EBE4D2",
-        "shadow":      "0 1px 3px rgba(22,50,101,0.08), 0 4px 16px rgba(22,50,101,0.05)",
-        "shadow_lg":   "0 4px 12px rgba(22,50,101,0.10), 0 16px 40px rgba(22,50,101,0.08)",
-        "card_hover_bg": "#F2EDDE",
+        # Off-white with a cool blueish undertone — replaces the previous
+        # beige to land closer to enterprise-SaaS conventions while
+        # staying coherent with the navy/teal brand.
+        "bg":            "#F5F7FA",
+        "surface":       "#FFFFFF",
+        "surface_alt":   "#EEF1F6",   # mid layer (sidebar, sub-panels)
+        "surface_elev":  "#FFFFFF",   # dropdowns/modals (stronger shadow)
+        "text":          "#0F1F3D",
+        "text_dim":      "#5B6B85",
+        "primary":       "#163265",
+        "accent":        "#0F8FA6",   # teal, slightly deeper for AA on white
+        "accent_soft":   "#DCEFF3",
+        "border":        "#E2E7EE",
+        "border_soft":   "rgba(15,31,61,0.06)",
+        "sidebar_bg":    "#FFFFFF",
+        "shadow":        "0 1px 2px rgba(15,31,61,0.04), 0 4px 16px rgba(15,31,61,0.05)",
+        "shadow_lg":     "0 4px 20px rgba(15,31,61,0.06), 0 16px 40px rgba(15,31,61,0.04)",
+        "shadow_elev":   "0 4px 20px rgba(15,31,61,0.08)",
+        "card_hover_bg": "#FAFBFD",
+        "logo_text":     "#163265",
+        "danger":        "#DC2626",
+        "warn":          "#EA580C",
+        "ok":            "#10B981",
     },
     "dark": {
-        "bg":          "#0A1929",
-        "surface":     "#152E47",
-        "surface_alt": "#1A3650",
-        "text":        "#E6F0F5",
-        "text_dim":    "#8FA5BD",
-        "primary":     "#4EC6D9",
-        "accent":      "#4EC6D9",
-        "accent_soft": "#1E3E5C",
-        "border":      "#1E3E5C",
-        "sidebar_bg":  "#0A1929",
-        "shadow":      "0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2)",
-        "shadow_lg":   "0 4px 12px rgba(0,0,0,0.4), 0 16px 40px rgba(0,0,0,0.3)",
+        "bg":            "#0A1929",
+        "surface":       "#152E47",
+        "surface_alt":   "#1A3650",
+        "surface_elev":  "#1F3F5C",
+        "text":          "#E6F0F5",
+        "text_dim":      "#8FA5BD",
+        "primary":       "#4EC6D9",
+        "accent":        "#4EC6D9",
+        "accent_soft":   "#1E3E5C",
+        "border":        "#1E3E5C",
+        "border_soft":   "rgba(255,255,255,0.08)",
+        "sidebar_bg":    "#0A1929",
+        "shadow":        "0 1px 3px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.25)",
+        "shadow_lg":     "0 4px 16px rgba(0,0,0,0.5), 0 16px 40px rgba(0,0,0,0.35)",
+        "shadow_elev":   "0 4px 20px rgba(0,0,0,0.45)",
         "card_hover_bg": "#1A3650",
+        "logo_text":     "#E6F0F5",
+        "danger":        "#F87171",
+        "warn":          "#FB923C",
+        "ok":            "#34D399",
     },
 }
 
@@ -389,19 +402,26 @@ def inject_css():
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 :root {{
-  --bg:          {th['bg']};
-  --surface:     {th['surface']};
-  --surface-alt: {th['surface_alt']};
-  --text:        {th['text']};
-  --text-dim:    {th['text_dim']};
-  --primary:     {th['primary']};
-  --accent:      {th['accent']};
-  --accent-soft: {th['accent_soft']};
-  --border:      {th['border']};
-  --sidebar-bg:  {th['sidebar_bg']};
-  --shadow:      {th['shadow']};
-  --shadow-lg:   {th['shadow_lg']};
+  --bg:           {th['bg']};
+  --surface:      {th['surface']};
+  --surface-alt:  {th['surface_alt']};
+  --surface-elev: {th['surface_elev']};
+  --text:         {th['text']};
+  --text-dim:     {th['text_dim']};
+  --primary:      {th['primary']};
+  --accent:       {th['accent']};
+  --accent-soft:  {th['accent_soft']};
+  --border:       {th['border']};
+  --border-soft:  {th['border_soft']};
+  --sidebar-bg:   {th['sidebar_bg']};
+  --shadow:       {th['shadow']};
+  --shadow-lg:    {th['shadow_lg']};
+  --shadow-elev:  {th['shadow_elev']};
   --card-hover-bg: {th['card_hover_bg']};
+  --logo-text:    {th['logo_text']};
+  --c-danger:     {th['danger']};
+  --c-warn:       {th['warn']};
+  --c-ok:         {th['ok']};
   --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono:    'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
@@ -848,6 +868,216 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
   font-size: 0.72rem; font-weight: 700;
   font-family: var(--font-display); letter-spacing: 0.5px;
 }}
+
+/* ════════════════════════════════════════════════════════════════
+   ENTERPRISE-SaaS REFRESH — sidebar nav, topbar crumb, status,
+   KPI typography, hover lifts, surface elevation, all-caps labels
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Sidebar brand: compact mark + wordmark ── */
+.grace-side-brand-compact {{
+  display: flex; align-items: center; gap: 12px;
+  padding: 18px 6px 14px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border-soft);
+}}
+.grace-side-brand-compact img {{
+  height: 42px; width: 42px; object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
+  flex-shrink: 0;
+}}
+.grace-side-brand-compact .brand-wordmark {{ display: flex; flex-direction: column; line-height: 1.1; }}
+.grace-side-brand-compact .brand-title {{
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 800;
+  color: var(--logo-text); letter-spacing: 1.5px;
+}}
+.grace-side-brand-compact .brand-subtitle {{
+  font-size: 0.66rem; color: var(--text-dim);
+  font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+  margin-top: 2px;
+}}
+
+/* ── Sidebar nav items (icon + label, active state with accent) ── */
+.nav-list {{ margin: 6px 0; }}
+.nav-item-wrap {{
+  position: relative;
+  display: flex; align-items: center;
+  border-radius: 10px;
+  margin: 2px 0;
+  transition: background 0.18s ease, transform 0.18s ease;
+}}
+.nav-item-wrap:hover {{ background: var(--surface-alt); }}
+.nav-item-wrap.active {{
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
+}}
+.nav-item-wrap .nav-icon {{
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; color: var(--text-dim);
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none; z-index: 2;
+}}
+.nav-item-wrap.active .nav-icon {{ color: var(--accent); }}
+.nav-item-wrap .nav-icon svg {{ width: 18px; height: 18px; }}
+/* Re-skin the Streamlit button inside each nav row to look like a list item */
+.nav-item-wrap [data-testid="stButton"] {{ width: 100%; margin: 0 !important; }}
+.nav-item-wrap [data-testid="stButton"] button {{
+  background: transparent !important;
+  border: none !important;
+  color: var(--text) !important;
+  font-family: var(--font-body) !important;
+  font-weight: 500 !important;
+  font-size: 0.92rem !important;
+  text-align: left !important;
+  padding: 10px 12px 10px 40px !important;  /* room for icon */
+  box-shadow: none !important;
+  width: 100% !important;
+}}
+.nav-item-wrap [data-testid="stButton"] button:hover {{
+  background: transparent !important; transform: none !important;
+}}
+.nav-item-wrap [data-testid="stButton"] button p {{ color: var(--text) !important; }}
+.nav-item-wrap.active [data-testid="stButton"] button,
+.nav-item-wrap.active [data-testid="stButton"] button p {{
+  color: var(--accent) !important; font-weight: 700 !important;
+}}
+
+/* ── System status component (sidebar) ── */
+.system-status {{
+  display: flex; align-items: center; gap: 10px;
+  margin: 14px 0 10px;
+  padding: 10px 12px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+}}
+.system-status .status-dot {{
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  position: relative;
+}}
+.system-status.status-ok       .status-dot {{ background: var(--c-ok);      box-shadow: 0 0 0 0 rgba(16,185,129,0.5); animation: stat-pulse 2s ease-in-out infinite; }}
+.system-status.status-degraded .status-dot {{ background: var(--c-warn);    box-shadow: 0 0 0 0 rgba(234,88,12,0.5);  animation: stat-pulse 2s ease-in-out infinite; }}
+.system-status.status-down     .status-dot {{ background: var(--c-danger); }}
+@keyframes stat-pulse {{
+  0%, 100% {{ box-shadow: 0 0 0 0 currentColor; opacity: 1; }}
+  50%      {{ box-shadow: 0 0 0 6px transparent; opacity: 0.7; }}
+}}
+.system-status .status-body {{ display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }}
+.system-status .status-title {{
+  font-size: 0.78rem; font-weight: 700; color: var(--text);
+  font-family: var(--font-display);
+}}
+.system-status .status-meta {{
+  font-size: 0.66rem; color: var(--text-dim);
+  font-family: var(--font-mono);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-top: 2px;
+}}
+
+/* ── Topbar breadcrumb (replaces the hero logo on operative pages) ── */
+.grace-crumb {{
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 4px 6px;
+  font-family: var(--font-display);
+}}
+.grace-crumb .crumb-home {{
+  font-weight: 700; color: var(--text-dim); font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}}
+.grace-crumb .crumb-sep {{ color: var(--text-dim); opacity: 0.5; }}
+.grace-crumb .crumb-current {{
+  font-weight: 700; color: var(--text); font-size: 1rem;
+  letter-spacing: 0.3px;
+}}
+
+/* ── Typography hierarchy (premium) ── */
+.page-hero h1 {{
+  font-size: 2.05rem !important; font-weight: 700 !important;
+  letter-spacing: -0.6px !important;
+}}
+.section-sub {{
+  font-family: var(--font-display);
+  font-size: 0.72rem !important; font-weight: 700 !important;
+  letter-spacing: 1.6px !important;
+  text-transform: uppercase;
+  color: var(--text-dim) !important;
+  margin-top: 22px !important;
+}}
+/* Form labels: small-caps, dim, professional */
+.stTextInput label, .stTextArea label, .stSelectbox label, .stRadio label,
+.stMultiSelect label, .stNumberInput label, .stDateInput label {{
+  font-family: var(--font-display) !important;
+  font-size: 0.7rem !important; font-weight: 700 !important;
+  letter-spacing: 1.2px !important;
+  text-transform: uppercase;
+  color: var(--text-dim) !important;
+}}
+
+/* ── KPI cards: bigger numbers, trend chip ── */
+.kpi-card {{
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  padding: 22px 20px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: left;
+}}
+.kpi-card:hover {{ transform: translateY(-3px); box-shadow: var(--shadow-lg); }}
+.kpi-card .kpi-label {{
+  font-family: var(--font-display);
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--text-dim);
+  margin-bottom: 10px;
+}}
+.kpi-card .kpi-value {{
+  font-family: var(--font-display);
+  font-size: 2.6rem; font-weight: 800; line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+}}
+.kpi-card .kpi-row {{ display: flex; align-items: baseline; gap: 10px; margin-top: 4px; }}
+.kpi-card .kpi-trend {{
+  display: inline-flex; align-items: center; gap: 3px;
+  font-family: var(--font-display);
+  font-size: 0.74rem; font-weight: 700;
+  padding: 2px 7px; border-radius: 6px;
+}}
+.kpi-card .kpi-trend.neutral {{ color: var(--text-dim); background: var(--surface-alt); }}
+.kpi-card .kpi-trend.up      {{ color: var(--c-ok);     background: color-mix(in srgb, var(--c-ok) 12%, transparent); }}
+.kpi-card .kpi-trend.down    {{ color: var(--c-danger); background: color-mix(in srgb, var(--c-danger) 12%, transparent); }}
+/* Primary KPI tile — bigger value, accent-tinted background */
+.kpi-card.kpi-primary {{
+  background: linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--accent) 8%, var(--surface)) 100%);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
+}}
+.kpi-card.kpi-primary .kpi-value {{ font-size: 3.4rem; color: var(--accent); }}
+.kpi-card.kpi-primary .kpi-label {{ color: var(--accent); }}
+
+/* ── Buttons: micro-lift and smoother transitions ── */
+.stButton button, .stDownloadButton button {{
+  transition: transform 0.18s cubic-bezier(.2,.6,.2,1),
+              box-shadow 0.18s ease,
+              background 0.18s ease !important;
+}}
+
+/* ── Inputs: focus glow ── */
+[data-testid="stTextInput"] input:focus,
+[data-testid="stTextArea"] textarea:focus,
+[data-testid="stSelectbox"] > div:focus-within {{
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent) !important;
+}}
+
+/* ── Dividers: alpha gradient instead of harsh line ── */
+hr {{
+  border: none !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, transparent 0%, var(--border-soft) 20%, var(--border-soft) 80%, transparent 100%) !important;
+  margin: 16px 0 !important;
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -914,21 +1144,27 @@ LANG_KEYS = ("en", "it")
 top_left, top_mid, top_lang, top_theme = st.columns([7, 1.8, 1.3, 0.55])
 
 with top_left:
-    # The logo image already carries the GRACE wordmark and the tagline
-    # ("Governance · Risk · Assurance · Compliance Engine"), so we display
-    # only the image — no duplicate text — and let it fill the topbar
-    # height as the visual header of the whole interface.
-    logo_html = (
-        f'<img class="brand-logo" src="data:image/png;base64,{LOGO_B64}" alt="GRACE — Governance, Risk, Assurance & Compliance Engine">'
-        if LOGO_B64
-        else '<div style="font-size:3rem">🛡️ GRACE</div>'
+    # The huge hero logo is gone from operative pages — it lives only
+    # in the sidebar brand block now (saved a lot of vertical real
+    # estate). What stays here is a slim breadcrumb-style row that
+    # tells the user where they are.
+    _crumb_labels = {
+        "gap_analysis": t("nav.gap_analysis"),
+        "doc_gen":      t("nav.doc_gen"),
+        "dashboard":    t("nav.dashboard"),
+        "registry":     t("nav.registry"),
+        "library":      t("nav.library"),
+    }
+    _crumb_current = _crumb_labels.get(
+        st.session_state.get("current_page", "gap_analysis"),
+        ""
     )
     st.markdown(
         f"""
-<div class="grace-topbar" style="margin-right:6px">
-  <div class="brand">
-    {logo_html}
-  </div>
+<div class="grace-crumb">
+  <span class="crumb-home">GRACE</span>
+  <span class="crumb-sep">/</span>
+  <span class="crumb-current">{_crumb_current}</span>
 </div>
 """,
         unsafe_allow_html=True,
@@ -967,83 +1203,92 @@ with top_theme:
 
 # ─── Sidebar ─────────────────────────────────────────────────────────
 
+PAGE_KEYS = ["gap_analysis", "doc_gen", "dashboard", "registry", "library"]
+# Inline SVG icons (lucide-style outline) used by the sidebar nav and
+# elsewhere. Kept tiny so they ship inside the stylesheet without
+# external HTTP. Single-stroke, no fills, currentColor — they inherit
+# the active/inactive accent automatically.
+def _nav_icon_svg(name: str) -> str:
+    paths = {
+        "gap_analysis": "<circle cx='10' cy='10' r='6'/><line x1='14.5' y1='14.5' x2='19' y2='19'/>",
+        "doc_gen":      "<path d='M5 3h9l5 5v13H5z'/><path d='M14 3v5h5'/><line x1='8' y1='13' x2='16' y2='13'/><line x1='8' y1='16' x2='14' y2='16'/>",
+        "dashboard":    "<line x1='4' y1='19' x2='4' y2='11'/><line x1='10' y1='19' x2='10' y2='5'/><line x1='16' y1='19' x2='16' y2='14'/><line x1='3' y1='19' x2='21' y2='19'/>",
+        "registry":     "<line x1='6' y1='6' x2='20' y2='6'/><line x1='6' y1='12' x2='20' y2='12'/><line x1='6' y1='18' x2='20' y2='18'/><circle cx='3' cy='6' r='1.2'/><circle cx='3' cy='12' r='1.2'/><circle cx='3' cy='18' r='1.2'/>",
+        "library":      "<path d='M4 5a2 2 0 0 1 2-2h6v18H6a2 2 0 0 1-2-2z'/><path d='M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6z'/>",
+        "reset":        "<polyline points='4 8 4 4 8 4'/><path d='M4 12a8 8 0 1 0 2.3-5.7'/>",
+    }
+    return paths.get(name, "")
+
+
 with st.sidebar:
-    # GRACE circular brand symbol on a teal gradient card.
-    # (The animated GRC analyst avatar is rendered separately, in a
-    # column to the left of the main content area — see below.)
+    # Small brand mark + wordmark — the huge hero logo is gone from the
+    # topbar; this is now the only place the GRACE identity lives in
+    # operative pages.
     if SYMBOL_B64:
         st.markdown(
-            f'<div class="grace-side-brand"><img src="data:image/png;base64,{SYMBOL_B64}" alt="GRACE"/></div>',
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            '<div class="grace-side-brand"><div style="font-size:3.2rem">🛡️</div></div>',
+            f'''
+<div class="grace-side-brand-compact">
+  <img src="data:image/png;base64,{SYMBOL_B64}" alt="GRACE"/>
+  <div class="brand-wordmark">
+    <div class="brand-title">GRACE</div>
+    <div class="brand-subtitle">GRC Engine</div>
+  </div>
+</div>
+            ''',
             unsafe_allow_html=True,
         )
 
-    PAGE_KEYS = ["gap_analysis", "doc_gen", "dashboard", "registry", "library"]
-    # Streamlit purges widget state for widgets that did NOT render in
-    # the previous run. The theme toggle in the topbar calls
-    # st.rerun() BEFORE this sidebar block executes, so the radio's
-    # built-in 'nav_page' key alone is not enough — its state is
-    # considered orphaned and reset on the next run.
-    #
-    # Mirror the selection into a non-widget key ('current_page') that
-    # Streamlit never purges, and derive the radio's `index=` from it.
+    # Streamlit-managed selection mirror (survives the topbar reruns)
     current = st.session_state.get("current_page", PAGE_KEYS[0])
     if current not in PAGE_KEYS:
         current = PAGE_KEYS[0]
-    # Extra breathing room above the navigation, per design feedback.
-    st.markdown('<div style="height:26px"></div>', unsafe_allow_html=True)
 
-    def _on_nav_change():
-        # Fires the moment the user picks a different page. Mirroring
-        # into current_page in the same callback (instead of after the
-        # widget render) guarantees the selection is committed BEFORE
-        # any downstream page handler reads it — fixes the perception
-        # of "needs 2-3 clicks to switch".
-        st.session_state["current_page"] = st.session_state["nav_page"]
+    st.markdown('<div class="nav-list">', unsafe_allow_html=True)
+    for _k in PAGE_KEYS:
+        active_cls = " active" if _k == current else ""
+        icon_svg = (
+            "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' "
+            "stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'>"
+            + _nav_icon_svg(_k) + "</svg>"
+        )
+        st.markdown(
+            f"<div class='nav-item-wrap{active_cls}' data-nav='{_k}'>"
+            f"<span class='nav-icon'>{icon_svg}</span>",
+            unsafe_allow_html=True,
+        )
+        if st.button(t(f"nav.{_k}"), key=f"nav_btn_{_k}", use_container_width=True):
+            st.session_state["current_page"] = _k
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    page = current  # downstream pages still read `page`
 
-    page = st.radio(
-        t("sidebar.navigation"),
-        PAGE_KEYS,
-        index=PAGE_KEYS.index(current),
-        format_func=lambda k: t(f"nav.{k}"),
-        label_visibility="collapsed",
-        key="nav_page",
-        on_change=_on_nav_change,
-    )
-    st.session_state["current_page"] = page
-
-    st.markdown("---")
-    # Fast health check (2s timeout) — degraded/offline now actually surface.
+    # ── System status (elegant component) ─────────────────────────
     try:
         _hr = requests.get(f"{API}/health", timeout=2)
         if _hr.status_code == 200:
-            _h = _hr.json()
-            _hstate = _h.get("status", "ok")
+            _hstate = _hr.json().get("status", "ok")
         else:
             _hstate = "down"
     except Exception:
         _hstate = "down"
-
-    if _hstate == "ok":
-        st.markdown(
-            f'<span class="status-pill online">{t("sidebar.engine_online")}</span>',
-            unsafe_allow_html=True,
-        )
-    elif _hstate == "degraded":
-        st.markdown(
-            f'<span class="status-pill degraded">{t("sidebar.engine_degraded")}</span>',
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            f'<span class="status-pill offline">{t("sidebar.engine_offline")}</span>',
-            unsafe_allow_html=True,
-        )
-    st.caption(t("sidebar.api_label", api=API))
+    _status_text = {
+        "ok":       t("sidebar.engine_online"),
+        "degraded": t("sidebar.engine_degraded"),
+        "down":     t("sidebar.engine_offline"),
+    }[_hstate]
+    st.markdown(
+        f'''
+<div class="system-status status-{_hstate}">
+  <span class="status-dot"></span>
+  <div class="status-body">
+    <div class="status-title">{_status_text}</div>
+    <div class="status-meta">{API}</div>
+  </div>
+</div>
+        ''',
+        unsafe_allow_html=True,
+    )
 
     # ── Prototype reset (with explicit confirmation) ──────────────
     st.markdown("---")
@@ -1442,20 +1687,28 @@ with _main_col:
             st.warning(t("db.no_data"))
             st.stop()
 
-        cols = st.columns(5)
+        # Bento-style KPIs: primary metric (Open Findings) is wider and
+        # gets emphasis; the other four sit beside it as smaller cards.
+        # Real period-over-period trends would need a snapshot table —
+        # for now each card carries a 'neutral' trend chip ('—') so the
+        # visual language is in place and the data can be wired later.
+        cols = st.columns([2, 1, 1, 1, 1])
         metrics = [
-            (t("db.kpi.open_findings"),  kpi.get("total_open_findings",0),            "📋"),
-            (t("db.kpi.documents"),       kpi.get("documents_registered",0),            "📄"),
-            (t("db.kpi.assessments"),     kpi.get("assessment_runs",0),                 "🧪"),
-            (t("db.kpi.avg_coverage"),   f"{kpi.get('avg_coverage_score',0):.0f}%",    "📈"),
-            (t("db.kpi.critical_open"),   kpi.get("by_severity",{}).get("critical",0), "🔴"),
+            (t("db.kpi.open_findings"),  kpi.get("total_open_findings", 0), True),
+            (t("db.kpi.documents"),      kpi.get("documents_registered", 0), False),
+            (t("db.kpi.assessments"),    kpi.get("assessment_runs", 0), False),
+            (t("db.kpi.avg_coverage"),   f"{kpi.get('avg_coverage_score', 0):.0f}%", False),
+            (t("db.kpi.critical_open"),  kpi.get("by_severity", {}).get("critical", 0), False),
         ]
-        for i, (label, value, icon) in enumerate(metrics):
+        for i, (label, value, primary) in enumerate(metrics):
+            primary_cls = " kpi-primary" if primary else ""
             cols[i].markdown(f"""
-    <div class="kpi-card">
-      <div class="kpi-icon">{icon}</div>
-      <div class="kpi-value">{value}</div>
+    <div class="kpi-card{primary_cls}">
       <div class="kpi-label">{label}</div>
+      <div class="kpi-row">
+        <div class="kpi-value">{value}</div>
+        <span class="kpi-trend neutral">— %</span>
+      </div>
     </div>""", unsafe_allow_html=True)
 
         st.markdown("&nbsp;", unsafe_allow_html=True)
