@@ -213,21 +213,20 @@ def _css() -> str:
 }}
 .grace-avatar-frame {{
   display: flex; flex-direction: column; align-items: center;
-  padding: 16px 12px 14px;
+  padding: 24px 18px 21px;
   /* Deep, fully opaque navy gradient — sits BELOW the page bg tone
      so the avatar reads as foreground content, not blended chrome. */
   background:
     radial-gradient(ellipse 60% 35% at 50% 12%, rgba(92,227,248,0.22) 0%, transparent 70%),
     linear-gradient(180deg, var(--av-ink-3) 0%, var(--av-ink-1) 100%);
   border: 1px solid var(--av-line);
-  border-radius: 18px;
+  border-radius: 22px;
   position: relative;
   margin-bottom: 14px;
-  /* Crisp layered depth — no fuzzy halos. */
   box-shadow:
     0 0 0 1px rgba(92,227,248,0.18),
-    0 10px 28px rgba(0,0,0,0.55),
-    0 2px 6px rgba(0,0,0,0.45),
+    0 14px 38px rgba(0,0,0,0.55),
+    0 3px 9px rgba(0,0,0,0.45),
     inset 0 1px 0 rgba(255,255,255,0.08);
   overflow: hidden;
   isolation: isolate;
@@ -256,42 +255,42 @@ def _css() -> str:
   100% {{ background-position: 200% 50%; }}
 }}
 
-/* Typography — premium-enterprise hierarchy */
+/* Typography — premium-enterprise hierarchy (1.5× scale) */
 .grace-avatar-name {{
-  font-size: 0.88rem; letter-spacing: 2px; font-weight: 800;
+  font-size: 1.32rem; letter-spacing: 3px; font-weight: 800;
   color: var(--av-text-1); text-transform: uppercase;
-  margin-top: 12px;
+  margin-top: 18px;
   text-shadow: 0 1px 2px rgba(0,0,0,0.6);
   font-family: "Space Grotesk", -apple-system, sans-serif;
   line-height: 1.1;
 }}
 .grace-avatar-role {{
-  font-size: 0.62rem; color: var(--av-text-2); font-weight: 600;
-  text-transform: uppercase; letter-spacing: 1.5px;
-  margin-top: 4px; line-height: 1.3;
+  font-size: 0.93rem; color: var(--av-text-2); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 2.2px;
+  margin-top: 6px; line-height: 1.3;
   font-family: "Space Grotesk", -apple-system, sans-serif;
 }}
 
-/* Status badge — a real accent point, not a faded label */
+/* Status badge — a real accent point, scaled 1.5× */
 .grace-avatar-status {{
-  display: inline-flex; align-items: center; gap: 7px;
-  margin-top: 10px;
-  padding: 3px 10px 3px 9px;
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-top: 15px;
+  padding: 5px 15px 5px 14px;
   border-radius: 999px;
-  font-size: 0.62rem; font-weight: 700; letter-spacing: 1px;
+  font-size: 0.93rem; font-weight: 700; letter-spacing: 1.5px;
   background: linear-gradient(180deg, rgba(92,227,248,0.22) 0%, rgba(92,227,248,0.10) 100%);
   color: var(--av-accent);
   text-transform: uppercase;
   border: 1px solid rgba(92,227,248,0.55);
   box-shadow:
     0 0 0 1px rgba(92,227,248,0.10),
-    0 2px 6px rgba(0,0,0,0.35);
+    0 3px 9px rgba(0,0,0,0.35);
   font-family: "Space Grotesk", -apple-system, sans-serif;
 }}
 .grace-avatar-status::before {{
-  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  content: ""; width: 10px; height: 10px; border-radius: 50%;
   background: var(--av-accent);
-  box-shadow: 0 0 6px var(--av-accent);
+  box-shadow: 0 0 9px var(--av-accent);
   animation: grace-pulse 2.6s ease-in-out infinite;
 }}
 @keyframes grace-pulse {{
@@ -299,34 +298,33 @@ def _css() -> str:
   50%      {{ transform: scale(1.25); opacity: 0.7; }}
 }}
 
-/* Description block (the bubble below the badge) — better hierarchy,
-   tighter contrast, more breathing room. */
+/* Description block (the bubble below the badge) — 1.5× scaled. */
 .grace-avatar-bubble {{
-  margin: 12px 4px 0;
-  padding: 12px 14px;
+  margin: 18px 4px 0;
+  padding: 18px 20px;
   background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
   border: 1px solid rgba(92,227,248,0.22);
-  border-radius: 12px;
+  border-radius: 14px;
   color: #E2F0F7;
-  font-size: 0.74rem; line-height: 1.55;
-  letter-spacing: 0.1px;
+  font-size: 1.05rem; line-height: 1.55;
+  letter-spacing: 0.15px;
   text-align: left;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
   position: relative;
 }}
 .grace-avatar-bubble::before {{
   content: "";
-  position: absolute; top: -7px; left: 50%;
+  position: absolute; top: -10px; left: 50%;
   transform: translateX(-50%) rotate(45deg);
-  width: 12px; height: 12px;
+  width: 18px; height: 18px;
   background: linear-gradient(135deg, rgba(92,227,248,0.30) 0%, rgba(255,255,255,0.06) 60%);
   border-left: 1px solid rgba(92,227,248,0.40);
   border-top: 1px solid rgba(92,227,248,0.40);
-  border-radius: 2px;
+  border-radius: 3px;
 }}
 
 /* ── Avatar SVG ── */
-.grace-avatar {{ width: 168px; height: auto; display: block; }}
+.grace-avatar {{ width: 252px; height: auto; display: block; }}
 
 /* ── Always-on micro-animations ── */
 @keyframes grace-blink {{
@@ -658,5 +656,7 @@ def render_avatar(state: Optional[AvatarState] = None,
 
 
 # Recommended iframe height for st.components.v1.html callers.
-# Bumped to fit the contextual speech bubble below the bust.
-AVATAR_FRAME_HEIGHT = 480
+# Scaled to 1.5× with the rest of the widget — the avatar SVG is now
+# 252 px wide, the bubble has 1.05 rem text, and the frame needs the
+# extra height to fit them without scroll.
+AVATAR_FRAME_HEIGHT = 720

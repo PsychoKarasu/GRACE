@@ -878,19 +878,40 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
    KPI typography, hover lifts, surface elevation, all-caps labels
    ════════════════════════════════════════════════════════════════ */
 
-/* ── Sidebar brand: full-width logo (image carries wordmark) ── */
+/* ── Sidebar brand: symbol + CSS wordmark + tagline (all readable) ── */
 .grace-side-brand-compact {{
-  display: flex; align-items: center; justify-content: center;
-  padding: 14px 4px 16px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px;
+  padding: 18px 10px 20px;
   margin-bottom: 14px;
   border-bottom: 1px solid var(--border-soft);
+  text-align: center;
 }}
-.grace-side-brand-compact img {{
-  width: 100%; height: auto;
-  max-width: 100%; max-height: 140px;
+.grace-side-brand-compact .brand-symbol {{
+  width: 96px; height: 96px;
   object-fit: contain;
-  filter: drop-shadow(0 3px 8px rgba(15,31,61,0.18));
+  filter: drop-shadow(0 3px 8px rgba(15,31,61,0.22));
   display: block;
+}}
+.grace-side-brand-compact .brand-symbol-fallback {{
+  font-size: 4.4rem; line-height: 1;
+}}
+.grace-side-brand-compact .brand-name {{
+  font-family: var(--font-display);
+  font-size: 1.72rem; font-weight: 800;
+  color: var(--logo-text);
+  letter-spacing: 4px;
+  margin-top: 4px;
+  line-height: 1;
+}}
+.grace-side-brand-compact .brand-tagline {{
+  font-family: var(--font-display);
+  font-size: 0.74rem; font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  line-height: 1.3;
+  margin-top: 2px;
+  padding: 0 4px;
 }}
 
 /* ── Sidebar nav items ──
@@ -1471,22 +1492,26 @@ with st.sidebar:
     # Small brand mark + wordmark — the huge hero logo is gone from the
     # topbar; this is now the only place the GRACE identity lives in
     # operative pages.
-    # Full-width logo (the image already carries wordmark + tagline).
-    # Fills the sidebar; no separate text block needed.
-    if LOGO_B64:
-        st.markdown(
-            f'''
+    # Sidebar brand: big circular symbol + CSS-rendered wordmark.
+    # The full LOGO_B64 image is too narrow inside the sidebar (~244 px),
+    # which shrunk the embedded tagline below readability. Using the
+    # circular symbol at a comfortable size + rendering 'GRACE' and the
+    # full tagline as live text keeps both elements crisp at any zoom.
+    _sym_html = (
+        f'<img class="brand-symbol" src="data:image/png;base64,{SYMBOL_B64}" alt="GRACE"/>'
+        if SYMBOL_B64 else
+        '<div class="brand-symbol-fallback">🛡</div>'
+    )
+    st.markdown(
+        f'''
 <div class="grace-side-brand-compact">
-  <img src="data:image/png;base64,{LOGO_B64}" alt="GRACE — Governance, Risk, Assurance & Compliance Engine"/>
+  {_sym_html}
+  <div class="brand-name">GRACE</div>
+  <div class="brand-tagline">Governance, Risk, Assurance &amp; Compliance Engine</div>
 </div>
-            ''',
-            unsafe_allow_html=True,
-        )
-    elif SYMBOL_B64:
-        st.markdown(
-            f'<div class="grace-side-brand-compact"><img src="data:image/png;base64,{SYMBOL_B64}" alt="GRACE"/></div>',
-            unsafe_allow_html=True,
-        )
+        ''',
+        unsafe_allow_html=True,
+    )
 
     # Streamlit-managed selection mirror (survives the topbar reruns)
     current = st.session_state.get("current_page", PAGE_KEYS[0])
@@ -1609,7 +1634,7 @@ def _resolve_avatar_message() -> str:
 # by page handlers — set_avatar_state(…) and avatar_message in
 # session_state — must show up in the SAME rerun, which means we have
 # to defer the avatar render until after the page body has executed.
-_avatar_col, _main_col = st.columns([1, 6])
+_avatar_col, _main_col = st.columns([1.5, 6])
 
 with _main_col:
     if page == "gap_analysis":
