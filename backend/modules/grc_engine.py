@@ -6,9 +6,12 @@ import json
 import re
 import yaml
 import hashlib
+import logging
 from pathlib import Path
 from typing import Optional
 import anthropic
+
+logger = logging.getLogger(__name__)
 
 PROMPT_DIR = Path("/prompt-library") if Path("/prompt-library").exists() \
              else Path(__file__).parent.parent.parent / "prompt-library"
@@ -23,24 +26,29 @@ LANGUAGE_NAME = {
 
 def _language_instruction(language: str, mode: str = "structured") -> str:
     """
-    Build an instruction line that forces the model to respond in `language`.
-    mode='structured' is for gap_assessment-style JSON output where enum
-    values and control IDs must stay in English. mode='prose' is for free
-    text (policies, explanations).
+    Build an instruction line that forces the model to respond in `language`,
+    INDEPENDENTLY of the source document's language. mode='structured' is
+    for JSON output where enum values and control IDs must stay in English.
+    mode='prose' is for free text (policies, explanations).
     """
     lang_name = LANGUAGE_NAME.get(language, "English")
-    if language == "en":
-        return ""
+    # NB: this instruction MUST fire even for language == 'en'. Without it,
+    # an Italian source document would lead Claude to mirror the document's
+    # language in its output, ignoring the user's language toggle.
     if mode == "structured":
         return (
             f"\n\nOUTPUT LANGUAGE: All free-text fields (executive_summary, "
             f"finding, evidence_found, evidence_required, remediation, "
             f"regulatory_reference where it is descriptive) MUST be written "
-            f"in {lang_name}. Schema enum values (compliant, partial, "
+            f"in {lang_name}, regardless of the language of the source "
+            f"document. Schema enum values (compliant, partial, "
             f"non_compliant, no_evidence, not_applicable, critical, high, "
             f"medium, low) and control IDs MUST remain in English."
         )
-    return f"\n\nOUTPUT LANGUAGE: Respond entirely in {lang_name}."
+    return (
+        f"\n\nOUTPUT LANGUAGE: Respond entirely in {lang_name}, "
+        f"regardless of the language of the source document."
+    )
 
 # Anthropic client — reads ANTHROPIC_API_KEY from environment
 _client: Optional[anthropic.Anthropic] = None
@@ -341,6 +349,88 @@ def _status_to_score(status: str) -> int:
             "no_evidence":10,"not_applicable":100}.get(status, 10)
 
 
+# ─── Finding translation (lazy, cached) ──────────────────────────
+
+_LANG_LABEL = {"en": "English", "it": "Italian"}
+
+
+def translate_finding_fields(description: str, recommended_action: str,
+                              regulatory_reference: str,
+                              target_lang: str,
+                              control_title: str = "") -> dict:
+    """Translate the user-facing fields of a finding to `target_lang`.
+
+    Retries up to 3 times with exponential back-off to absorb transient
+    cold-start failures — the first parallel worker in main.py used to
+    fail repeatedly because of pool warm-up, persistently leaving its
+    finding untranslated even though the same prompt succeeded for the
+    next sibling.
+
+    Returns the four translated fields plus 'ok' (bool). The caller
+    must check 'ok' before persisting — caching a failed call would
+    serve the originals back on every subsequent view.
+    """
+    import time as _time
+    target_name = _LANG_LABEL.get(target_lang, "English")
+    payload = json.dumps({
+        "control_title": control_title or "",
+        "description": description or "",
+        "recommended_action": recommended_action or "",
+        "regulatory_reference": regulatory_reference or "",
+    }, ensure_ascii=False)
+
+    prompt = (
+        f"You are translating a GRC (Governance, Risk, Compliance) finding "
+        f"into {target_name}. Translate the natural-language portions of "
+        f"every field. Preserve every regulatory reference, control "
+        f"identifier (e.g. 'IAM-02', 'Art.21.2.j'), framework name "
+        f"(ISO27001, GDPR, NIS2, SOC2…), product name, acronym and "
+        f"quoted clause verbatim. Maintain a professional auditor tone.\n\n"
+        f"Return ONLY a valid JSON object with exactly these keys: "
+        f"\"control_title\", \"description\", \"recommended_action\", "
+        f"\"regulatory_reference\". No prose around the JSON.\n\n"
+        f"Input JSON:\n{payload}"
+    )
+
+    last_error = None
+    for attempt in range(3):
+        try:
+            msg = get_client().messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=1800,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            text = msg.content[0].text.strip()
+            if text.startswith("```"):
+                text = text.split("```")[1]
+                if text.startswith("json"):
+                    text = text[4:].strip()
+            translated = json.loads(text)
+            return {
+                "control_title":        translated.get("control_title") or control_title,
+                "description":          translated.get("description") or description,
+                "recommended_action":   translated.get("recommended_action") or recommended_action,
+                "regulatory_reference": translated.get("regulatory_reference") or regulatory_reference,
+                "ok":                   True,
+            }
+        except Exception as e:
+            last_error = e
+            if attempt < 2:
+                _time.sleep(0.4 * (attempt + 1))  # 0.4 s, 0.8 s
+                continue
+
+    logger.warning("Translation to %s failed after 3 attempts (%s); "
+                   "returning originals, NOT caching",
+                   target_lang, last_error)
+    return {
+        "control_title":        control_title,
+        "description":          description,
+        "recommended_action":   recommended_action,
+        "regulatory_reference": regulatory_reference,
+        "ok":                   False,
+    }
+
+
 # ─── Document Generation ─────────────────────────────────────────
 
 def generate_document(doc_type: str, framework_id: str,
@@ -452,17 +542,23 @@ def explain_control(framework_id: str, control_id: str, language: str = "en") ->
         f"Cover: what it requires, why it matters, what good implementation looks like, "
         f"and the 3 most common gaps you see in practice. Keep it practical and concrete."
     )
-    client = get_client()
-    with client.messages.stream(
-        model="claude-sonnet-4-6",
-        max_tokens=1000,
-        system=system,
-        messages=[{"role": "user", "content": user}]
-    ) as stream:
-        for _ in stream.text_stream:
-            pass
-        response = stream.get_final_message()
-    return response.content[0].text
+    # Non-streaming call — we don't yield tokens to the frontend (the
+    # whole result is rendered at once via st.markdown), so streaming
+    # only added latency before. Haiku is plenty for an explanation
+    # and replies in 2-3 s vs Sonnet's 15-20 s, which used to time out
+    # the frontend's 10 s api_get and leave the UI 'spinning then
+    # nothing'.
+    try:
+        msg = get_client().messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1000,
+            system=system,
+            messages=[{"role": "user", "content": user}],
+        )
+        return msg.content[0].text
+    except Exception as e:
+        logger.warning("explain_control failed for %s/%s: %s", framework_id, control_id, e)
+        return f"_Could not generate explanation — {e}_"
 
 
 # ─── Synthetic Document Generation (demo dataset) ─────────────────

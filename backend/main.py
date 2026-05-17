@@ -50,7 +50,71 @@ def on_startup():
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "GRACE API", "version": "1.0.0-prototype"}
+    """Real liveness/readiness probe.
+
+    - 'ok'       : DB reachable AND Anthropic API key configured
+    - 'degraded' : DB reachable but API key missing (read-only)
+    - 'down'     : DB unreachable (returns HTTP 503)
+    """
+    import os
+    from fastapi import HTTPException
+    from modules.database import get_db
+
+    try:
+        conn = get_db()
+        conn.execute("SELECT 1").fetchone()
+        conn.close()
+        db_ok = True
+    except Exception:
+        db_ok = False
+
+    api_key_ok = bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())
+
+    if not db_ok:
+        raise HTTPException(status_code=503, detail={
+            "status": "down", "service": "GRACE API", "db": False,
+        })
+
+    status = "ok" if api_key_ok else "degraded"
+    return {
+        "status": status,
+        "service": "GRACE API",
+        "version": "1.0.0-prototype",
+        "db": True,
+        "api_key": api_key_ok,
+    }
+
+
+# ─── Admin (prototype only) ──────────────────────────────────────────
+
+@app.post("/api/v1/admin/reset")
+def reset_prototype_data():
+    """Wipe all user-generated data — uploaded/generated documents,
+    assessment runs, findings, gaps, translations and output documents.
+    Framework catalogs and the schema itself are untouched. Prototype-
+    only convenience endpoint, not safe for production use."""
+    from modules.database import get_db
+    conn = get_db()
+    tables = [
+        "finding_translations",
+        "gaps",
+        "findings",
+        "audit_events",
+        "assessment_runs",
+        "output_documents",
+        "documents",
+    ]
+    counts = {}
+    for table in tables:
+        try:
+            row = conn.execute(f"SELECT COUNT(*) as n FROM {table}").fetchone()
+            counts[table] = row["n"]
+            conn.execute(f"DELETE FROM {table}")
+        except Exception:
+            counts[table] = None
+    conn.commit()
+    conn.close()
+    return {"status": "reset_complete", "deleted": counts}
 
 
 # ─── Frameworks ──────────────────────────────────────────────────────
@@ -232,12 +296,303 @@ def run_assessment_sync(body: AssessmentRequest):
         raise HTTPException(500, detail=str(e))
 
 
+# ─── Ask GRACE: unified natural-language workspace ───────────────────
+#
+# Single entry point that routes the request to the right downstream
+# pipeline. Keeps the old endpoints intact (callers like the legacy
+# Assessment widget can still hit them), but the new Ask GRACE panel
+# in the UI talks ONLY to /api/v1/ask. Intent classification is a
+# straightforward keyword heuristic today — well-isolated so we can
+# swap it for a Claude-based router later without touching the
+# dispatch logic.
+
+class AskRequest(BaseModel):
+    query: str
+    document_ids: Optional[list] = None
+    framework_id: Optional[str] = None
+    language: Optional[str] = "en"
+
+
+_INTENT_KEYWORDS = {
+    "explain":         ["explain ", "spiega ", "what is ", "cosa è ", "cos'è "],
+    "query_findings":  ["finding", "registr", "open", "aperti", "critical", "critici",
+                        "list ", "show me", "mostra", "summari", "riassum"],
+    # 'analyze_new' is inferred from STRUCTURED signals (document_ids +
+    # framework_id), not keywords — see classify_intent below.
+}
+
+
+def classify_intent(query: str, has_docs: bool, has_framework: bool) -> str:
+    """Lightweight intent router.
+
+    Priority:
+      1. analyze_new   — user attached/pasted content AND picked a framework
+      2. explain       — query starts with 'explain X', 'what is X' …
+      3. query_findings — query mentions findings/registry/critical/etc.
+      4. free_qa       — everything else
+    """
+    q = (query or "").strip().lower()
+    if has_docs and has_framework:
+        return "analyze_new"
+    for kw in _INTENT_KEYWORDS["explain"]:
+        if q.startswith(kw):
+            return "explain"
+    for kw in _INTENT_KEYWORDS["query_findings"]:
+        if kw in q:
+            return "query_findings"
+    return "free_qa"
+
+
+def _free_qa_response(query: str, framework_id: Optional[str], language: str) -> str:
+    """Generic Claude Q&A about GRC. Lightweight system prompt that
+    keeps GRACE on-topic without long-context overhead."""
+    from modules.grc_engine import get_client, _language_instruction
+    system = (
+        "You are GRACE, an AI GRC (Governance, Risk, Assurance & Compliance) "
+        "analyst. Reply to the user's question concisely, with practical "
+        "framing. Cite framework articles or control IDs when relevant. If "
+        "the question is outside GRC scope, say so briefly and redirect to "
+        "what GRACE can help with."
+        + _language_instruction(language, mode="prose")
+    )
+    user_msg = query
+    if framework_id:
+        user_msg = f"(Context: user's working framework is {framework_id})\n\n{query}"
+    try:
+        msg = get_client().messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=900,
+            system=system,
+            messages=[{"role": "user", "content": user_msg}],
+        )
+        return msg.content[0].text
+    except Exception as e:
+        return f"_Couldn't reach the model: {e}_"
+
+
+def _findings_summary_response(query: str, language: str) -> tuple[str, list]:
+    """Summarise the findings table in the user's words via Claude.
+    Returns (markdown, citations)."""
+    findings = list_findings(limit=50)
+    if not findings:
+        return ("_No findings in the registry yet — run a Gap Analysis to populate it._", [])
+    # Build a compact tabular context for Claude
+    rows = []
+    for f in findings[:30]:
+        rows.append(
+            f"- [{f.get('severity','?').upper()}] {f.get('framework','')} "
+            f"{f.get('control_id','')} · {f.get('control_title','')[:80]} "
+            f"(status: {f.get('compliance_status','?')}, op: {f.get('operational_status','?')})"
+        )
+    from modules.grc_engine import get_client, _language_instruction
+    system = (
+        "You are GRACE, an AI GRC analyst. You will be given a list of "
+        "findings from the user's registry. Answer the user's question by "
+        "summarising / filtering / explaining those findings. Be concise, "
+        "highlight critical and high severity items first, and reference "
+        "control IDs verbatim."
+        + _language_instruction(language, mode="prose")
+    )
+    user_msg = (
+        f"User question: {query}\n\n"
+        f"Findings registry ({len(findings)} total, showing top 30):\n"
+        + "\n".join(rows)
+    )
+    try:
+        msg = get_client().messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=900,
+            system=system,
+            messages=[{"role": "user", "content": user_msg}],
+        )
+        text = msg.content[0].text
+    except Exception as e:
+        text = f"_Couldn't reach the model: {e}_"
+    citations = [
+        {"type": "finding", "id": f["finding_id"],
+         "label": f"{f.get('framework','')} {f.get('control_id','')}"}
+        for f in findings[:8]
+    ]
+    return (text, citations)
+
+
+@app.post("/api/v1/ask")
+def ask_grace(body: AskRequest):
+    """Unified Ask-GRACE dispatcher. Returns a flexible envelope:
+
+    {
+      "intent":         "analyze_new" | "explain" | "query_findings" | "free_qa",
+      "response_type":  "analysis"    | "explanation" | "findings_qa" | "qa",
+      "response_text":  "<markdown>",                           # for non-analysis
+      "result":         {...gap_analysis result...} (optional), # for analysis
+      "finding_ids":    [...] (optional),
+      "citations":      [{"type": "...", "id": "...", "label": "..."}]
+    }
+    """
+    document_ids = body.document_ids or []
+    has_docs = bool(document_ids)
+    has_fw   = bool(body.framework_id)
+    intent   = classify_intent(body.query or "", has_docs, has_fw)
+    language = body.language or "en"
+
+    if intent == "analyze_new":
+        # Concatenate text from all attached docs into one analysis input,
+        # then run the existing gap_analysis pipeline.
+        merged_chunks = []
+        titles = []
+        for did in document_ids:
+            d = get_document(did)
+            if d:
+                merged_chunks.append(d["content_text"])
+                titles.append(d["title"])
+        merged_text  = "\n\n---\n\n".join(merged_chunks)
+        merged_title = " + ".join(titles) if titles else "Untitled"
+
+        run_id = create_run(document_ids[0], body.framework_id, None, "ask_grace")
+        try:
+            result = run_gap_analysis(
+                document_text=merged_text,
+                document_title=merged_title,
+                framework_id=body.framework_id,
+                controls_scope=None,
+                language=language,
+            )
+            finding_ids = save_findings(run_id, document_ids[0], result, language=language)
+            complete_run(run_id, "completed")
+            return {
+                "intent":        intent,
+                "response_type": "analysis",
+                "result":        result,
+                "finding_ids":   finding_ids,
+                "run_id":        run_id,
+                "citations":     [{"type": "document", "id": did, "label": ttl}
+                                  for did, ttl in zip(document_ids, titles)],
+            }
+        except Exception as e:
+            complete_run(run_id, "error", str(e))
+            return {"intent": intent, "response_type": "error",
+                    "response_text": f"_Analysis failed: {e}_", "citations": []}
+
+    if intent == "explain":
+        # Try to parse 'explain CONTROL_ID' or 'spiega CONTROL_ID'.
+        # Fall back to free_qa if no recognisable control ID.
+        import re as _re
+        m = _re.search(r"([A-Z]+\.?[A-Z0-9.\-]+|Art\.\d+(?:\.\d+)*\.?[a-z]?)", body.query or "")
+        if m and body.framework_id:
+            ctrl_id = m.group(1)
+            from modules.grc_engine import explain_control
+            text = explain_control(body.framework_id, ctrl_id, language=language)
+            return {
+                "intent":        intent,
+                "response_type": "explanation",
+                "response_text": text,
+                "citations":     [{"type": "control", "id": ctrl_id,
+                                   "label": f"{body.framework_id} · {ctrl_id}"}],
+            }
+        # No control ID matched → free Q&A
+        intent = "free_qa"
+
+    if intent == "query_findings":
+        text, citations = _findings_summary_response(body.query, language)
+        return {
+            "intent":        intent,
+            "response_type": "findings_qa",
+            "response_text": text,
+            "citations":     citations,
+        }
+
+    # free_qa fallback
+    text = _free_qa_response(body.query, body.framework_id, language)
+    return {
+        "intent":        "free_qa",
+        "response_type": "qa",
+        "response_text": text,
+        "citations":     [],
+    }
+
+
 # ─── Findings ────────────────────────────────────────────────────────
 
 @app.get("/api/v1/findings")
 def get_findings(framework: Optional[str] = None, status: Optional[str] = None,
-                 operational_status: Optional[str] = None, limit: int = 100):
-    return {"findings": list_findings(framework, status, limit, operational_status)}
+                 operational_status: Optional[str] = None, limit: int = 100,
+                 language: Optional[str] = None):
+    """Return findings, with user-facing fields lazily translated to
+    `language` when it differs from the finding's stored generation
+    language. Translations are cached in the finding_translations table
+    so each (finding × target_lang) pair only hits Claude once."""
+    from modules.database import (
+        get_finding_translation, save_finding_translation,
+    )
+    from modules.grc_engine import translate_finding_fields
+
+    findings = list_findings(framework, status, limit, operational_status)
+
+    if not language or language not in ("en", "it"):
+        return {"findings": findings}
+
+    # We deliberately do NOT short-circuit on (stored_language == requested
+    # language). The stored language column reflects the language passed
+    # to the run, but Claude's output can still come back in a different
+    # language (e.g. if the source document was Italian and the prompt
+    # only weakly steered output to English). For every (finding ×
+    # ui_language) we serve from cache or ask Claude.
+    #
+    # The first view per pair triggers one Haiku round-trip per finding.
+    # We run those Claude calls in PARALLEL via a ThreadPoolExecutor so a
+    # 10-finding page costs ~one Haiku-call wall-clock, not ten — the
+    # frontend no longer freezes for 30 s on the first Registry visit.
+    import concurrent.futures as _cf
+    from threading import Lock
+
+    pending = []        # findings that need a Claude call
+    for f in findings:
+        fid = f["finding_id"]
+        cached = get_finding_translation(fid, language)
+        if cached:
+            f["description"]          = cached["description"]
+            f["recommended_action"]   = cached["recommended_action"]
+            f["regulatory_reference"] = cached["regulatory_reference"]
+            if cached.get("control_title"):
+                f["control_title"]    = cached["control_title"]
+            f["language"]             = language
+        else:
+            pending.append(f)
+
+    if pending:
+        def _translate_one(f):
+            return f, translate_finding_fields(
+                f.get("description", ""),
+                f.get("recommended_action", ""),
+                f.get("regulatory_reference", ""),
+                language,
+                control_title=f.get("control_title", ""),
+            )
+
+        with _cf.ThreadPoolExecutor(max_workers=min(8, len(pending))) as ex:
+            for f, translated in ex.map(_translate_one, pending):
+                # Apply the translated content in-flight regardless of
+                # outcome — when ok=False the originals stay in place,
+                # which is the safest fallback for the UI.
+                f["description"]          = translated["description"]
+                f["recommended_action"]   = translated["recommended_action"]
+                f["regulatory_reference"] = translated["regulatory_reference"]
+                if translated.get("control_title"):
+                    f["control_title"]    = translated["control_title"]
+                f["language"]             = language
+                # CRITICAL: only persist to the translation cache when
+                # the call actually succeeded.
+                if translated.get("ok"):
+                    save_finding_translation(
+                        f["finding_id"], language,
+                        translated["description"],
+                        translated["recommended_action"],
+                        translated["regulatory_reference"],
+                        success=True,
+                        control_title=translated.get("control_title", ""),
+                    )
+
+    return {"findings": findings}
 
 
 class StatusUpdate(BaseModel):
