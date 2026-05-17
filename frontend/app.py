@@ -28,6 +28,51 @@ API = os.environ.get("GRACE_API_URL", "http://localhost:8000")
 DEFAULT_LANGUAGE = os.environ.get("GRACE_DEFAULT_LANGUAGE", "en")
 DEFAULT_THEME = os.environ.get("GRACE_DEFAULT_THEME", "light")
 
+# ─── Demo password gate (opt-in via env var) ─────────────────────────
+# When GRACE_DEMO_PASSWORD is set, the user must enter it before the app
+# renders. When unset (local dev), the gate is silently disabled so
+# nothing changes about the developer experience.
+
+_DEMO_PASSWORD = os.environ.get("GRACE_DEMO_PASSWORD", "")
+
+
+def _demo_gate():
+    if not _DEMO_PASSWORD:
+        return
+    if st.session_state.get("_grace_auth_ok"):
+        return
+
+    import hmac
+    st.markdown(
+        "<div style='text-align:center; padding:4rem 0 1rem 0;'>"
+        "<div style='font-size:3rem; margin-bottom:0.5rem;'>🛡️</div>"
+        "<h1 style='margin:0; font-weight:600;'>GRACE</h1>"
+        "<p style='color:#6b7280; margin:0.5rem 0 0 0;'>"
+        "Governance, Risk, Assurance &amp; Compliance Engine</p>"
+        "<p style='color:#9ca3af; margin-top:1.5rem; font-size:0.9rem;'>"
+        "Demo access — please enter the shared password</p>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+    left, mid, right = st.columns([1, 2, 1])
+    with mid:
+        with st.form("_demo_gate", clear_on_submit=False):
+            pwd = st.text_input(
+                "Password", type="password",
+                label_visibility="collapsed", placeholder="Demo password",
+            )
+            submitted = st.form_submit_button("Enter", use_container_width=True)
+            if submitted:
+                if hmac.compare_digest(pwd, _DEMO_PASSWORD):
+                    st.session_state["_grace_auth_ok"] = True
+                    st.rerun()
+                else:
+                    st.error("Invalid password")
+    st.stop()
+
+
+_demo_gate()
+
 ASSETS = Path(__file__).parent / "assets"
 
 

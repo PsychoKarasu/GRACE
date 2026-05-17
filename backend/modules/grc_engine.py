@@ -6,9 +6,12 @@ import json
 import re
 import yaml
 import hashlib
+import logging
 from pathlib import Path
 from typing import Optional
 import anthropic
+
+logger = logging.getLogger(__name__)
 
 PROMPT_DIR = Path("/prompt-library") if Path("/prompt-library").exists() \
              else Path(__file__).parent.parent.parent / "prompt-library"
@@ -556,3 +559,133 @@ def explain_control(framework_id: str, control_id: str, language: str = "en") ->
     except Exception as e:
         logger.warning("explain_control failed for %s/%s: %s", framework_id, control_id, e)
         return f"_Could not generate explanation — {e}_"
+
+
+# ─── Synthetic Document Generation (demo dataset) ─────────────────
+
+def generate_synthetic_document(
+    framework_id: str,
+    persona: dict,
+    coverage_profile: dict,
+    doc_type_name: str,
+    language: str = "en",
+    model: str = "claude-haiku-4-5",
+) -> dict:
+    """
+    Generate a SYNTHETIC realistic-but-fictional compliance document for demo
+    and testing purposes. The output is watermarked, fictional, and must NEVER
+    be used as a real organizational policy.
+
+    Uses prompt caching on the control catalog block, so batch generations
+    against the same framework reuse the heavy input cheaply.
+    """
+    framework = load_framework(framework_id)
+    if not framework:
+        raise ValueError(f"Framework {framework_id} not loaded")
+
+    framework_name = framework.get("name", framework_id)
+    controls_view = [
+        {
+            "control_id": c["control_id"],
+            "title":       c.get("title", ""),
+            "description": (c.get("description") or "")[:240],
+        }
+        for c in framework.get("controls", [])
+    ]
+    controls_json = json.dumps(controls_view, indent=2)
+
+    base_system = (
+        f"You are an expert {framework_name} compliance consultant who has authored "
+        "hundreds of audit-ready compliance documents across sectors. You write "
+        "documents that read as produced by a real internal compliance team — not "
+        "generated boilerplate.\n\n"
+        "Given a fictional organization persona, a coverage profile, and a document "
+        "type, produce a single compliance document in Markdown with this structure:\n"
+        "1. Header banner (mandatory first line): "
+        "**SYNTHETIC DEMO DOCUMENT — FICTIONAL ORGANIZATION — NOT REAL DATA**\n"
+        "2. Document control block: version, effective date, classification, owner, "
+        "approver, next review date\n"
+        "3. Body with framework-appropriate sections (purpose, scope, roles, control "
+        "statements, references, enforcement, review cycle)\n"
+        "4. Explicit references to control IDs from the provided catalog\n\n"
+        "CRITICAL RULES (violations require regeneration):\n"
+        "- NEVER use real personal names. Use obvious placeholders only (\"[CISO TBD]\", "
+        "\"Mario Rossi — CISO\", \"Jane Smith — DPO\").\n"
+        "- NEVER use real customer names, real addresses, real phone numbers. Use "
+        "@example.com for any email.\n"
+        "- Reference controls by their real IDs from the catalog. Depth of reference "
+        "MUST match the coverage profile.\n"
+        "- Target 1800–2800 words. The document must feel realistic, not toy-sized.\n"
+        "- Vary style by persona: a fintech ISMS reads different from a manufacturing one.\n"
+        "- Where coverage profile demands gaps, leave them realistically (\"TBD\", missing "
+        "procedures, vague timelines, controls referenced but not implemented).\n\n"
+        "OUTPUT: Return ONLY the markdown text. No preamble, no code fences."
+    )
+    if language != "en":
+        lang_name = LANGUAGE_NAME.get(language, "English")
+        base_system += (
+            f"\n\nLANGUAGE: Write the entire document in {lang_name}. Keep control IDs "
+            f"and standard names in their original form (e.g. 'ISO/IEC 27001:2022 A.5.15')."
+        )
+
+    system = [
+        {"type": "text", "text": base_system},
+        {
+            "type": "text",
+            "text": f"=== CONTROL CATALOG ({framework_id}) ===\n{controls_json}",
+            "cache_control": {"type": "ephemeral"},
+        },
+    ]
+
+    user_content = (
+        f"Generate a \"{doc_type_name}\" document for the following scenario.\n\n"
+        "FICTIONAL ORGANIZATION:\n"
+        f"- Name: {persona['name']}\n"
+        f"- Sector: {persona['sector']}\n"
+        f"- Size: {persona['size']}\n"
+        f"- Operational scope: {persona['scope']}\n"
+        f"- Technology stack: {persona['tech_stack']}\n"
+        f"- Compliance maturity: {persona['maturity']}\n\n"
+        f"TARGET FRAMEWORK: {framework_name} ({framework_id})\n\n"
+        f"COVERAGE PROFILE: {coverage_profile['description']}\n"
+        f"- Target overall coverage: {coverage_profile['target_coverage']}\n"
+        f"- Gap density: {coverage_profile['gap_density']}\n"
+        f"- Tone: {coverage_profile['tone']}\n\n"
+        f"DOCUMENT TYPE: {doc_type_name}\n\n"
+        "Produce the document now. Remember: SYNTHETIC banner first line, fictional "
+        "names only, real control IDs."
+    )
+
+    client = get_client()
+    with client.messages.stream(
+        model=model,
+        max_tokens=8000,
+        system=system,
+        messages=[{"role": "user", "content": user_content}],
+    ) as stream:
+        for _ in stream.text_stream:
+            pass
+        response = stream.get_final_message()
+
+    markdown = response.content[0].text or ""
+    if "SYNTHETIC DEMO DOCUMENT" not in markdown[:600]:
+        markdown = (
+            "**SYNTHETIC DEMO DOCUMENT — FICTIONAL ORGANIZATION — NOT REAL DATA**\n\n"
+            + markdown
+        )
+
+    usage = response.usage
+    return {
+        "title": f"{persona['name']} — {doc_type_name} (synthetic)",
+        "markdown_content": markdown,
+        "framework_id": framework_id,
+        "persona_id": persona.get("id"),
+        "doc_type": doc_type_name,
+        "model": model,
+        "usage": {
+            "input_tokens":  getattr(usage, "input_tokens", None),
+            "output_tokens": getattr(usage, "output_tokens", None),
+            "cache_creation_input_tokens": getattr(usage, "cache_creation_input_tokens", None),
+            "cache_read_input_tokens":     getattr(usage, "cache_read_input_tokens", None),
+        },
+    }

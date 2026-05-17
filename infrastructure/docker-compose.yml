@@ -5,8 +5,12 @@ services:
       context: ../backend
       dockerfile: Dockerfile
     container_name: grace-backend
+    # Loopback-only binding so the API is reachable from this host but
+    # never from outside, even when Docker is run on a public VM. The
+    # production overlay adds Caddy in front; Caddy reaches the backend
+    # via the Docker network (grace-backend:8000), not via this binding.
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     volumes:
@@ -25,8 +29,11 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
     container_name: grace-frontend
+    # See grace-backend above. Loopback-only by design; Caddy in the
+    # production overlay reverse-proxies to grace-frontend:8501 over
+    # the Docker network. Local dev still works via http://localhost:8501.
     ports:
-      - "8501:8501"
+      - "127.0.0.1:8501:8501"
     environment:
       - GRACE_API_URL=http://grace-backend:8000
     depends_on:
