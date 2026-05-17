@@ -81,7 +81,7 @@ TRANSLATIONS = {
         "ga.upload_label":            "Upload PDF, DOCX or TXT",
         "ga.choose_example":          "Choose example document",
         "ga.doc_preview":             "Document preview",
-        "ga.run_button":              "🚀  Run Gap Analysis",
+        "ga.run_button":              "Run Gap Analysis",
         "ga.copilot_response":        "Assessment",
         "ga.provide_content":         "Please provide document content.",
         "ga.registering":             "Registering document…",
@@ -119,6 +119,8 @@ TRANSLATIONS = {
         "db.kpi.assessments":         "Assessments",
         "db.kpi.avg_coverage":        "Avg Coverage",
         "db.kpi.critical_open":       "Critical Open",
+        "db.kpi.open":                "Open in Registry",
+        "db.kpi.view":                "View",
         "db.status_distribution":     "Compliance Status",
         "db.coverage_framework":      "Coverage by Framework",
         "db.severity_breakdown":      "Severity Breakdown",
@@ -148,14 +150,14 @@ TRANSLATIONS = {
         "lib.header":                 "Framework Library",
         "lib.intro":                  "25 international frameworks — P0 frameworks active in this prototype.",
         "lib.coming_phase3":          "🚧  Coming Phase 3",
-        "lib.active":                 "✅  Active",
+        "lib.active":                 "Active",
         "lib.category":               "Category",
         "lib.priority":               "Priority",
         "lib.controls":               "Controls",
         "lib.controls_loaded":        "{n} controls loaded in prototype",
         "lib.more_controls":          "+ {n} more controls…",
         "lib.explain_ctrl":           "Explain a control",
-        "lib.explain_button":         "🤖  Explain with Claude",
+        "lib.explain_button":         "Explain with Claude",
         "lib.explain_spinner":        "Getting plain-language explanation…",
         "lib.cannot_reach":           "Cannot reach GRACE API",
         "lib.framework_entry":        "**{name}** — {controls} controls · {tag}",
@@ -164,10 +166,10 @@ TRANSLATIONS = {
         "verdict.non_compliant":      "Non-Compliant",
         "verdict.no_evidence":        "No Evidence",
         "verdict.not_applicable":     "Not Applicable",
-        "verdict_emoji.compliant":    "✅ Compliant",
-        "verdict_emoji.partial":      "⚠️ Partial",
-        "verdict_emoji.non_compliant":"❌ Non-Compliant",
-        "verdict_emoji.no_evidence":  "❓ No Evidence",
+        "verdict_emoji.compliant":    "Compliant",
+        "verdict_emoji.partial":      "Partial",
+        "verdict_emoji.non_compliant":"Non-Compliant",
+        "verdict_emoji.no_evidence":  "No Evidence",
         "severity.critical":          "CRITICAL",
         "severity.high":              "HIGH",
         "severity.medium":            "MEDIUM",
@@ -216,7 +218,7 @@ TRANSLATIONS = {
         "ga.upload_label":            "Carica PDF, DOCX o TXT",
         "ga.choose_example":          "Scegli documento d'esempio",
         "ga.doc_preview":             "Anteprima documento",
-        "ga.run_button":              "🚀  Esegui Analisi",
+        "ga.run_button":              "Esegui Analisi",
         "ga.copilot_response":        "Assessment",
         "ga.provide_content":         "Fornisci il contenuto del documento.",
         "ga.registering":             "Registrazione del documento…",
@@ -254,6 +256,8 @@ TRANSLATIONS = {
         "db.kpi.assessments":         "Assessment",
         "db.kpi.avg_coverage":        "Copertura Media",
         "db.kpi.critical_open":       "Critici Aperti",
+        "db.kpi.open":                "Apri nel Registro",
+        "db.kpi.view":                "Vedi",
         "db.status_distribution":     "Stato di Conformità",
         "db.coverage_framework":      "Copertura per Framework",
         "db.severity_breakdown":      "Distribuzione Severità",
@@ -283,14 +287,14 @@ TRANSLATIONS = {
         "lib.header":                 "Libreria Framework",
         "lib.intro":                  "25 framework internazionali — i framework P0 sono attivi in questo prototipo.",
         "lib.coming_phase3":          "🚧  In arrivo in Fase 3",
-        "lib.active":                 "✅  Attivo",
+        "lib.active":                 "Attivo",
         "lib.category":               "Categoria",
         "lib.priority":               "Priorità",
         "lib.controls":               "Controlli",
         "lib.controls_loaded":        "{n} controlli caricati nel prototipo",
         "lib.more_controls":          "+ altri {n} controlli…",
         "lib.explain_ctrl":           "Spiega un controllo",
-        "lib.explain_button":         "🤖  Spiega con Claude",
+        "lib.explain_button":         "Spiega con Claude",
         "lib.explain_spinner":        "Recupero la spiegazione in linguaggio naturale…",
         "lib.cannot_reach":           "Impossibile raggiungere l'API GRACE",
         "lib.framework_entry":        "**{name}** — {controls} controlli · {tag}",
@@ -299,10 +303,10 @@ TRANSLATIONS = {
         "verdict.non_compliant":      "Non Conforme",
         "verdict.no_evidence":        "Senza Evidenza",
         "verdict.not_applicable":     "Non Applicabile",
-        "verdict_emoji.compliant":    "✅ Conforme",
-        "verdict_emoji.partial":      "⚠️ Parziale",
-        "verdict_emoji.non_compliant":"❌ Non Conforme",
-        "verdict_emoji.no_evidence":  "❓ Senza Evidenza",
+        "verdict_emoji.compliant":    "Conforme",
+        "verdict_emoji.partial":      "Parziale",
+        "verdict_emoji.non_compliant":"Non Conforme",
+        "verdict_emoji.no_evidence":  "Senza Evidenza",
         "severity.critical":          "CRITICA",
         "severity.high":              "ALTA",
         "severity.medium":            "MEDIA",
@@ -1114,25 +1118,174 @@ hr {{
   background: linear-gradient(90deg, transparent 0%, var(--border-soft) 20%, var(--border-soft) 80%, transparent 100%) !important;
   margin: 16px 0 !important;
 }}
+
+/* ════════════════════════════════════════════════════════════════
+   Phase 2: SVG icon badges, donut, severity stacked bar,
+            KPI head/link/clickable styling
+   ════════════════════════════════════════════════════════════════ */
+
+/* Inline icon inside .badge */
+.badge {{ gap: 5px; }}
+.badge .badge-icon {{
+  display: inline-flex; align-items: center; line-height: 0;
+}}
+
+/* KPI card glyph row + click affordance */
+.kpi-card .kpi-head {{
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px;
+  color: var(--text-dim);
+}}
+.kpi-card.kpi-primary .kpi-head {{ color: var(--accent); }}
+.kpi-card .kpi-glyph {{
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  background: var(--surface-alt);
+  color: var(--text-dim);
+}}
+.kpi-card.kpi-primary .kpi-glyph {{
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent);
+}}
+.kpi-card .kpi-link {{
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--font-display);
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 14px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}}
+.kpi-card:hover .kpi-link {{ opacity: 1; color: var(--accent); }}
+.kpi-card.kpi-clickable {{ cursor: pointer; }}
+
+/* ── Donut chart ── */
+.donut-wrap {{
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}}
+.donut-wrap:hover {{ transform: translateY(-1px); box-shadow: var(--shadow); }}
+.donut-wrap .donut-svg {{
+  width: 72px; height: 72px;
+  flex-shrink: 0;
+}}
+.donut-wrap .donut-meta {{ display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }}
+.donut-wrap .donut-label {{
+  font-family: var(--font-display);
+  font-size: 0.92rem; font-weight: 700;
+  color: var(--text);
+}}
+.donut-wrap .donut-sub {{
+  font-size: 0.76rem; color: var(--text-dim);
+  margin-top: 2px;
+}}
+
+/* ── Severity stacked bar + legend ── */
+.sev-bar {{
+  display: flex; width: 100%; height: 24px;
+  border-radius: 8px; overflow: hidden;
+  background: var(--surface-alt);
+  border: 1px solid var(--border-soft);
+}}
+.sev-seg {{ height: 100%; transition: opacity 0.2s ease; }}
+.sev-seg:hover {{ opacity: 0.8; }}
+.sev-legend {{
+  display: flex; flex-wrap: wrap; gap: 18px;
+  margin-top: 12px;
+}}
+.sev-leg {{
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-display);
+  font-size: 0.76rem;
+}}
+.sev-dot {{
+  width: 10px; height: 10px; border-radius: 50%;
+}}
+.sev-leg-label {{
+  color: var(--text-dim);
+  font-weight: 600; letter-spacing: 0.4px;
+  text-transform: uppercase; font-size: 0.7rem;
+}}
+.sev-leg-count {{
+  color: var(--text);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}}
 </style>
 """, unsafe_allow_html=True)
 
 
 # ─── Helper functions ────────────────────────────────────────────────
 
+# ── Inline SVG icon system ───────────────────────────────────────────
+# Lucide-style outline icons (single-stroke, currentColor). Centralised
+# in one helper so we can swap emojis out everywhere without touching
+# the call sites individually. icon('name', size=16) returns an inline
+# <svg> string ready to embed in markdown blocks.
+_ICON_PATHS = {
+    # Verdict states (status badges)
+    "compliant":     "<polyline points='4 12 9 17 20 6'/>",
+    "partial":       "<path d='M12 2L2 21h20z'/><line x1='12' y1='10' x2='12' y2='15'/><circle cx='12' cy='18.5' r='0.6' fill='currentColor'/>",
+    "non_compliant": "<circle cx='12' cy='12' r='9'/><line x1='8' y1='8' x2='16' y2='16'/><line x1='16' y1='8' x2='8' y2='16'/>",
+    "no_evidence":   "<circle cx='12' cy='12' r='9'/><path d='M9 9.5a3 3 0 1 1 4.5 2.5c-.9.5-1.5 1-1.5 2'/><line x1='12' y1='17' x2='12' y2='17.5'/>",
+    "not_applicable": "<circle cx='12' cy='12' r='9'/><line x1='5' y1='12' x2='19' y2='12'/>",
+    # Severity (used as small dots)
+    "dot":           "<circle cx='12' cy='12' r='5' fill='currentColor'/>",
+    # Page-section markers
+    "input":         "<rect x='3' y='5' width='18' height='14' rx='2'/><line x1='7' y1='10' x2='17' y2='10'/><line x1='7' y1='14' x2='14' y2='14'/>",
+    "assessment":    "<path d='M9 11l3 3 8-8'/><path d='M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'/>",
+    "doc":           "<path d='M5 3h9l5 5v13H5z'/><polyline points='14 3 14 9 19 9'/><line x1='8' y1='13' x2='16' y2='13'/><line x1='8' y1='17' x2='14' y2='17'/>",
+    "upload":        "<path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' y1='3' x2='12' y2='15'/>",
+    "example":       "<path d='M9 11h6'/><path d='M9 15h4'/><rect x='4' y='4' width='16' height='16' rx='2'/>",
+    "play":          "<polygon points='6 4 20 12 6 20 6 4' fill='currentColor' stroke='none'/>",
+    "stat_open":     "<circle cx='12' cy='12' r='9'/><polyline points='12 6 12 12 16 14'/>",
+    "stat_doc":      "<path d='M5 3h9l5 5v13H5z'/><polyline points='14 3 14 9 19 9'/>",
+    "stat_assess":   "<rect x='3' y='4' width='18' height='16' rx='2'/><polyline points='7 12 11 16 17 9'/>",
+    "stat_coverage": "<path d='M3 12a9 9 0 1 0 9-9'/><polyline points='12 3 12 12 19 8'/>",
+    "stat_critical": "<path d='M12 2L2 21h20z'/><line x1='12' y1='10' x2='12' y2='14'/><circle cx='12' cy='17.5' r='0.8' fill='currentColor'/>",
+    "reset":         "<polyline points='4 8 4 4 8 4'/><path d='M4 12a8 8 0 1 0 2.3-5.7'/>",
+    "explain":       "<circle cx='12' cy='12' r='9'/><path d='M9.5 9a2.5 2.5 0 1 1 4 2c-.9.6-1.5 1.2-1.5 2.2'/><line x1='12' y1='17' x2='12' y2='17.5'/>",
+    "filter":        "<polygon points='3 4 21 4 14 13 14 19 10 21 10 13 3 4'/>",
+    "external":      "<path d='M5 5h6'/><path d='M19 13v6H5V5h6'/><polyline points='14 4 20 4 20 10'/><line x1='10' y1='14' x2='20' y2='4'/>",
+}
+
+def icon(name: str, size: int = 16, color: str = "currentColor") -> str:
+    """Return an inline <svg> for the given icon name."""
+    path = _ICON_PATHS.get(name, _ICON_PATHS["dot"])
+    return (
+        f"<svg width='{size}' height='{size}' viewBox='0 0 24 24' fill='none' "
+        f"stroke='{color}' stroke-width='1.8' stroke-linecap='round' "
+        f"stroke-linejoin='round' style='vertical-align:middle;display:inline-block'>"
+        f"{path}</svg>"
+    )
+
+
 def status_badge(status: str) -> str:
-    icons = {"compliant":"✅","partial":"⚠️","non_compliant":"❌","no_evidence":"❓","not_applicable":"➖"}
     styles = {"compliant":"green","partial":"yellow","non_compliant":"red","no_evidence":"gray","not_applicable":"gray"}
-    icon  = icons.get(status, "•")
     style = styles.get(status, "gray")
-    label = t(f"verdict.{status}") if status in icons else status.replace("_"," ").title()
-    return f'<span class="badge badge-{style}">{icon} {label}</span>'
+    label = t(f"verdict.{status}") if status in styles else status.replace("_"," ").title()
+    return (
+        f'<span class="badge badge-{style}">'
+        f'<span class="badge-icon">{icon(status, size=12)}</span>'
+        f'{label}</span>'
+    )
 
 def severity_badge(severity: str) -> str:
     styles = {"critical":"red","high":"orange","medium":"yellow","low":"gray"}
     style = styles.get(severity, "gray")
     label = t(f"severity.{severity}") if severity in styles else severity.upper()
-    return f'<span class="badge badge-{style}">{label}</span>'
+    return (
+        f'<span class="badge badge-{style}">'
+        f'<span class="badge-icon">{icon("dot", size=10)}</span>'
+        f'{label}</span>'
+    )
 
 def opstatus_label(op_status: str) -> str:
     return t(f"opstatus.{op_status}") if op_status else ""
@@ -1141,6 +1294,69 @@ def score_bar(score: int, color: str = None) -> str:
     if color is None:
         color = THEMES[get_theme()]["accent"]
     return f'<div class="score-bar"><div class="score-fill" style="width:{score}%;background:{color}"></div></div>'
+
+
+# ── Visualisation: coverage donut ─────────────────────────────────────
+def coverage_donut(score: int, label: str, count: int) -> str:
+    """SVG donut showing % coverage. Inline so the dashboard doesn't
+    need plotly/altair just for a single ring per framework."""
+    s = max(0, min(100, int(score)))
+    color = "#10B981" if s >= 80 else "#EA580C" if s >= 40 else "#DC2626"
+    radius, stroke = 32, 7
+    circ = 2 * 3.14159 * radius
+    filled = circ * s / 100
+    return f"""
+<div class='donut-wrap'>
+  <svg viewBox='0 0 80 80' class='donut-svg'>
+    <circle cx='40' cy='40' r='{radius}' fill='none'
+            stroke='var(--surface-alt)' stroke-width='{stroke}'/>
+    <circle cx='40' cy='40' r='{radius}' fill='none'
+            stroke='{color}' stroke-width='{stroke}'
+            stroke-dasharray='{filled} {circ}'
+            stroke-linecap='round'
+            transform='rotate(-90 40 40)'/>
+    <text x='40' y='44' text-anchor='middle'
+          fill='var(--text)' font-family='Space Grotesk' font-weight='700'
+          font-size='16'>{s}%</text>
+  </svg>
+  <div class='donut-meta'>
+    <div class='donut-label'>{label}</div>
+    <div class='donut-sub'>{count} finding{'s' if count != 1 else ''}</div>
+  </div>
+</div>
+"""
+
+
+# ── Visualisation: severity stacked bar ───────────────────────────────
+def severity_stacked_bar(by_sev: dict) -> str:
+    """Single horizontal stacked bar (critical → high → medium → low)
+    with each segment proportional to its count. Replaces the old
+    grid of four separate KPI cards for severity."""
+    order = [("critical", "#DC2626"), ("high", "#EA580C"),
+             ("medium", "#EAB308"), ("low", "#6B7280")]
+    total = sum(by_sev.get(k, 0) for k, _ in order) or 1
+    segs = []
+    legend = []
+    for k, color in order:
+        n = by_sev.get(k, 0)
+        pct = (n / total) * 100
+        if n > 0:
+            segs.append(
+                f"<div class='sev-seg' style='width:{pct:.2f}%;background:{color}' "
+                f"title='{n} {k}'></div>"
+            )
+        legend.append(
+            f"<div class='sev-leg'>"
+            f"<span class='sev-dot' style='background:{color}'></span>"
+            f"<span class='sev-leg-label'>{t(f'severity.{k}')}</span>"
+            f"<span class='sev-leg-count'>{n}</span>"
+            f"</div>"
+        )
+    return (
+        f"<div class='sev-bar'>{''.join(segs)}</div>"
+        f"<div class='sev-legend'>{''.join(legend)}</div>"
+    )
+
 
 def api_get(path: str):
     try:
@@ -1329,7 +1545,10 @@ with st.sidebar:
 
     # ── Prototype reset (with explicit confirmation) ──────────────
     st.markdown("---")
-    with st.expander("🧹 " + t("sidebar.reset_section"), expanded=False):
+    # Expander labels can't host HTML, so we keep a single text label
+    # for the disclosure and let the inline icon live next to the
+    # primary confirm button below.
+    with st.expander(t("sidebar.reset_section"), expanded=False):
         st.caption(t("sidebar.reset_help"))
         if st.button(t("sidebar.reset_confirm"), key="reset_btn",
                      type="primary", use_container_width=True):
@@ -1724,41 +1943,65 @@ with _main_col:
             st.warning(t("db.no_data"))
             st.stop()
 
-        # Bento-style KPIs: primary metric (Open Findings) is wider and
-        # gets emphasis; the other four sit beside it as smaller cards.
-        # Real period-over-period trends would need a snapshot table —
-        # for now each card carries a 'neutral' trend chip ('—') so the
-        # visual language is in place and the data can be wired later.
+        # Bento-style KPIs: primary metric (Open Findings) wider, with
+        # SVG glyph on the left and click-through to the Registry. The
+        # smaller four sit beside it. Trend chip is neutral for now
+        # (period snapshots not stored yet — UI ready for it).
         cols = st.columns([2, 1, 1, 1, 1])
         metrics = [
-            (t("db.kpi.open_findings"),  kpi.get("total_open_findings", 0), True),
-            (t("db.kpi.documents"),      kpi.get("documents_registered", 0), False),
-            (t("db.kpi.assessments"),    kpi.get("assessment_runs", 0), False),
-            (t("db.kpi.avg_coverage"),   f"{kpi.get('avg_coverage_score', 0):.0f}%", False),
-            (t("db.kpi.critical_open"),  kpi.get("by_severity", {}).get("critical", 0), False),
+            ("open_findings",  t("db.kpi.open_findings"),  kpi.get("total_open_findings", 0), True,  "stat_open",     None),
+            ("documents",      t("db.kpi.documents"),      kpi.get("documents_registered", 0), False, "stat_doc",      None),
+            ("assessments",    t("db.kpi.assessments"),    kpi.get("assessment_runs", 0),      False, "stat_assess",   None),
+            ("avg_coverage",   t("db.kpi.avg_coverage"),   f"{kpi.get('avg_coverage_score', 0):.0f}%", False, "stat_coverage", None),
+            ("critical_open",  t("db.kpi.critical_open"),  kpi.get("by_severity", {}).get("critical", 0), False, "stat_critical", "critical"),
         ]
-        for i, (label, value, primary) in enumerate(metrics):
+        for i, (kpi_key, label, value, primary, ico, sev_filter) in enumerate(metrics):
             primary_cls = " kpi-primary" if primary else ""
             cols[i].markdown(f"""
-    <div class="kpi-card{primary_cls}">
-      <div class="kpi-label">{label}</div>
+    <div class="kpi-card kpi-clickable{primary_cls}" data-kpi="{kpi_key}">
+      <div class="kpi-head">
+        <span class="kpi-glyph">{icon(ico, size=18)}</span>
+        <span class="kpi-label">{label}</span>
+      </div>
       <div class="kpi-row">
         <div class="kpi-value">{value}</div>
         <span class="kpi-trend neutral">— %</span>
       </div>
+      <div class="kpi-link">{t("db.kpi.view")} {icon("external", size=12)}</div>
     </div>""", unsafe_allow_html=True)
+            # Tiny "Open" button under each card — Streamlit-native, fires
+            # the navigation + filter pre-fill.
+            if cols[i].button(t("db.kpi.open"), key=f"kpi_open_{kpi_key}",
+                              use_container_width=True):
+                # Pre-fill the Registry filters based on which KPI was clicked
+                if kpi_key == "critical_open":
+                    st.session_state["registry_filter_severity"] = "critical"
+                # All KPIs route to Registry by default — landing there gives
+                # the user a clear next action.
+                st.session_state["current_page"] = "registry"
+                st.rerun()
 
         st.markdown("&nbsp;", unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
+        col1, col2 = st.columns([1, 1.4])
 
         with col1:
             st.markdown(f'<div class="section-sub">{t("db.status_distribution")}</div>', unsafe_allow_html=True)
             by_status = kpi.get("by_status",{})
             if by_status:
                 for status, count in by_status.items():
-                    label = t(f"verdict_emoji.{status}") if status in ("compliant","partial","non_compliant","no_evidence") else status
-                    st.markdown(f"<div class='recent-row'><span class='doc-name'>{label}</span><span class='meta'>{count}</span></div>",
-                                unsafe_allow_html=True)
+                    if status in ("compliant","partial","non_compliant","no_evidence","not_applicable"):
+                        st.markdown(
+                            f"<div class='recent-row'>"
+                            f"<span class='doc-name'>{status_badge(status)}</span>"
+                            f"<span class='meta'>{count}</span></div>",
+                            unsafe_allow_html=True,
+                        )
+                    else:
+                        st.markdown(
+                            f"<div class='recent-row'><span class='doc-name'>{status}</span>"
+                            f"<span class='meta'>{count}</span></div>",
+                            unsafe_allow_html=True,
+                        )
             else:
                 st.info(t("db.no_findings"))
 
@@ -1766,18 +2009,16 @@ with _main_col:
             st.markdown(f'<div class="section-sub">{t("db.coverage_framework")}</div>', unsafe_allow_html=True)
             by_fw = kpi.get("by_framework",{})
             if by_fw:
-                for fw, data in by_fw.items():
-                    score = data.get("avg_score",0) or 0
-                    color = "#16A34A" if score >= 80 else "#EA580C" if score >= 40 else "#DC2626"
-                    st.markdown(
-                        f"<div style='margin-bottom:10px'>"
-                        f"<div style='display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:4px'>"
-                        f"<span style='font-weight:600;color:var(--primary)'>{fw}</span>"
-                        f"<span style='color:var(--text-dim)'>" + t("db.findings_avg", count=data.get('count',0), score=f"{score:.0f}") + "</span>"
-                        f"</div>"
-                        f"{score_bar(score, color)}"
-                        f"</div>",
-                        unsafe_allow_html=True
+                # Compact donut grid: 2 per row.
+                donut_cols = st.columns(2)
+                for i, (fw, data) in enumerate(by_fw.items()):
+                    donut_cols[i % 2].markdown(
+                        coverage_donut(
+                            data.get("avg_score", 0) or 0,
+                            fw,
+                            data.get("count", 0),
+                        ),
+                        unsafe_allow_html=True,
                     )
             else:
                 st.info(t("db.no_framework_data"))
@@ -1785,17 +2026,8 @@ with _main_col:
         st.markdown("&nbsp;", unsafe_allow_html=True)
         st.markdown(f'<div class="section-sub">{t("db.severity_breakdown")}</div>', unsafe_allow_html=True)
         by_sev = kpi.get("by_severity",{})
-        sev_order = ["critical","high","medium","low"]
-        sev_colors = {"critical":"#DC2626","high":"#EA580C","medium":"#EAB308","low":"#6B7280"}
         if by_sev:
-            cols = st.columns(len(sev_order))
-            for i, sev in enumerate(sev_order):
-                count = by_sev.get(sev,0)
-                cols[i].markdown(f"""
-    <div class="kpi-card">
-      <div class="kpi-value" style="color:{sev_colors[sev]}">{count}</div>
-      <div class="kpi-label">{t(f"severity.{sev}")}</div>
-    </div>""", unsafe_allow_html=True)
+            st.markdown(severity_stacked_bar(by_sev), unsafe_allow_html=True)
         else:
             st.info(t("db.no_severity_data"))
 
@@ -1834,18 +2066,28 @@ with _main_col:
         FRAMEWORKS = ["ISO27001:2022","GDPR","SOC2","NIS2"]
         ALL = "__ALL__"
 
+        # Pre-fill from dashboard KPI click-through, if any.
+        _preset_severity = st.session_state.pop("registry_filter_severity", None)
+        _preset_verdict  = st.session_state.pop("registry_filter_verdict", None)
+        _preset_op       = st.session_state.pop("registry_filter_op", None)
+
         col1, col2, col3 = st.columns(3)
         fw_filter = col1.selectbox(
             t("reg.framework"), [ALL] + FRAMEWORKS,
             format_func=lambda v: t("all") if v == ALL else v,
+            key="reg_fw_filter",
         )
         verdict_filter = col2.selectbox(
             t("reg.verdict"), [ALL] + VERDICTS,
             format_func=lambda v: t("all") if v == ALL else t(f"verdict.{v}"),
+            index=(VERDICTS.index(_preset_verdict) + 1) if _preset_verdict in VERDICTS else 0,
+            key="reg_verdict_filter",
         )
         op_status_filter = col3.selectbox(
             t("reg.operational_status"), [ALL] + OP_STATUSES,
             format_func=lambda v: t("all") if v == ALL else t(f"opstatus.{v}"),
+            index=(OP_STATUSES.index(_preset_op) + 1) if _preset_op in OP_STATUSES else 0,
+            key="reg_op_filter",
         )
 
         query = f"/api/v1/findings?limit=100&language={get_lang()}"
