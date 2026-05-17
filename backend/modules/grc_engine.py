@@ -353,16 +353,24 @@ _LANG_LABEL = {"en": "English", "it": "Italian"}
 
 def translate_finding_fields(description: str, recommended_action: str,
                               regulatory_reference: str,
-                              target_lang: str) -> dict:
-    """Translate the three user-facing fields of a finding to `target_lang`.
+                              target_lang: str,
+                              control_title: str = "") -> dict:
+    """Translate the user-facing fields of a finding to `target_lang`.
 
-    Returns a dict with the same three keys plus 'ok' (bool). On
-    failure 'ok' is False and originals are returned — the caller MUST
-    check 'ok' before caching, otherwise the stale originals end up
-    persisted and the finding never gets a real translation.
+    Retries up to 3 times with exponential back-off to absorb transient
+    cold-start failures — the first parallel worker in main.py used to
+    fail repeatedly because of pool warm-up, persistently leaving its
+    finding untranslated even though the same prompt succeeded for the
+    next sibling.
+
+    Returns the four translated fields plus 'ok' (bool). The caller
+    must check 'ok' before persisting — caching a failed call would
+    serve the originals back on every subsequent view.
     """
+    import time as _time
     target_name = _LANG_LABEL.get(target_lang, "English")
     payload = json.dumps({
+        "control_title": control_title or "",
         "description": description or "",
         "recommended_action": recommended_action or "",
         "regulatory_reference": regulatory_reference or "",
@@ -370,43 +378,54 @@ def translate_finding_fields(description: str, recommended_action: str,
 
     prompt = (
         f"You are translating a GRC (Governance, Risk, Compliance) finding "
-        f"into {target_name}. Preserve every regulatory reference, control "
-        f"identifier, framework name, product name, acronym and quoted clause "
-        f"verbatim — only translate natural-language sentences around them. "
-        f"Maintain a professional auditor tone.\n\n"
+        f"into {target_name}. Translate the natural-language portions of "
+        f"every field. Preserve every regulatory reference, control "
+        f"identifier (e.g. 'IAM-02', 'Art.21.2.j'), framework name "
+        f"(ISO27001, GDPR, NIS2, SOC2…), product name, acronym and "
+        f"quoted clause verbatim. Maintain a professional auditor tone.\n\n"
         f"Return ONLY a valid JSON object with exactly these keys: "
-        f"\"description\", \"recommended_action\", \"regulatory_reference\". "
-        f"No prose around the JSON.\n\n"
+        f"\"control_title\", \"description\", \"recommended_action\", "
+        f"\"regulatory_reference\". No prose around the JSON.\n\n"
         f"Input JSON:\n{payload}"
     )
 
-    try:
-        msg = get_client().messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=1500,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = msg.content[0].text.strip()
-        # Strip code fences if Claude wrapped the JSON
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:].strip()
-        translated = json.loads(text)
-        return {
-            "description":          translated.get("description") or description,
-            "recommended_action":   translated.get("recommended_action") or recommended_action,
-            "regulatory_reference": translated.get("regulatory_reference") or regulatory_reference,
-            "ok":                   True,
-        }
-    except Exception as e:
-        logger.warning("Translation to %s failed (%s); returning original fields, NOT caching", target_lang, e)
-        return {
-            "description":          description,
-            "recommended_action":   recommended_action,
-            "regulatory_reference": regulatory_reference,
-            "ok":                   False,
-        }
+    last_error = None
+    for attempt in range(3):
+        try:
+            msg = get_client().messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=1800,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            text = msg.content[0].text.strip()
+            if text.startswith("```"):
+                text = text.split("```")[1]
+                if text.startswith("json"):
+                    text = text[4:].strip()
+            translated = json.loads(text)
+            return {
+                "control_title":        translated.get("control_title") or control_title,
+                "description":          translated.get("description") or description,
+                "recommended_action":   translated.get("recommended_action") or recommended_action,
+                "regulatory_reference": translated.get("regulatory_reference") or regulatory_reference,
+                "ok":                   True,
+            }
+        except Exception as e:
+            last_error = e
+            if attempt < 2:
+                _time.sleep(0.4 * (attempt + 1))  # 0.4 s, 0.8 s
+                continue
+
+    logger.warning("Translation to %s failed after 3 attempts (%s); "
+                   "returning originals, NOT caching",
+                   target_lang, last_error)
+    return {
+        "control_title":        control_title,
+        "description":          description,
+        "recommended_action":   recommended_action,
+        "regulatory_reference": regulatory_reference,
+        "ok":                   False,
+    }
 
 
 # ─── Document Generation ─────────────────────────────────────────

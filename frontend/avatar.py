@@ -39,35 +39,38 @@ import streamlit as st
 # Palette derived from the GRACE logo (navy + teal + neutrals).
 
 TOKENS = {
-    # Hair / outline — cooler, lighter blue, more depth between hilite
-    # and shadow so the strands read as glossy rather than flat.
-    "hair_base":     "#163C70",
-    "hair_shadow":   "#0E2348",
-    "hair_hilite":   "#2D5BA8",
-    "outline":       "#0A1929",
-    # Skin — warmer peach, richer cheek tone (the previous beige read
-    # as washed out under the brighter frame).
-    "skin":          "#FFD9B8",
-    "skin_shadow":   "#F0BC93",
-    "blush":         "#FF9D8D",
-    # Eyes — punchier teal iris that pops against the lighter skin.
+    # Hair / outline — richer cobalt with stronger hilite/shadow split.
+    # The previous tones sat in the same range as the page background
+    # and read as flat; widened the dynamic range so the strands look
+    # glossy and read clearly off the deep-navy frame.
+    "hair_base":     "#2A5AB8",
+    "hair_shadow":   "#1A3B7A",
+    "hair_hilite":   "#4880D8",
+    "outline":       "#08152A",
+    # Skin — warmer, more saturated peach; the previous beige read
+    # as washed-out under the frame's glow overlay (now removed).
+    "skin":          "#FFD0A8",
+    "skin_shadow":   "#EAA67E",
+    "blush":         "#F88774",
+    # Eyes — vivid aqua iris with a deep teal mid-tone for depth.
     "eye_white":     "#FFFFFF",
-    "iris":          "#36B4C9",
-    "iris_dark":     "#0E3F5A",
+    "iris":          "#28D2EA",
+    "iris_dark":     "#0F4A6E",
     "iris_hilite":   "#FFFFFF",
-    "brow":          "#1F2F58",
-    # Mouth — saturated coral instead of the muted brown-pink.
-    "lip":           "#D4574E",
-    # Outfit — brighter navy + crisp white blouse, more vibrant teal pin.
+    "brow":          "#1A2B52",
+    # Mouth — saturated coral red, no muted brown-pink.
+    "lip":           "#DA4A3F",
+    # Outfit — richer cobalt with high-contrast highlights, crisp white
+    # blouse, ice-cyan accent pin that stands out from the jacket.
     "blouse":        "#FFFFFF",
-    "blouse_shadow": "#D7DEE6",
-    "jacket":        "#1E4A95",
-    "jacket_shadow": "#143571",
-    "jacket_collar": "#2A60B6",
-    "accent_pin":    "#5BDDF2",
-    "pin_core":      "#1E4A95",
-    # Halo / glow — unchanged per user request.
-    "halo":          "#4EC6D9",
+    "blouse_shadow": "#D2DCE6",
+    "jacket":        "#2D63B5",
+    "jacket_shadow": "#163A78",
+    "jacket_collar": "#4078CE",
+    "accent_pin":    "#5CE3F8",
+    "pin_core":      "#163A78",
+    # Halo — bright ice cyan, used only behind the bust (not as overlay).
+    "halo":          "#5CE3F8",
 }
 
 
@@ -181,59 +184,145 @@ def set_state(new_state: AvatarState) -> None:
 
 def _css() -> str:
     """CSS injected with the SVG. Animations are state-gated via
-    `.grace-avatar.state-<name>` selectors on the root SVG."""
+    `.grace-avatar.state-<name>` selectors on the root SVG.
+
+    Design notes (premium-enterprise look):
+    - Frame uses a DEEP navy that sits darker than the page bg, so the
+      character pops instead of merging into the surrounding dark-mode
+      navy. No teal in the base gradient.
+    - No full-card overlay: the previous radial-gradient with 0.42 alpha
+      teal veiled the colours. The accent glow is now LOCALISED to the
+      top quarter of the frame.
+    - Border is a single hairline accent + a precise outer ring shadow.
+    - Typography hierarchy: name (largest, white, tight tracking) →
+      role (smaller, ice-blue, secondary) → badge (vivid accent pill).
+    - Card depth via layered, non-fuzzy shadows.
+    """
     return f"""
 <style>
+:root {{
+  --av-ink-1: #08172E;
+  --av-ink-2: #0E2548;
+  --av-ink-3: #122D5C;
+  --av-line: #4EC6D9;
+  --av-line-soft: rgba(78,198,217,0.35);
+  --av-text-1: #F2FAFF;
+  --av-text-2: #BFD8E8;
+  --av-accent: #5CE3F8;
+  --av-accent-soft: rgba(92,227,248,0.18);
+}}
 .grace-avatar-frame {{
   display: flex; flex-direction: column; align-items: center;
-  padding: 14px 6px 12px;
-  /* Brighter, fully opaque navy → teal gradient so the frame pops
-     against both the cream light-theme background AND the deep navy
-     dark-theme background. */
-  background: linear-gradient(160deg, #2C7B95 0%, #15376C 100%);
-  border: 2px solid rgba(78,198,217,0.65);
-  border-radius: 16px;
-  position: relative; overflow: hidden;
+  padding: 16px 12px 14px;
+  /* Deep, fully opaque navy gradient — sits BELOW the page bg tone
+     so the avatar reads as foreground content, not blended chrome. */
+  background:
+    radial-gradient(ellipse 60% 35% at 50% 12%, rgba(92,227,248,0.22) 0%, transparent 70%),
+    linear-gradient(180deg, var(--av-ink-3) 0%, var(--av-ink-1) 100%);
+  border: 1px solid var(--av-line);
+  border-radius: 18px;
+  position: relative;
   margin-bottom: 14px;
+  /* Crisp layered depth — no fuzzy halos. */
   box-shadow:
-    0 8px 28px rgba(78,198,217,0.25),
-    0 4px 14px rgba(10,25,41,0.40),
-    inset 0 1px 0 rgba(255,255,255,0.12);
+    0 0 0 1px rgba(92,227,248,0.18),
+    0 10px 28px rgba(0,0,0,0.55),
+    0 2px 6px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  overflow: hidden;
+  isolation: isolate;
 }}
+/* Subtle, very slow shimmer along the border — adds 'alive' without
+   gaming-glow. The animation runs once every 7 s; opacity stays low. */
 .grace-avatar-frame::before {{
   content: ""; position: absolute; inset: 0;
-  background: radial-gradient(circle at 50% 25%, rgba(120,220,235,0.42) 0%, transparent 55%);
+  border-radius: 18px;
+  padding: 1px;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(92,227,248,0.55) 50%,
+    transparent 70%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
   pointer-events: none;
+  opacity: 0.55;
+  background-size: 200% 200%;
+  animation: grace-shimmer 7s ease-in-out infinite;
 }}
-.grace-avatar-name {{
-  font-size: 0.82rem; letter-spacing: 1.6px; font-weight: 800;
-  color: #FFFFFF; text-transform: uppercase; margin-top: 10px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
-  font-family: "Space Grotesk", -apple-system, sans-serif;
-}}
-.grace-avatar-role {{
-  font-size: 0.66rem; color: #D4ECF1; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 1.2px; margin-top: 3px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
-}}
-.grace-avatar-status {{
-  display: inline-flex; align-items: center; gap: 5px;
-  margin-top: 6px;
-  padding: 2px 8px; border-radius: 999px;
-  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.5px;
-  background: rgba(78,198,217,0.14); color: #4EC6D9;
-  text-transform: uppercase;
-  border: 1px solid rgba(78,198,217,0.3);
-}}
-.grace-avatar-status::before {{
-  content: ""; width: 6px; height: 6px; border-radius: 50%;
-  background: #4EC6D9;
-  animation: grace-pulse 2s ease-in-out infinite;
+@keyframes grace-shimmer {{
+  0%   {{ background-position: 0% 50%; }}
+  100% {{ background-position: 200% 50%; }}
 }}
 
+/* Typography — premium-enterprise hierarchy */
+.grace-avatar-name {{
+  font-size: 0.88rem; letter-spacing: 2px; font-weight: 800;
+  color: var(--av-text-1); text-transform: uppercase;
+  margin-top: 12px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  font-family: "Space Grotesk", -apple-system, sans-serif;
+  line-height: 1.1;
+}}
+.grace-avatar-role {{
+  font-size: 0.62rem; color: var(--av-text-2); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  margin-top: 4px; line-height: 1.3;
+  font-family: "Space Grotesk", -apple-system, sans-serif;
+}}
+
+/* Status badge — a real accent point, not a faded label */
+.grace-avatar-status {{
+  display: inline-flex; align-items: center; gap: 7px;
+  margin-top: 10px;
+  padding: 3px 10px 3px 9px;
+  border-radius: 999px;
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 1px;
+  background: linear-gradient(180deg, rgba(92,227,248,0.22) 0%, rgba(92,227,248,0.10) 100%);
+  color: var(--av-accent);
+  text-transform: uppercase;
+  border: 1px solid rgba(92,227,248,0.55);
+  box-shadow:
+    0 0 0 1px rgba(92,227,248,0.10),
+    0 2px 6px rgba(0,0,0,0.35);
+  font-family: "Space Grotesk", -apple-system, sans-serif;
+}}
+.grace-avatar-status::before {{
+  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--av-accent);
+  box-shadow: 0 0 6px var(--av-accent);
+  animation: grace-pulse 2.6s ease-in-out infinite;
+}}
 @keyframes grace-pulse {{
-  0%, 100% {{ box-shadow: 0 0 0 0 rgba(78,198,217,0.55); }}
-  50%      {{ box-shadow: 0 0 0 5px rgba(78,198,217,0); }}
+  0%, 100% {{ transform: scale(1);   opacity: 1;   }}
+  50%      {{ transform: scale(1.25); opacity: 0.7; }}
+}}
+
+/* Description block (the bubble below the badge) — better hierarchy,
+   tighter contrast, more breathing room. */
+.grace-avatar-bubble {{
+  margin: 12px 4px 0;
+  padding: 12px 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+  border: 1px solid rgba(92,227,248,0.22);
+  border-radius: 12px;
+  color: #E2F0F7;
+  font-size: 0.74rem; line-height: 1.55;
+  letter-spacing: 0.1px;
+  text-align: left;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  position: relative;
+}}
+.grace-avatar-bubble::before {{
+  content: "";
+  position: absolute; top: -7px; left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px; height: 12px;
+  background: linear-gradient(135deg, rgba(92,227,248,0.30) 0%, rgba(255,255,255,0.06) 60%);
+  border-left: 1px solid rgba(92,227,248,0.40);
+  border-top: 1px solid rgba(92,227,248,0.40);
+  border-radius: 2px;
 }}
 
 /* ── Avatar SVG ── */
@@ -339,33 +428,23 @@ def _css() -> str:
   animation: grace-speak 0.45s ease-in-out infinite;
 }}
 
-/* ── Speech bubble ── */
-.grace-avatar-bubble {{
-  margin: 12px 6px 4px;
-  position: relative;
-  background: linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.04) 100%);
-  border: 1px solid rgba(78,198,217,0.35);
-  border-radius: 12px;
-  padding: 10px 12px;
-  color: #E4F2F5;
-  font-family: "Inter", -apple-system, sans-serif;
-  font-size: 0.78rem; line-height: 1.45;
-  text-align: left;
-  box-shadow: 0 4px 16px rgba(10,25,41,0.30);
-  animation: grace-bubble-in 0.45s ease-out;
-}}
-.grace-avatar-bubble::before {{
-  content: ""; position: absolute;
-  top: -7px; left: 50%; transform: translateX(-50%) rotate(45deg);
-  width: 12px; height: 12px;
-  background: linear-gradient(135deg, rgba(78,198,217,0.35) 0%, rgba(255,255,255,0.07) 60%);
-  border-left: 1px solid rgba(78,198,217,0.35);
-  border-top: 1px solid rgba(78,198,217,0.35);
-  border-radius: 2px;
-}}
+/* Bubble fade-in keyframe (the bubble styling itself lives in the
+   premium block above with the rest of the layout typography). */
 @keyframes grace-bubble-in {{
   0%   {{ opacity: 0; transform: translateY(-4px); }}
   100% {{ opacity: 1; transform: translateY(0); }}
+}}
+.grace-avatar-bubble {{ animation: grace-bubble-in 0.45s ease-out; }}
+
+/* Very subtle micro-float on the whole avatar SVG — adds 'alive'
+   without ever drifting far enough to feel like an animation loop. */
+@keyframes grace-float {{
+  0%, 100% {{ transform: translateY(0); }}
+  50%      {{ transform: translateY(-2px); }}
+}}
+.grace-avatar {{
+  animation: grace-float 6.2s ease-in-out infinite;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35));
 }}
 </style>
 """
