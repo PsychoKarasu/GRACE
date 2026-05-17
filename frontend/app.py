@@ -878,28 +878,19 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
    KPI typography, hover lifts, surface elevation, all-caps labels
    ════════════════════════════════════════════════════════════════ */
 
-/* ── Sidebar brand: compact mark + wordmark ── */
+/* ── Sidebar brand: full-width logo (image carries wordmark) ── */
 .grace-side-brand-compact {{
-  display: flex; align-items: center; gap: 12px;
-  padding: 18px 6px 14px;
-  margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 14px 4px 16px;
+  margin-bottom: 14px;
   border-bottom: 1px solid var(--border-soft);
 }}
 .grace-side-brand-compact img {{
-  height: 42px; width: 42px; object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
-  flex-shrink: 0;
-}}
-.grace-side-brand-compact .brand-wordmark {{ display: flex; flex-direction: column; line-height: 1.1; }}
-.grace-side-brand-compact .brand-title {{
-  font-family: var(--font-display);
-  font-size: 1.15rem; font-weight: 800;
-  color: var(--logo-text); letter-spacing: 1.5px;
-}}
-.grace-side-brand-compact .brand-subtitle {{
-  font-size: 0.66rem; color: var(--text-dim);
-  font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
-  margin-top: 2px;
+  width: 100%; height: auto;
+  max-width: 100%; max-height: 140px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 8px rgba(15,31,61,0.18));
+  display: block;
 }}
 
 /* ── Sidebar nav items ──
@@ -1162,6 +1153,10 @@ hr {{
 .kpi-card.kpi-clickable {{ cursor: pointer; }}
 
 /* ── Donut chart ── */
+.donut-grid {{
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}}
 .donut-wrap {{
   display: flex; align-items: center; gap: 14px;
   margin-bottom: 14px;
@@ -1476,17 +1471,20 @@ with st.sidebar:
     # Small brand mark + wordmark — the huge hero logo is gone from the
     # topbar; this is now the only place the GRACE identity lives in
     # operative pages.
-    if SYMBOL_B64:
+    # Full-width logo (the image already carries wordmark + tagline).
+    # Fills the sidebar; no separate text block needed.
+    if LOGO_B64:
         st.markdown(
             f'''
 <div class="grace-side-brand-compact">
-  <img src="data:image/png;base64,{SYMBOL_B64}" alt="GRACE"/>
-  <div class="brand-wordmark">
-    <div class="brand-title">GRACE</div>
-    <div class="brand-subtitle">GRC Engine</div>
-  </div>
+  <img src="data:image/png;base64,{LOGO_B64}" alt="GRACE — Governance, Risk, Assurance & Compliance Engine"/>
 </div>
             ''',
+            unsafe_allow_html=True,
+        )
+    elif SYMBOL_B64:
+        st.markdown(
+            f'<div class="grace-side-brand-compact"><img src="data:image/png;base64,{SYMBOL_B64}" alt="GRACE"/></div>',
             unsafe_allow_html=True,
         )
 
@@ -2009,17 +2007,23 @@ with _main_col:
             st.markdown(f'<div class="section-sub">{t("db.coverage_framework")}</div>', unsafe_allow_html=True)
             by_fw = kpi.get("by_framework",{})
             if by_fw:
-                # Compact donut grid: 2 per row.
-                donut_cols = st.columns(2)
-                for i, (fw, data) in enumerate(by_fw.items()):
-                    donut_cols[i % 2].markdown(
-                        coverage_donut(
-                            data.get("avg_score", 0) or 0,
-                            fw,
-                            data.get("count", 0),
-                        ),
-                        unsafe_allow_html=True,
+                # CSS grid (instead of st.columns) so we don't hit
+                # Streamlit's 'columns only one level deep' limit —
+                # the dashboard is already nested inside _main_col and
+                # an outer st.columns([1, 1.4]), which puts us at the
+                # edge of the allowed nesting.
+                _donut_html = "".join(
+                    coverage_donut(
+                        data.get("avg_score", 0) or 0,
+                        fw,
+                        data.get("count", 0),
                     )
+                    for fw, data in by_fw.items()
+                )
+                st.markdown(
+                    f'<div class="donut-grid">{_donut_html}</div>',
+                    unsafe_allow_html=True,
+                )
             else:
                 st.info(t("db.no_framework_data"))
 
