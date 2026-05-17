@@ -39,32 +39,34 @@ import streamlit as st
 # Palette derived from the GRACE logo (navy + teal + neutrals).
 
 TOKENS = {
-    # Hair / outline
-    "hair_base":     "#0E2541",
-    "hair_shadow":   "#0A1929",
-    "hair_hilite":   "#1A3B6C",
+    # Hair / outline — cooler, lighter blue, more depth between hilite
+    # and shadow so the strands read as glossy rather than flat.
+    "hair_base":     "#163C70",
+    "hair_shadow":   "#0E2348",
+    "hair_hilite":   "#2D5BA8",
     "outline":       "#0A1929",
-    # Skin
-    "skin":          "#F2DAC2",
-    "skin_shadow":   "#E5C5A8",
-    "blush":         "#F0BFB0",
-    # Eyes
-    "eye_white":     "#FBFCFD",
-    "iris":          "#2A7A8A",
-    "iris_dark":     "#0F2349",
+    # Skin — warmer peach, richer cheek tone (the previous beige read
+    # as washed out under the brighter frame).
+    "skin":          "#FFD9B8",
+    "skin_shadow":   "#F0BC93",
+    "blush":         "#FF9D8D",
+    # Eyes — punchier teal iris that pops against the lighter skin.
+    "eye_white":     "#FFFFFF",
+    "iris":          "#36B4C9",
+    "iris_dark":     "#0E3F5A",
     "iris_hilite":   "#FFFFFF",
-    "brow":          "#1A2C50",
-    # Mouth
-    "lip":           "#A86A6A",
-    # Outfit
-    "blouse":        "#FAFBFC",
-    "blouse_shadow": "#E2E6EB",
-    "jacket":        "#163265",
-    "jacket_shadow": "#0E2348",
-    "jacket_collar": "#1F3F73",
-    "accent_pin":    "#4EC6D9",
-    "pin_core":      "#163265",
-    # Halo / glow
+    "brow":          "#1F2F58",
+    # Mouth — saturated coral instead of the muted brown-pink.
+    "lip":           "#D4574E",
+    # Outfit — brighter navy + crisp white blouse, more vibrant teal pin.
+    "blouse":        "#FFFFFF",
+    "blouse_shadow": "#D7DEE6",
+    "jacket":        "#1E4A95",
+    "jacket_shadow": "#143571",
+    "jacket_collar": "#2A60B6",
+    "accent_pin":    "#5BDDF2",
+    "pin_core":      "#1E4A95",
+    # Halo / glow — unchanged per user request.
     "halo":          "#4EC6D9",
 }
 
