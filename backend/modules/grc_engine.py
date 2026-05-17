@@ -539,14 +539,20 @@ def explain_control(framework_id: str, control_id: str, language: str = "en") ->
         f"Cover: what it requires, why it matters, what good implementation looks like, "
         f"and the 3 most common gaps you see in practice. Keep it practical and concrete."
     )
-    client = get_client()
-    with client.messages.stream(
-        model="claude-sonnet-4-6",
-        max_tokens=1000,
-        system=system,
-        messages=[{"role": "user", "content": user}]
-    ) as stream:
-        for _ in stream.text_stream:
-            pass
-        response = stream.get_final_message()
-    return response.content[0].text
+    # Non-streaming call — we don't yield tokens to the frontend (the
+    # whole result is rendered at once via st.markdown), so streaming
+    # only added latency before. Haiku is plenty for an explanation
+    # and replies in 2-3 s vs Sonnet's 15-20 s, which used to time out
+    # the frontend's 10 s api_get and leave the UI 'spinning then
+    # nothing'.
+    try:
+        msg = get_client().messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1000,
+            system=system,
+            messages=[{"role": "user", "content": user}],
+        )
+        return msg.content[0].text
+    except Exception as e:
+        logger.warning("explain_control failed for %s/%s: %s", framework_id, control_id, e)
+        return f"_Could not generate explanation — {e}_"
