@@ -371,6 +371,7 @@ def get_findings(framework: Optional[str] = None, status: Optional[str] = None,
                         translated["description"],
                         translated["recommended_action"],
                         translated["regulatory_reference"],
+                        success=True,
                     )
 
     return {"findings": findings}

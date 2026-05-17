@@ -123,6 +123,15 @@ def init_db():
     cols = {r["name"] for r in conn.execute("PRAGMA table_info(findings)").fetchall()}
     if "language" not in cols:
         conn.execute("ALTER TABLE findings ADD COLUMN language TEXT DEFAULT 'en'")
+    # finding_translations: add success flag (1 = real translation we can
+    # trust, 0/NULL = produced by a failed/legacy code path and must be
+    # retranslated on next view). Default 0 invalidates ALL pre-existing
+    # rows, which is desired — earlier builds (pre PR #28) saved the
+    # ORIGINAL fields when the Claude call failed, so those rows would
+    # otherwise leave individual findings stuck in their source language.
+    ft_cols = {r["name"] for r in conn.execute("PRAGMA table_info(finding_translations)").fetchall()}
+    if ft_cols and "success" not in ft_cols:
+        conn.execute("ALTER TABLE finding_translations ADD COLUMN success INTEGER DEFAULT 0")
     conn.commit()
     conn.close()
 
@@ -324,11 +333,18 @@ def update_operational_status(finding_id: str, new_status: str, actor: str = "de
 # ─── KPI aggregation ────────────────────────────────────────────
 
 def get_finding_translation(finding_id: str, language: str) -> dict | None:
-    """Return cached translation for the finding or None."""
+    """Return a cached, TRUSTED translation for the finding or None.
+
+    Rows with success != 1 are treated as a cache miss — they were
+    written by an earlier code path that persisted the original fields
+    when the Claude call failed. Returning them would permanently leave
+    the finding in its source language.
+    """
     conn = get_db()
     row = conn.execute(
         "SELECT description, recommended_action, regulatory_reference "
-        "FROM finding_translations WHERE finding_id=? AND language=?",
+        "FROM finding_translations "
+        "WHERE finding_id=? AND language=? AND success = 1",
         (finding_id, language),
     ).fetchone()
     conn.close()
@@ -337,14 +353,15 @@ def get_finding_translation(finding_id: str, language: str) -> dict | None:
 
 def save_finding_translation(finding_id: str, language: str,
                              description: str, recommended_action: str,
-                             regulatory_reference: str) -> None:
+                             regulatory_reference: str,
+                             success: bool = True) -> None:
     conn = get_db()
     conn.execute(
         "INSERT OR REPLACE INTO finding_translations "
         "(finding_id, language, description, recommended_action, "
-        " regulatory_reference, created_at) VALUES (?,?,?,?,?,?)",
+        " regulatory_reference, created_at, success) VALUES (?,?,?,?,?,?,?)",
         (finding_id, language, description, recommended_action,
-         regulatory_reference, now_utc()),
+         regulatory_reference, now_utc(), 1 if success else 0),
     )
     conn.commit()
     conn.close()

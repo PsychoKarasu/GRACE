@@ -488,23 +488,36 @@ def inject_css():
   margin: 0 !important; font-size: 1.05rem !important;
 }}
 
-/* ── Finding "Update" button: black text on white for max contrast ── */
-.finding-update .stButton button {{
+/* ── Update buttons in the Finding Registry: black on white ──
+   The previous .finding-update wrapper didn't actually wrap anything
+   (st.markdown HTML is a sibling of subsequent widgets, not a parent),
+   so the selectors never matched. Switching to a structural target:
+   every non-primary stButton that lives inside an expander gets the
+   black-on-white treatment. The theme-toggle button keeps its own
+   look via its specific .grace-theme-wrap override later. */
+[data-testid="stExpander"] [data-testid="stButton"] button[kind="secondary"],
+[data-testid="stExpander"] [data-testid="stButton"] button:not([kind="primary"]) {{
   background: #FFFFFF !important;
   color: #000000 !important;
   border: 1px solid var(--border) !important;
   font-weight: 700 !important;
   letter-spacing: 0.3px;
 }}
-.finding-update .stButton button * {{ color: #000000 !important; }}
-.finding-update .stButton button p {{ color: #000000 !important; }}
-.finding-update .stButton button:hover {{
+[data-testid="stExpander"] [data-testid="stButton"] button:not([kind="primary"]) *,
+[data-testid="stExpander"] [data-testid="stButton"] button:not([kind="primary"]) p,
+[data-testid="stExpander"] [data-testid="stButton"] button:not([kind="primary"]) div {{
+  color: #000000 !important;
+}}
+[data-testid="stExpander"] [data-testid="stButton"] button:not([kind="primary"]):hover {{
   background: var(--accent) !important;
   color: #FFFFFF !important;
   border-color: var(--accent) !important;
 }}
-.finding-update .stButton button:hover *,
-.finding-update .stButton button:hover p {{ color: #FFFFFF !important; }}
+[data-testid="stExpander"] [data-testid="stButton"] button:not([kind="primary"]):hover *,
+[data-testid="stExpander"] [data-testid="stButton"] button:not([kind="primary"]):hover p,
+[data-testid="stExpander"] [data-testid="stButton"] button:not([kind="primary"]):hover div {{
+  color: #FFFFFF !important;
+}}
 
 /* ── Sidebar brand panel (circular GRACE symbol) ── */
 .grace-side-brand {{
