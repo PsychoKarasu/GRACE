@@ -516,8 +516,14 @@ def inject_css():
 .grace-lang-wrap.lang-selected-it [data-baseweb="select"] > div {{
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'><rect width='1' height='2' x='0' fill='%23009246'/><rect width='1' height='2' x='1' fill='%23fff'/><rect width='1' height='2' x='2' fill='%23CE2B37'/></svg>") !important;
 }}
-/* Open-state dropdown items: flag-by-position (1st option = EN, 2nd = IT). */
-[data-baseweb="popover"] li {{
+/* Open-state dropdown items: paint flags ONLY on the language popover.
+   BaseWeb renders selectbox popovers as <body>-level portals, so the
+   trigger's .grace-lang-wrap class doesn't propagate inside. We scope
+   instead via :has() — only popovers whose <ul> has exactly two <li>
+   children (the only popover with that shape is the EN/IT picker).
+   Other selectboxes (Framework, Verdict, Operational Status, …) have
+   3+ options and are therefore unaffected. */
+[data-baseweb="popover"] ul:has(> li:nth-child(2):last-child) li {{
   background-repeat: no-repeat !important;
   background-position: 12px center !important;
   background-size: 18px 12px !important;
@@ -526,10 +532,10 @@ def inject_css():
   font-weight: 600 !important;
   letter-spacing: 0.6px !important;
 }}
-[data-baseweb="popover"] li:nth-child(1) {{
+[data-baseweb="popover"] ul:has(> li:nth-child(2):last-child) li:nth-child(1) {{
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40'><rect width='60' height='40' fill='%23B22234'/><rect y='3.1' width='60' height='3.1' fill='%23fff'/><rect y='9.3' width='60' height='3.1' fill='%23fff'/><rect y='15.5' width='60' height='3.1' fill='%23fff'/><rect y='21.7' width='60' height='3.1' fill='%23fff'/><rect y='27.9' width='60' height='3.1' fill='%23fff'/><rect y='34.1' width='60' height='3.1' fill='%23fff'/><rect width='24' height='21.5' fill='%233C3B6E'/></svg>") !important;
 }}
-[data-baseweb="popover"] li:nth-child(2) {{
+[data-baseweb="popover"] ul:has(> li:nth-child(2):last-child) li:nth-child(2) {{
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'><rect width='1' height='2' x='0' fill='%23009246'/><rect width='1' height='2' x='1' fill='%23fff'/><rect width='1' height='2' x='2' fill='%23CE2B37'/></svg>") !important;
 }}
 
@@ -924,15 +930,24 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
 .grace-side-brand-compact {{
   display: flex; flex-direction: column; align-items: center;
   gap: 8px;
-  padding: 18px 10px 20px;
+  padding: 20px 12px;
   margin-bottom: 14px;
-  border-bottom: 1px solid var(--border-soft);
   text-align: center;
+  /* Subtle contrast card so the navy/teal logo doesn't blend into the
+     dark-mode sidebar background. Light mode keeps a softer
+     accent-tinted backdrop for visual continuity. */
+  background:
+    radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--accent) 18%, transparent) 0%, transparent 65%),
+    color-mix(in srgb, var(--accent) 6%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border-soft));
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18),
+              inset 0 1px 0 color-mix(in srgb, var(--accent) 15%, transparent);
 }}
 .grace-side-brand-compact .brand-symbol {{
   width: 96px; height: 96px;
   object-fit: contain;
-  filter: drop-shadow(0 3px 8px rgba(15,31,61,0.22));
+  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.35));
   display: block;
 }}
 .grace-side-brand-compact .brand-symbol-fallback {{
@@ -1156,6 +1171,38 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
               box-shadow 0.18s ease,
               background 0.18s ease !important;
 }}
+
+/* Secondary buttons in the MAIN area (not sidebar) need explicit
+   black-on-white styling in dark mode — Streamlit's default in dark
+   theme was making the 'Open in Registry' KPI buttons render with
+   light text on a light background (illegible). Sidebar buttons are
+   already styled separately and override this. */
+[data-testid="stAppViewContainer"] .stButton button:not([kind="primary"]),
+[data-testid="stAppViewContainer"] .stDownloadButton button:not([kind="primary"]) {{
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid var(--border) !important;
+  font-weight: 600 !important;
+}}
+[data-testid="stAppViewContainer"] .stButton button:not([kind="primary"]) *,
+[data-testid="stAppViewContainer"] .stButton button:not([kind="primary"]) p,
+[data-testid="stAppViewContainer"] .stDownloadButton button:not([kind="primary"]) *,
+[data-testid="stAppViewContainer"] .stDownloadButton button:not([kind="primary"]) p {{
+  color: #000000 !important;
+}}
+[data-testid="stAppViewContainer"] .stButton button:not([kind="primary"]):hover,
+[data-testid="stAppViewContainer"] .stDownloadButton button:not([kind="primary"]):hover {{
+  background: var(--accent-soft) !important;
+  border-color: var(--accent) !important;
+}}
+/* Re-restore the theme-toggle button (icon-only, brand-aligned) so the
+   global rule above doesn't flatten it. */
+.grace-theme-wrap .stButton button {{
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}}
+.grace-theme-wrap .stButton button * {{ color: var(--text) !important; }}
 
 /* ── Inputs: focus glow ── */
 [data-testid="stTextInput"] input:focus,
