@@ -519,24 +519,43 @@ def inject_css():
 /* Open-state dropdown items: paint flags ONLY on the language popover.
    BaseWeb renders selectbox popovers as <body>-level portals, so the
    trigger's .grace-lang-wrap class doesn't propagate inside. We scope
-   instead via :has() — only popovers whose <ul> has exactly two <li>
-   children (the only popover with that shape is the EN/IT picker).
-   Other selectboxes (Framework, Verdict, Operational Status, …) have
-   3+ options and are therefore unaffected. */
-[data-baseweb="popover"] ul:has(> li:nth-child(2):last-child) li {{
+   instead via :has() — popovers whose option list has exactly two
+   options (the EN/IT picker is the only 2-option selectbox in the app)
+   get flags. The selectors don't require direct-child relationships
+   so they survive any internal wrapper BaseWeb may render. */
+[data-baseweb="popover"]:has([role="option"]:nth-child(2):last-child) [role="option"] {{
   background-repeat: no-repeat !important;
-  background-position: 12px center !important;
-  background-size: 18px 12px !important;
-  padding-left: 38px !important;
+  background-position: 14px center !important;
+  background-size: 22px 14px !important;
+  padding-left: 46px !important;
   font-family: var(--font-display) !important;
   font-weight: 600 !important;
   letter-spacing: 0.6px !important;
 }}
-[data-baseweb="popover"] ul:has(> li:nth-child(2):last-child) li:nth-child(1) {{
+[data-baseweb="popover"]:has([role="option"]:nth-child(2):last-child) [role="option"]:nth-child(1) {{
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40'><rect width='60' height='40' fill='%23B22234'/><rect y='3.1' width='60' height='3.1' fill='%23fff'/><rect y='9.3' width='60' height='3.1' fill='%23fff'/><rect y='15.5' width='60' height='3.1' fill='%23fff'/><rect y='21.7' width='60' height='3.1' fill='%23fff'/><rect y='27.9' width='60' height='3.1' fill='%23fff'/><rect y='34.1' width='60' height='3.1' fill='%23fff'/><rect width='24' height='21.5' fill='%233C3B6E'/></svg>") !important;
 }}
-[data-baseweb="popover"] ul:has(> li:nth-child(2):last-child) li:nth-child(2) {{
+[data-baseweb="popover"]:has([role="option"]:nth-child(2):last-child) [role="option"]:nth-child(2) {{
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'><rect width='1' height='2' x='0' fill='%23009246'/><rect width='1' height='2' x='1' fill='%23fff'/><rect width='1' height='2' x='2' fill='%23CE2B37'/></svg>") !important;
+}}
+/* Fallback for browsers without :has() — only ~3% of users. Targets
+   any popover with 2 options. Harmless because no other 2-option
+   selectbox exists in the app. */
+@supports not (selector(:has(*))) {{
+  [data-baseweb="popover"] [role="option"]:nth-child(1):nth-last-child(2) {{
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40'><rect width='60' height='40' fill='%23B22234'/><rect width='24' height='21.5' fill='%233C3B6E'/></svg>") !important;
+    background-repeat: no-repeat !important;
+    background-position: 14px center !important;
+    background-size: 22px 14px !important;
+    padding-left: 46px !important;
+  }}
+  [data-baseweb="popover"] [role="option"]:nth-child(2):last-child {{
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'><rect width='1' height='2' x='0' fill='%23009246'/><rect width='1' height='2' x='1' fill='%23fff'/><rect width='1' height='2' x='2' fill='%23CE2B37'/></svg>") !important;
+    background-repeat: no-repeat !important;
+    background-position: 14px center !important;
+    background-size: 22px 14px !important;
+    padding-left: 46px !important;
+  }}
 }}
 
 .grace-theme-wrap .stButton button {{
@@ -930,24 +949,25 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
 .grace-side-brand-compact {{
   display: flex; flex-direction: column; align-items: center;
   gap: 8px;
-  padding: 20px 12px;
+  padding: 22px 14px;
   margin-bottom: 14px;
   text-align: center;
-  /* Subtle contrast card so the navy/teal logo doesn't blend into the
-     dark-mode sidebar background. Light mode keeps a softer
-     accent-tinted backdrop for visual continuity. */
-  background:
-    radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--accent) 18%, transparent) 0%, transparent 65%),
-    color-mix(in srgb, var(--accent) 6%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border-soft));
+  /* Brand card is intentionally LIGHT on both themes — the GRACE logo
+     is navy + teal on a cream background by design, so its strokes
+     need a light backdrop to read crisply. On the dark-mode sidebar
+     this also makes the panel pop forward as a distinct surface. */
+  background: linear-gradient(160deg, #FFFFFF 0%, #E8F1F8 100%);
+  border: 1px solid #4EC6D9;
   border-radius: 14px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.18),
-              inset 0 1px 0 color-mix(in srgb, var(--accent) 15%, transparent);
+  box-shadow:
+    0 0 0 1px rgba(78,198,217,0.20),
+    0 8px 22px rgba(0,0,0,0.30),
+    inset 0 1px 0 rgba(255,255,255,0.50);
 }}
 .grace-side-brand-compact .brand-symbol {{
   width: 96px; height: 96px;
   object-fit: contain;
-  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.35));
+  filter: drop-shadow(0 2px 6px rgba(15,31,61,0.18));
   display: block;
 }}
 .grace-side-brand-compact .brand-symbol-fallback {{
@@ -956,7 +976,8 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
 .grace-side-brand-compact .brand-name {{
   font-family: var(--font-display);
   font-size: 1.72rem; font-weight: 800;
-  color: var(--logo-text);
+  /* Fixed navy regardless of theme — sits on the light card. */
+  color: #163265;
   letter-spacing: 4px;
   margin-top: 4px;
   line-height: 1;
@@ -965,7 +986,7 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
   font-family: var(--font-display);
   font-size: 0.74rem; font-weight: 600;
   letter-spacing: 0.5px;
-  color: var(--text-dim);
+  color: #5B6B85;
   line-height: 1.3;
   margin-top: 2px;
   padding: 0 4px;
@@ -1531,19 +1552,33 @@ with top_mid:
     st.markdown("")  # spacer
 
 with top_lang:
-    # Single dropdown with inline-SVG flag icons (Unicode flag emojis
-    # don't render reliably on Windows). The wrapper carries a class
-    # that signals the active language to CSS, which then paints the
-    # correct flag onto the selectbox's closed-state value.
+    # Single dropdown with inline-SVG flag icons. Two important details:
+    #
+    # 1. The selectbox label is HARDCODED ('Language') — not localised
+    #    via t() — because Streamlit derives widget identity from
+    #    (type, label, position). Localising the label means the
+    #    identity changes the moment the user toggles the language,
+    #    which used to make Streamlit drop the widget's state and
+    #    require a second click to commit. label_visibility='collapsed'
+    #    keeps it invisible anyway.
+    #
+    # 2. We attach an empty on_change callback so Streamlit treats the
+    #    selection as a explicit state mutation and reruns with the
+    #    fresh value on the very first click.
     current_lang = st.session_state.get("language", "en")
     wrap_cls = f"grace-lang-wrap lang-selected-{current_lang}"
     st.markdown(f'<div class="{wrap_cls}">', unsafe_allow_html=True)
+
+    def _on_lang_change():
+        pass  # presence of the callback is enough to force a clean commit
+
     st.selectbox(
-        t("topbar.language"),
+        "Language",  # constant label — see comment above
         options=["en", "it"],
         format_func=lambda k: "EN" if k == "en" else "IT",
         key="language",
         label_visibility="collapsed",
+        on_change=_on_lang_change,
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
