@@ -327,19 +327,23 @@ def t(key: str, **kwargs) -> str:
 
 THEMES = {
     "light": {
-        "bg":          "#FAFAF7",
-        "surface":     "#FFFFFF",
-        "surface_alt": "#F4F1E8",
+        # Soft, warm "paper" palette — the previous near-pure white was
+        # too glaring next to the navy brand and the dark-theme contrast
+        # made the eye work harder. Beige/cream surfaces feel calmer and
+        # echo the cream backdrop already inside the GRACE logo.
+        "bg":          "#F1EBDC",
+        "surface":     "#FAF6EB",
+        "surface_alt": "#EBE4D2",
         "text":        "#163265",
         "text_dim":    "#5A6F8C",
         "primary":     "#163265",
         "accent":      "#2A7A8A",
         "accent_soft": "#D5EDF2",
-        "border":      "#E5E7EB",
-        "sidebar_bg":  "#F4F1E8",
+        "border":      "#DCD3BD",
+        "sidebar_bg":  "#EBE4D2",
         "shadow":      "0 1px 3px rgba(22,50,101,0.08), 0 4px 16px rgba(22,50,101,0.05)",
         "shadow_lg":   "0 4px 12px rgba(22,50,101,0.10), 0 16px 40px rgba(22,50,101,0.08)",
-        "card_hover_bg": "#F8F9FB",
+        "card_hover_bg": "#F2EDDE",
     },
     "dark": {
         "bg":          "#0A1929",
