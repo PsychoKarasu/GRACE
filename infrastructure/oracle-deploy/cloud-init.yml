@@ -1,0 +1,47 @@
+#cloud-config
+# GRACE on Oracle Always Free — VM bootstrap script.
+# Paste this into the "Show advanced options → Management → User data"
+# field when launching the Oracle Cloud instance. Runs once at first
+# boot and prepares the VM for `docker compose up`.
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - ca-certificates
+  - curl
+  - git
+  - htop
+  - fail2ban
+  - unattended-upgrades
+
+runcmd:
+  # ── Docker Engine + Compose plugin from the official Docker repo ───
+  - curl -fsSL https://get.docker.com | sh
+  - systemctl enable --now docker
+  - usermod -aG docker ubuntu
+
+  # ── Open ports 80 / 443 at the OS-level firewall.
+  # Oracle's Ubuntu image ships with iptables-legacy rules that REJECT
+  # everything except SSH on 22, even when the VCN Security List allows
+  # the traffic. These two lines fix the OS layer; the VCN layer must
+  # be configured separately in the Oracle Cloud Console.
+  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+  - iptables -I INPUT 6 -m state --state NEW -p udp --dport 443 -j ACCEPT  # HTTP/3
+  - netfilter-persistent save || iptables-save > /etc/iptables/rules.v4
+
+  # ── Unattended security updates (Ubuntu's APT auto-upgrade for security)
+  - echo 'APT::Periodic::Update-Package-Lists "1";' > /etc/apt/apt.conf.d/20auto-upgrades
+  - echo 'APT::Periodic::Unattended-Upgrade "1";' >> /etc/apt/apt.conf.d/20auto-upgrades
+
+  # ── fail2ban with default sshd jail
+  - systemctl enable --now fail2ban
+
+  # ── Timezone (optional, helps log readability)
+  - timedatectl set-timezone Europe/Rome
+
+  # ── Marker file: future scripts can detect bootstrap completion
+  - touch /var/log/grace-cloud-init.done
+
+final_message: "GRACE VM bootstrap completed in $UPTIME seconds. Marker: /var/log/grace-cloud-init.done"

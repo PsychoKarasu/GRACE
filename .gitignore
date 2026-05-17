@@ -20,3 +20,8 @@ backend/data/*.db-shm
 
 # Streamlit
 .streamlit/
+
+# Production secrets — NEVER commit
+infrastructure/.env
+infrastructure/caddy-data/
+infrastructure/caddy-config/

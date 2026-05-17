@@ -1,0 +1,48 @@
+# GRACE — Caddy reverse proxy configuration.
+#
+# Requires env vars from docker-compose.prod.yml:
+#   GRACE_DOMAIN       — public hostname (e.g. grace-demo.duckdns.org)
+#   GRACE_ACME_EMAIL   — optional, contact email for Let's Encrypt notices
+#
+# Caddy auto-provisions TLS certificates via Let's Encrypt on first request
+# to {$GRACE_DOMAIN}. Certificates and OCSP staples persist in the
+# caddy-data named volume.
+
+{
+	# Global options
+	email {$GRACE_ACME_EMAIL}
+	servers {
+		protocols h1 h2 h3
+	}
+}
+
+{$GRACE_DOMAIN} {
+	encode gzip zstd
+
+	# Security headers — hardened defaults for a public demo URL.
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options    "nosniff"
+		X-Frame-Options           "DENY"
+		Referrer-Policy           "strict-origin-when-cross-origin"
+		# Streamlit serves its own iframe-based components; keep CSP permissive
+		# enough that the app works, but drop legacy unsafe-inline where we can.
+		-Server
+	}
+
+	# Streamlit's _stcore websocket endpoint — Caddy upgrades transparently
+	# but make the intent explicit so misconfigurations surface in logs.
+	@websocket {
+		header Connection *Upgrade*
+		header Upgrade    websocket
+	}
+
+	reverse_proxy grace-frontend:8501 {
+		# Forward the original host and client IP so Streamlit's CORS /
+		# XSRF logic sees the public hostname, not the internal one.
+		header_up Host              {host}
+		header_up X-Real-IP         {remote_host}
+		header_up X-Forwarded-For   {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+}

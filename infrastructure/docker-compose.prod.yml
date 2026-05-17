@@ -1,0 +1,45 @@
+# GRACE — Production overlay (Caddy + private backend + demo password gate).
+#
+# Usage from infrastructure/:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Requires infrastructure/.env with: ANTHROPIC_API_KEY, GRACE_DEMO_PASSWORD,
+# GRACE_DOMAIN. Copy .env.example as a starting point.
+
+services:
+
+  # Note: backend and frontend keep their loopback-only port bindings from
+  # the base file (127.0.0.1:8000 and 127.0.0.1:8501). Docker Compose
+  # cannot remove ports via overlay merge — but loopback binding already
+  # means they are not reachable from outside the VM. Caddy reaches them
+  # via the Docker network (grace-backend:8000, grace-frontend:8501).
+
+  grace-frontend:
+    environment:
+      - GRACE_API_URL=http://grace-backend:8000
+      - GRACE_DEMO_PASSWORD=${GRACE_DEMO_PASSWORD}
+      - GRACE_DEFAULT_LANGUAGE=${GRACE_DEFAULT_LANGUAGE:-en}
+      - GRACE_DEFAULT_THEME=${GRACE_DEFAULT_THEME:-light}
+
+  grace-caddy:
+    image: caddy:2.8-alpine
+    container_name: grace-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"  # HTTP/3
+    environment:
+      - GRACE_DOMAIN=${GRACE_DOMAIN}
+      - GRACE_ACME_EMAIL=${GRACE_ACME_EMAIL:-}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      grace-frontend:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  caddy-data:
+  caddy-config:
