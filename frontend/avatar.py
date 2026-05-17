@@ -185,18 +185,22 @@ def _css() -> str:
 .grace-avatar-frame {{
   display: flex; flex-direction: column; align-items: center;
   padding: 14px 6px 12px;
-  /* Slightly deeper navy so light-theme contrast for the name+role
-     labels below is guaranteed (the surrounding page can be cream). */
-  background: linear-gradient(160deg, rgba(28,80,98,0.92) 0%, rgba(15,33,72,0.95) 100%);
-  border: 1px solid rgba(78,198,217,0.35);
+  /* Brighter, fully opaque navy → teal gradient so the frame pops
+     against both the cream light-theme background AND the deep navy
+     dark-theme background. */
+  background: linear-gradient(160deg, #2C7B95 0%, #15376C 100%);
+  border: 2px solid rgba(78,198,217,0.65);
   border-radius: 16px;
   position: relative; overflow: hidden;
   margin-bottom: 14px;
-  box-shadow: 0 6px 22px rgba(10,25,41,0.30), inset 0 1px 0 rgba(255,255,255,0.06);
+  box-shadow:
+    0 8px 28px rgba(78,198,217,0.25),
+    0 4px 14px rgba(10,25,41,0.40),
+    inset 0 1px 0 rgba(255,255,255,0.12);
 }}
 .grace-avatar-frame::before {{
   content: ""; position: absolute; inset: 0;
-  background: radial-gradient(circle at 50% 25%, rgba(78,198,217,0.30) 0%, transparent 55%);
+  background: radial-gradient(circle at 50% 25%, rgba(120,220,235,0.42) 0%, transparent 55%);
   pointer-events: none;
 }}
 .grace-avatar-name {{

@@ -23,24 +23,29 @@ LANGUAGE_NAME = {
 
 def _language_instruction(language: str, mode: str = "structured") -> str:
     """
-    Build an instruction line that forces the model to respond in `language`.
-    mode='structured' is for gap_assessment-style JSON output where enum
-    values and control IDs must stay in English. mode='prose' is for free
-    text (policies, explanations).
+    Build an instruction line that forces the model to respond in `language`,
+    INDEPENDENTLY of the source document's language. mode='structured' is
+    for JSON output where enum values and control IDs must stay in English.
+    mode='prose' is for free text (policies, explanations).
     """
     lang_name = LANGUAGE_NAME.get(language, "English")
-    if language == "en":
-        return ""
+    # NB: this instruction MUST fire even for language == 'en'. Without it,
+    # an Italian source document would lead Claude to mirror the document's
+    # language in its output, ignoring the user's language toggle.
     if mode == "structured":
         return (
             f"\n\nOUTPUT LANGUAGE: All free-text fields (executive_summary, "
             f"finding, evidence_found, evidence_required, remediation, "
             f"regulatory_reference where it is descriptive) MUST be written "
-            f"in {lang_name}. Schema enum values (compliant, partial, "
+            f"in {lang_name}, regardless of the language of the source "
+            f"document. Schema enum values (compliant, partial, "
             f"non_compliant, no_evidence, not_applicable, critical, high, "
             f"medium, low) and control IDs MUST remain in English."
         )
-    return f"\n\nOUTPUT LANGUAGE: Respond entirely in {lang_name}."
+    return (
+        f"\n\nOUTPUT LANGUAGE: Respond entirely in {lang_name}, "
+        f"regardless of the language of the source document."
+    )
 
 # Anthropic client — reads ANTHROPIC_API_KEY from environment
 _client: Optional[anthropic.Anthropic] = None
@@ -351,8 +356,10 @@ def translate_finding_fields(description: str, recommended_action: str,
                               target_lang: str) -> dict:
     """Translate the three user-facing fields of a finding to `target_lang`.
 
-    Returns a dict with the same keys. Falls back to the originals if
-    Claude returns an unparseable response so the UI never breaks.
+    Returns a dict with the same three keys plus 'ok' (bool). On
+    failure 'ok' is False and originals are returned — the caller MUST
+    check 'ok' before caching, otherwise the stale originals end up
+    persisted and the finding never gets a real translation.
     """
     target_name = _LANG_LABEL.get(target_lang, "English")
     payload = json.dumps({
@@ -390,13 +397,15 @@ def translate_finding_fields(description: str, recommended_action: str,
             "description":          translated.get("description") or description,
             "recommended_action":   translated.get("recommended_action") or recommended_action,
             "regulatory_reference": translated.get("regulatory_reference") or regulatory_reference,
+            "ok":                   True,
         }
-    except Exception:
-        logger.warning("Translation to %s failed; returning original fields", target_lang)
+    except Exception as e:
+        logger.warning("Translation to %s failed (%s); returning original fields, NOT caching", target_lang, e)
         return {
             "description":          description,
             "recommended_action":   recommended_action,
             "regulatory_reference": regulatory_reference,
+            "ok":                   False,
         }
 
 
