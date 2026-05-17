@@ -1725,6 +1725,18 @@ with _main_col:
             st.markdown(f'<div class="section-sub">{t("ga.copilot_response")}</div>', unsafe_allow_html=True)
             result_container = st.container()
 
+        # ── Avatar state machine: GUIDANCE vs READY based on field
+        # completion. Only set a new state if we're not already in a
+        # post-action terminal state (SUCCESS / ERROR / WARNING) so the
+        # completion message stays visible until the user does
+        # something next.
+        _terminal = (AvatarState.SUCCESS, AvatarState.ERROR, AvatarState.WARNING)
+        if get_avatar_state() not in _terminal:
+            _has_doc = bool(document_text) or (input_method == "upload" and uploaded is not None)
+            set_avatar_state(
+                AvatarState.READY if (selected_fw_id and _has_doc) else AvatarState.GUIDANCE
+            )
+
         if run_clicked:
             if not document_text and input_method != "upload":
                 st.warning(t("ga.provide_content"))
@@ -1881,6 +1893,15 @@ with _main_col:
                 context["scope"] = st.text_input(t("dg.isms_scope"), "All IT systems and data processing")
 
             gen_clicked = st.button(t("dg.generate_button"), type="primary", use_container_width=True)
+
+        # Avatar state machine for Doc Gen: READY when fw_id + doc_type
+        # + at least one context field are set; GUIDANCE otherwise.
+        _terminal_dg = (AvatarState.SUCCESS, AvatarState.ERROR)
+        if get_avatar_state() not in _terminal_dg:
+            _ctx_filled = any((v or "").strip() for v in context.values())
+            set_avatar_state(
+                AvatarState.READY if (fw_id and doc_type and _ctx_filled) else AvatarState.GUIDANCE
+            )
 
         with col2:
             st.markdown(f'<div class="section-sub">{t("dg.generated")}</div>', unsafe_allow_html=True)
