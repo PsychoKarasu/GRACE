@@ -67,6 +67,9 @@ def load_framework(framework_id: str) -> dict:
         "GDPR":          "gdpr.json",
         "SOC2":          "soc2.json",
         "NIS2":          "nis2.json",
+        "HIPAA":         "hipaa.json",
+        "NISTCSF2.0":    "nistcsf_2_0.json",
+        "PCI-DSS4.0.1":  "pci_dss_4_0_1.json",
     }
     fname = mapping.get(framework_id)
     if not fname:
@@ -83,10 +86,10 @@ def list_supported_frameworks() -> list:
         {"id": "ISO27001:2022", "name": "ISO/IEC 27001:2022",     "category": "Information Security",    "controls": 93,  "priority": "P0"},
         {"id": "GDPR",          "name": "GDPR 2016/679",          "category": "Privacy & Data Protection","controls": 99,  "priority": "P0"},
         {"id": "SOC2",          "name": "SOC 2 TSC 2017",         "category": "Information Security",    "controls": 35,  "priority": "P0"},
+        {"id": "HIPAA",         "name": "HIPAA Security Rule",     "category": "Privacy & Data Protection","controls": 54,  "priority": "P0"},
+        {"id": "NISTCSF2.0",    "name": "NIST CSF 2.0",           "category": "Cybersecurity",           "controls": 106, "priority": "P0"},
+        {"id": "PCI-DSS4.0.1",  "name": "PCI DSS v4.0.1",        "category": "Financial Services",      "controls": 264, "priority": "P0"},
         {"id": "NIS2",          "name": "NIS2 Directive 2022/2555","category": "Cybersecurity Regulation","controls": 10,  "priority": "P1"},
-        {"id": "NISTCSF2.0",    "name": "NIST CSF 2.0",           "category": "Cybersecurity",           "controls": 106, "priority": "P0", "coming_soon": True},
-        {"id": "PCI-DSS4.0.1",  "name": "PCI DSS v4.0.1",        "category": "Financial Services",      "controls": 264, "priority": "P0", "coming_soon": True},
-        {"id": "HIPAA",         "name": "HIPAA Security Rule",     "category": "Privacy & Data Protection","controls": 54,  "priority": "P0", "coming_soon": True},
         {"id": "DORA",          "name": "DORA 2022/2554",          "category": "Financial Services",      "controls": 64,  "priority": "P1", "coming_soon": True},
         {"id": "ISO42001",      "name": "ISO/IEC 42001:2023",      "category": "AI & Governance",         "controls": 38,  "priority": "P1", "coming_soon": True},
         {"id": "EUAIACT",       "name": "EU AI Act 2024/1689",     "category": "AI & Governance",         "controls": 4,   "priority": "P1", "coming_soon": True},
@@ -101,6 +104,9 @@ def load_framework_prompt(framework_id: str) -> str:
         "GDPR":          "gdpr.yaml",
         "SOC2":          "soc2.yaml",
         "NIS2":          "nis2.yaml",
+        "HIPAA":         "hipaa.yaml",
+        "NISTCSF2.0":    "nistcsf_2_0.yaml",
+        "PCI-DSS4.0.1":  "pci_dss_4_0_1.yaml",
     }
     fname = mapping.get(framework_id, "")
     path = PROMPT_DIR / "frameworks" / fname
