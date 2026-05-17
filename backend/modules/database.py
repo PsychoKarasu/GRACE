@@ -115,6 +115,7 @@ def init_db():
             description          TEXT,
             recommended_action   TEXT,
             regulatory_reference TEXT,
+            control_title        TEXT,
             created_at           TEXT NOT NULL,
             PRIMARY KEY (finding_id, language)
         );
@@ -132,6 +133,11 @@ def init_db():
     ft_cols = {r["name"] for r in conn.execute("PRAGMA table_info(finding_translations)").fetchall()}
     if ft_cols and "success" not in ft_cols:
         conn.execute("ALTER TABLE finding_translations ADD COLUMN success INTEGER DEFAULT 0")
+    if ft_cols and "control_title" not in ft_cols:
+        # control_title was added later — existing rows have NULL for it.
+        # When NULL is read, the caller falls back to the finding's
+        # original title (still readable, just not localised).
+        conn.execute("ALTER TABLE finding_translations ADD COLUMN control_title TEXT")
     conn.commit()
     conn.close()
 
@@ -337,12 +343,11 @@ def get_finding_translation(finding_id: str, language: str) -> dict | None:
 
     Rows with success != 1 are treated as a cache miss — they were
     written by an earlier code path that persisted the original fields
-    when the Claude call failed. Returning them would permanently leave
-    the finding in its source language.
+    when the Claude call failed.
     """
     conn = get_db()
     row = conn.execute(
-        "SELECT description, recommended_action, regulatory_reference "
+        "SELECT description, recommended_action, regulatory_reference, control_title "
         "FROM finding_translations "
         "WHERE finding_id=? AND language=? AND success = 1",
         (finding_id, language),
@@ -354,14 +359,17 @@ def get_finding_translation(finding_id: str, language: str) -> dict | None:
 def save_finding_translation(finding_id: str, language: str,
                              description: str, recommended_action: str,
                              regulatory_reference: str,
-                             success: bool = True) -> None:
+                             success: bool = True,
+                             control_title: str = "") -> None:
     conn = get_db()
     conn.execute(
         "INSERT OR REPLACE INTO finding_translations "
         "(finding_id, language, description, recommended_action, "
-        " regulatory_reference, created_at, success) VALUES (?,?,?,?,?,?,?)",
+        " regulatory_reference, control_title, created_at, success) "
+        "VALUES (?,?,?,?,?,?,?,?)",
         (finding_id, language, description, recommended_action,
-         regulatory_reference, now_utc(), 1 if success else 0),
+         regulatory_reference, control_title, now_utc(),
+         1 if success else 0),
     )
     conn.commit()
     conn.close()

@@ -338,6 +338,8 @@ def get_findings(framework: Optional[str] = None, status: Optional[str] = None,
             f["description"]          = cached["description"]
             f["recommended_action"]   = cached["recommended_action"]
             f["regulatory_reference"] = cached["regulatory_reference"]
+            if cached.get("control_title"):
+                f["control_title"]    = cached["control_title"]
             f["language"]             = language
         else:
             pending.append(f)
@@ -349,6 +351,7 @@ def get_findings(framework: Optional[str] = None, status: Optional[str] = None,
                 f.get("recommended_action", ""),
                 f.get("regulatory_reference", ""),
                 language,
+                control_title=f.get("control_title", ""),
             )
 
         with _cf.ThreadPoolExecutor(max_workers=min(8, len(pending))) as ex:
@@ -359,12 +362,11 @@ def get_findings(framework: Optional[str] = None, status: Optional[str] = None,
                 f["description"]          = translated["description"]
                 f["recommended_action"]   = translated["recommended_action"]
                 f["regulatory_reference"] = translated["regulatory_reference"]
+                if translated.get("control_title"):
+                    f["control_title"]    = translated["control_title"]
                 f["language"]             = language
                 # CRITICAL: only persist to the translation cache when
-                # the call actually succeeded. Caching failed calls is
-                # what made the "first finding stays in EN" bug
-                # permanent — the originals were saved under (fid,
-                # target_lang) and every subsequent view served them.
+                # the call actually succeeded.
                 if translated.get("ok"):
                     save_finding_translation(
                         f["finding_id"], language,
@@ -372,6 +374,7 @@ def get_findings(framework: Optional[str] = None, status: Optional[str] = None,
                         translated["recommended_action"],
                         translated["regulatory_reference"],
                         success=True,
+                        control_title=translated.get("control_title", ""),
                     )
 
     return {"findings": findings}
