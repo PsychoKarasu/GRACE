@@ -137,14 +137,14 @@ PAGE_DEFAULT_STATE = {
 MESSAGES = {
     # ─── English ────────────────────────────────────────────────
     # Gap Analysis
-    ("gap_analysis", AvatarState.IDLE,      "en"): "Pick a framework, drop in your policy — I'll map every control and surface the gaps.",
-    ("gap_analysis", AvatarState.GUIDANCE,  "en"): "Select a framework and provide a document (paste, upload, or use an example) to enable the run.",
-    ("gap_analysis", AvatarState.ATTENTIVE, "en"): "Ready when you are. Choose a framework and paste or upload the document.",
-    ("gap_analysis", AvatarState.READY,     "en"): "All set. Click Run Gap Analysis whenever you're ready.",
-    ("gap_analysis", AvatarState.ANALYZING, "en"): "Reading your document and mapping it against the framework's control catalog…",
-    ("gap_analysis", AvatarState.SUCCESS,   "en"): "Analysis complete. Findings panel is open below — open Finding Registry for the full triage view.",
+    ("gap_analysis", AvatarState.IDLE,      "en"): "Ask me to analyse a document, explain a finding, or query results in plain language. Attach files or paste text to add context.",
+    ("gap_analysis", AvatarState.GUIDANCE,  "en"): "Type a question, or attach a document and pick a framework to run an analysis.",
+    ("gap_analysis", AvatarState.ATTENTIVE, "en"): "Ready when you are. Describe what you need or add context — I'll route it.",
+    ("gap_analysis", AvatarState.READY,     "en"): "All set. Click Ask GRACE to dispatch.",
+    ("gap_analysis", AvatarState.ANALYZING, "en"): "Working on it — reading your context and routing to the right pipeline…",
+    ("gap_analysis", AvatarState.SUCCESS,   "en"): "Done. Check the response panel on the right. Open Finding Registry for the full triage.",
     ("gap_analysis", AvatarState.WARNING,   "en"): "Several gaps detected — let's walk through them together, severity-first.",
-    ("gap_analysis", AvatarState.ERROR,     "en"): "Couldn't complete the analysis. Check the document, the framework, or the service status.",
+    ("gap_analysis", AvatarState.ERROR,     "en"): "Couldn't complete the request. Check the input, the framework, or the service status.",
 
     # Document Generation
     ("doc_gen",      AvatarState.IDLE,      "en"): "Tell me the framework and document type — I'll draft it audit-ready.",
@@ -161,14 +161,14 @@ MESSAGES = {
     ("library",      AvatarState.IDLE,      "en"): "Pick a framework to explore its controls. Ask me to explain any of them in plain language.",
 
     # ─── Italiano ───────────────────────────────────────────────
-    ("gap_analysis", AvatarState.IDLE,      "it"): "Scegli un framework e carica la tua policy — mappo ogni controllo e ti mostro i gap.",
-    ("gap_analysis", AvatarState.GUIDANCE,  "it"): "Seleziona un framework e fornisci un documento (incolla, carica o usa un esempio) per abilitare l'esecuzione.",
-    ("gap_analysis", AvatarState.ATTENTIVE, "it"): "Sono pronta. Scegli framework e incolla o carica il documento.",
-    ("gap_analysis", AvatarState.READY,     "it"): "Tutto pronto. Clicca Esegui Analisi quando vuoi.",
-    ("gap_analysis", AvatarState.ANALYZING, "it"): "Sto leggendo il documento e confrontandolo con il catalogo dei controlli del framework…",
-    ("gap_analysis", AvatarState.SUCCESS,   "it"): "Analisi completata. Il pannello dei risultati è qui sotto — apri il Registro Findings per la vista completa.",
+    ("gap_analysis", AvatarState.IDLE,      "it"): "Chiedimi di analizzare un documento, spiegare un finding o interrogare risultati in linguaggio naturale. Allega file o incolla testo per aggiungere contesto.",
+    ("gap_analysis", AvatarState.GUIDANCE,  "it"): "Scrivi una domanda, oppure allega un documento e scegli un framework per lanciare un'analisi.",
+    ("gap_analysis", AvatarState.ATTENTIVE, "it"): "Sono pronta. Descrivi cosa ti serve o aggiungi contesto — instrado io.",
+    ("gap_analysis", AvatarState.READY,     "it"): "Tutto pronto. Clicca Chiedi a GRACE per inviare.",
+    ("gap_analysis", AvatarState.ANALYZING, "it"): "Sto lavorando — leggo il tuo contesto e instrado verso la pipeline giusta…",
+    ("gap_analysis", AvatarState.SUCCESS,   "it"): "Fatto. Guarda il pannello di risposta a destra. Apri il Registro Findings per il triage completo.",
     ("gap_analysis", AvatarState.WARNING,   "it"): "Ho trovato diversi gap — li affrontiamo per severità, partendo dai critici.",
-    ("gap_analysis", AvatarState.ERROR,     "it"): "Non sono riuscita a completare l'analisi. Controlla il documento, il framework o lo stato del servizio.",
+    ("gap_analysis", AvatarState.ERROR,     "it"): "Non sono riuscita a completare la richiesta. Controlla l'input, il framework o lo stato del servizio.",
 
     ("doc_gen",      AvatarState.IDLE,      "it"): "Dimmi framework e tipo di documento — lo redigo audit-ready.",
     ("doc_gen",      AvatarState.GUIDANCE,  "it"): "Scegli un framework e un tipo di documento, poi aggiungi una frase di contesto.",
