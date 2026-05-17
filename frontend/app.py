@@ -61,11 +61,11 @@ TRANSLATIONS = {
         "topbar.theme.light":         "Light",
         "topbar.theme.dark":          "Dark",
         "topbar.tagline":             "Governance · Risk · Assurance · Compliance Engine",
-        "nav.gap_analysis":           "🔍  Gap Analysis",
-        "nav.doc_gen":                "📄  Document Generation",
-        "nav.dashboard":              "📊  Governance Dashboard",
-        "nav.registry":               "🗂️  Finding Registry",
-        "nav.library":                "📚  Framework Library",
+        "nav.gap_analysis":           "Gap Analysis",
+        "nav.doc_gen":                "Document Generation",
+        "nav.dashboard":              "Governance Dashboard",
+        "nav.registry":               "Finding Registry",
+        "nav.library":                "Framework Library",
         "ga.header":                  "Gap Analysis",
         "ga.intro":                   "Upload a document and receive a structured, framework-aligned compliance assessment in seconds.",
         "ga.input":                   "Input",
@@ -196,11 +196,11 @@ TRANSLATIONS = {
         "topbar.theme.light":         "Chiaro",
         "topbar.theme.dark":          "Scuro",
         "topbar.tagline":             "Governance · Risk · Assurance · Compliance Engine",
-        "nav.gap_analysis":           "🔍  Analisi dei Gap",
-        "nav.doc_gen":                "📄  Generazione Documenti",
-        "nav.dashboard":              "📊  Dashboard Governance",
-        "nav.registry":               "🗂️  Registro Findings",
-        "nav.library":                "📚  Libreria Framework",
+        "nav.gap_analysis":           "Analisi dei Gap",
+        "nav.doc_gen":                "Generazione Documenti",
+        "nav.dashboard":              "Dashboard Governance",
+        "nav.registry":               "Registro Findings",
+        "nav.library":                "Libreria Framework",
         "ga.header":                  "Analisi dei Gap",
         "ga.intro":                   "Carica un documento e ottieni in pochi secondi un assessment di conformità strutturato e allineato al framework.",
         "ga.input":                   "Input",
@@ -898,49 +898,85 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
   margin-top: 2px;
 }}
 
-/* ── Sidebar nav items (icon + label, active state with accent) ── */
-.nav-list {{ margin: 6px 0; }}
-.nav-item-wrap {{
-  position: relative;
-  display: flex; align-items: center;
-  border-radius: 10px;
-  margin: 2px 0;
-  transition: background 0.18s ease, transform 0.18s ease;
+/* ── Sidebar nav items ──
+   Streamlit emits HTML markdown as a sibling of subsequent widgets
+   (not as a parent), so wrapping divs around st.button() doesn't
+   actually nest. We target the buttons directly via [data-testid="stSidebar"]
+   instead — that selector matches reliably on both themes.
+   Icons are positioned visually next to each button via a small SVG
+   row rendered above the button; the active state is signalled by
+   wrapping markdown that uses CSS `+` selectors to colour the
+   following Streamlit button. */
+[data-testid="stSidebar"] .nav-list {{ margin: 6px 0; }}
+[data-testid="stSidebar"] .nav-icon {{
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  color: var(--text-dim);
+  vertical-align: middle;
+  margin-right: 4px;
 }}
-.nav-item-wrap:hover {{ background: var(--surface-alt); }}
-.nav-item-wrap.active {{
+[data-testid="stSidebar"] .nav-icon.active {{ color: var(--accent); }}
+[data-testid="stSidebar"] .nav-icon svg {{ width: 18px; height: 18px; }}
+[data-testid="stSidebar"] .nav-row {{
+  display: flex; align-items: center; gap: 8px;
+  padding: 2px 8px 2px 12px;
+  margin: 4px 0 -8px;
+  border-radius: 10px 10px 0 0;
+  transition: background 0.18s ease;
+}}
+[data-testid="stSidebar"] .nav-row.active {{
   background: var(--accent-soft);
   box-shadow: inset 3px 0 0 var(--accent);
 }}
-.nav-item-wrap .nav-icon {{
-  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-  width: 18px; height: 18px; color: var(--text-dim);
-  display: flex; align-items: center; justify-content: center;
-  pointer-events: none; z-index: 2;
+[data-testid="stSidebar"] .nav-row .nav-label-hint {{
+  font-family: var(--font-display);
+  font-size: 0.62rem; letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 700;
 }}
-.nav-item-wrap.active .nav-icon {{ color: var(--accent); }}
-.nav-item-wrap .nav-icon svg {{ width: 18px; height: 18px; }}
-/* Re-skin the Streamlit button inside each nav row to look like a list item */
-.nav-item-wrap [data-testid="stButton"] {{ width: 100%; margin: 0 !important; }}
-.nav-item-wrap [data-testid="stButton"] button {{
-  background: transparent !important;
-  border: none !important;
+[data-testid="stSidebar"] .nav-row.active .nav-label-hint {{ color: var(--accent); }}
+
+/* Generic sidebar button restyle — used by the nav buttons AND the
+   reset confirm button. Black text on white surface for guaranteed
+   readability on both themes. */
+[data-testid="stSidebar"] [data-testid="stButton"] button {{
+  background: var(--surface) !important;
   color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
   font-family: var(--font-body) !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
   font-size: 0.92rem !important;
   text-align: left !important;
-  padding: 10px 12px 10px 40px !important;  /* room for icon */
-  box-shadow: none !important;
+  padding: 9px 14px !important;
   width: 100% !important;
+  box-shadow: none !important;
+  letter-spacing: 0.2px;
 }}
-.nav-item-wrap [data-testid="stButton"] button:hover {{
-  background: transparent !important; transform: none !important;
+[data-testid="stSidebar"] [data-testid="stButton"] button *,
+[data-testid="stSidebar"] [data-testid="stButton"] button p {{
+  color: var(--text) !important;
 }}
-.nav-item-wrap [data-testid="stButton"] button p {{ color: var(--text) !important; }}
-.nav-item-wrap.active [data-testid="stButton"] button,
-.nav-item-wrap.active [data-testid="stButton"] button p {{
-  color: var(--accent) !important; font-weight: 700 !important;
+[data-testid="stSidebar"] [data-testid="stButton"] button:hover {{
+  background: var(--accent-soft) !important;
+  border-color: var(--accent) !important;
+  transform: translateX(2px);
+}}
+[data-testid="stSidebar"] [data-testid="stButton"] button:hover *,
+[data-testid="stSidebar"] [data-testid="stButton"] button:hover p {{
+  color: var(--accent) !important;
+}}
+/* Primary-kind sidebar buttons (reset confirm) keep the accent fill */
+[data-testid="stSidebar"] [data-testid="stButton"] button[kind="primary"] {{
+  background: var(--accent) !important;
+  color: #FFFFFF !important;
+  border-color: var(--accent) !important;
+  text-align: center !important;
+}}
+[data-testid="stSidebar"] [data-testid="stButton"] button[kind="primary"] *,
+[data-testid="stSidebar"] [data-testid="stButton"] button[kind="primary"] p {{
+  color: #FFFFFF !important;
 }}
 
 /* ── System status component (sidebar) ── */
@@ -1244,22 +1280,23 @@ with st.sidebar:
         current = PAGE_KEYS[0]
 
     st.markdown('<div class="nav-list">', unsafe_allow_html=True)
+    # Streamlit's button(type=…) is the cleanest way to mark active
+    # state — 'primary' for the current page, 'secondary' for the rest.
+    # The previous icon-on-top-of-button approach didn't actually nest
+    # (markdown is a sibling of widgets, not a parent), so the icons
+    # were orphan SVGs floating next to buttons whose own style had
+    # taken over. Phase 2 will add real icons via a custom component;
+    # for now: clean, readable text nav.
     for _k in PAGE_KEYS:
-        active_cls = " active" if _k == current else ""
-        icon_svg = (
-            "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' "
-            "stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'>"
-            + _nav_icon_svg(_k) + "</svg>"
-        )
-        st.markdown(
-            f"<div class='nav-item-wrap{active_cls}' data-nav='{_k}'>"
-            f"<span class='nav-icon'>{icon_svg}</span>",
-            unsafe_allow_html=True,
-        )
-        if st.button(t(f"nav.{_k}"), key=f"nav_btn_{_k}", use_container_width=True):
+        is_active = (_k == current)
+        if st.button(
+            t(f"nav.{_k}"),
+            key=f"nav_btn_{_k}",
+            type=("primary" if is_active else "secondary"),
+            use_container_width=True,
+        ):
             st.session_state["current_page"] = _k
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     page = current  # downstream pages still read `page`
 
@@ -1953,12 +1990,34 @@ with _main_col:
                             )
                             if st.button(t("lib.explain_button"), key=f"exp_{fw['id']}"):
                                 with st.spinner(t("lib.explain_spinner")):
-                                    result = api_get(
-                                        f"/api/v1/frameworks/{fw['id']}/controls/"
-                                        f"{selected_ctrl}/explain?language={get_lang()}"
-                                    )
-                                    if result:
-                                        st.markdown(result.get("explanation", ""))
+                                    # The default api_get times out at 10 s,
+                                    # which used to be too short for the
+                                    # streaming Sonnet call and the UI just
+                                    # stopped silently. Use a dedicated call
+                                    # with a 60 s timeout and URL-encode the
+                                    # framework_id so colons (e.g. ISO27001:
+                                    # 2022) are preserved cleanly.
+                                    import urllib.parse as _up
+                                    _fw_enc = _up.quote(fw['id'], safe='')
+                                    _ctrl_enc = _up.quote(selected_ctrl, safe='')
+                                    try:
+                                        _r = requests.get(
+                                            f"{API}/api/v1/frameworks/{_fw_enc}/controls/"
+                                            f"{_ctrl_enc}/explain",
+                                            params={"language": get_lang()},
+                                            timeout=60,
+                                        )
+                                        if _r.ok:
+                                            _result = _r.json()
+                                            _expl = _result.get("explanation", "")
+                                            if _expl:
+                                                st.markdown(_expl)
+                                            else:
+                                                st.warning("Empty explanation returned.")
+                                        else:
+                                            st.error(f"API error {_r.status_code}: {_r.text[:200]}")
+                                    except Exception as _e:
+                                        st.error(f"Request failed: {_e}")
 
 
 # ── Render the avatar (last, so it reflects state changes from page handlers) ──
