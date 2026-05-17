@@ -77,15 +77,48 @@ TOKENS = {
 # ─── [STATE] ──────────────────────────────────────────────────────────
 
 class AvatarState(str, Enum):
-    """Supported behavioural states. The string value is also the CSS class."""
+    """Behavioural states. The string value is also the CSS class.
+
+    Priority for the resolver (higher wins when multiple signals fire
+    in the same script run):
+
+        ERROR > ANALYZING (loading) > THINKING > SUCCESS > WARNING >
+        READY > GUIDANCE > ATTENTIVE > SPEAKING > IDLE
+    """
     IDLE      = "idle"
     ATTENTIVE = "attentive"
-    THINKING  = "thinking"
-    ANALYZING = "analyzing"
-    SUCCESS   = "success"
-    WARNING   = "warning"
-    ERROR     = "error"
-    SPEAKING  = "speaking"
+    GUIDANCE  = "guidance"        # Required input still missing
+    READY     = "ready"           # All inputs present, action enabled
+    THINKING  = "thinking"        # Loading — document generation
+    ANALYZING = "analyzing"       # Loading — gap analysis ("loading-analysis")
+    SUCCESS   = "success"         # Action completed successfully
+    WARNING   = "warning"         # Soft warning (e.g. partial coverage)
+    ERROR     = "error"           # Action failed
+    SPEAKING  = "speaking"        # Generic talking state
+
+
+# Numeric priority — higher value preempts lower.
+STATE_PRIORITY = {
+    AvatarState.ERROR:     100,
+    AvatarState.ANALYZING:  90,
+    AvatarState.THINKING:   90,
+    AvatarState.SUCCESS:    80,
+    AvatarState.WARNING:    70,
+    AvatarState.READY:      60,
+    AvatarState.GUIDANCE:   50,
+    AvatarState.ATTENTIVE:  40,
+    AvatarState.SPEAKING:   30,
+    AvatarState.IDLE:        0,
+}
+
+
+def resolve_state(*candidates: AvatarState) -> AvatarState:
+    """Return the highest-priority state out of the provided candidates.
+    None entries are ignored; falls back to IDLE if nothing is passed."""
+    valid = [c for c in candidates if isinstance(c, AvatarState)]
+    if not valid:
+        return AvatarState.IDLE
+    return max(valid, key=lambda s: STATE_PRIORITY.get(s, 0))
 
 
 # UI event → default avatar state mapping. The page renderer can override
@@ -103,38 +136,49 @@ PAGE_DEFAULT_STATE = {
 # (page, state, lang) → (page, IDLE, lang) → ("*", state, lang) → "".
 MESSAGES = {
     # ─── English ────────────────────────────────────────────────
+    # Gap Analysis
     ("gap_analysis", AvatarState.IDLE,      "en"): "Pick a framework, drop in your policy — I'll map every control and surface the gaps.",
+    ("gap_analysis", AvatarState.GUIDANCE,  "en"): "Select a framework and provide a document (paste, upload, or use an example) to enable the run.",
     ("gap_analysis", AvatarState.ATTENTIVE, "en"): "Ready when you are. Choose a framework and paste or upload the document.",
-    ("gap_analysis", AvatarState.ANALYZING, "en"): "Reading your policy now and matching it to the control catalog… give me a moment.",
-    ("gap_analysis", AvatarState.SUCCESS,   "en"): "Strong coverage. Let's review what's working and where to harden further.",
+    ("gap_analysis", AvatarState.READY,     "en"): "All set. Click Run Gap Analysis whenever you're ready.",
+    ("gap_analysis", AvatarState.ANALYZING, "en"): "Reading your document and mapping it against the framework's control catalog…",
+    ("gap_analysis", AvatarState.SUCCESS,   "en"): "Analysis complete. Findings panel is open below — open Finding Registry for the full triage view.",
     ("gap_analysis", AvatarState.WARNING,   "en"): "Several gaps detected — let's walk through them together, severity-first.",
-    ("gap_analysis", AvatarState.ERROR,     "en"): "I couldn't complete the assessment. Check the document and try again.",
+    ("gap_analysis", AvatarState.ERROR,     "en"): "Couldn't complete the analysis. Check the document, the framework, or the service status.",
 
-    ("doc_gen",      AvatarState.IDLE,      "en"): "Tell me the framework and the document type — I'll draft it audit-ready.",
+    # Document Generation
+    ("doc_gen",      AvatarState.IDLE,      "en"): "Tell me the framework and document type — I'll draft it audit-ready.",
+    ("doc_gen",      AvatarState.GUIDANCE,  "en"): "Choose a framework and a document type, then add a sentence of context.",
     ("doc_gen",      AvatarState.ATTENTIVE, "en"): "Add a few words of context (scope, sector, tools) to make the draft more accurate.",
+    ("doc_gen",      AvatarState.READY,     "en"): "Inputs look good. Click Generate when you're ready.",
     ("doc_gen",      AvatarState.THINKING,  "en"): "Drafting your document — selecting clauses, citing references…",
-    ("doc_gen",      AvatarState.SUCCESS,   "en"): "Draft ready. Read it end-to-end and adapt to your organisation before publishing.",
+    ("doc_gen",      AvatarState.SUCCESS,   "en"): "Draft is ready in the right panel. Read it end-to-end and tailor it to your organisation before publishing.",
     ("doc_gen",      AvatarState.ERROR,     "en"): "The generator hit an issue. Try again or simplify the context.",
 
-    ("dashboard",    AvatarState.IDLE,      "en"): "Here's the live picture of your compliance posture. Click any framework for the detail.",
+    # Other pages
+    ("dashboard",    AvatarState.IDLE,      "en"): "Here's the live picture of your compliance posture. Click any KPI for the filtered registry view.",
     ("registry",     AvatarState.IDLE,      "en"): "Findings grouped by source document. Update the operational status as you triage.",
     ("library",      AvatarState.IDLE,      "en"): "Pick a framework to explore its controls. Ask me to explain any of them in plain language.",
 
     # ─── Italiano ───────────────────────────────────────────────
     ("gap_analysis", AvatarState.IDLE,      "it"): "Scegli un framework e carica la tua policy — mappo ogni controllo e ti mostro i gap.",
+    ("gap_analysis", AvatarState.GUIDANCE,  "it"): "Seleziona un framework e fornisci un documento (incolla, carica o usa un esempio) per abilitare l'esecuzione.",
     ("gap_analysis", AvatarState.ATTENTIVE, "it"): "Sono pronta. Scegli framework e incolla o carica il documento.",
-    ("gap_analysis", AvatarState.ANALYZING, "it"): "Sto leggendo la policy e confrontandola con il catalogo dei controlli… un attimo.",
-    ("gap_analysis", AvatarState.SUCCESS,   "it"): "Copertura solida. Vediamo cosa funziona e dove rafforzare.",
+    ("gap_analysis", AvatarState.READY,     "it"): "Tutto pronto. Clicca Esegui Analisi quando vuoi.",
+    ("gap_analysis", AvatarState.ANALYZING, "it"): "Sto leggendo il documento e confrontandolo con il catalogo dei controlli del framework…",
+    ("gap_analysis", AvatarState.SUCCESS,   "it"): "Analisi completata. Il pannello dei risultati è qui sotto — apri il Registro Findings per la vista completa.",
     ("gap_analysis", AvatarState.WARNING,   "it"): "Ho trovato diversi gap — li affrontiamo per severità, partendo dai critici.",
-    ("gap_analysis", AvatarState.ERROR,     "it"): "Non sono riuscita a completare l'analisi. Controlla il documento e riprova.",
+    ("gap_analysis", AvatarState.ERROR,     "it"): "Non sono riuscita a completare l'analisi. Controlla il documento, il framework o lo stato del servizio.",
 
     ("doc_gen",      AvatarState.IDLE,      "it"): "Dimmi framework e tipo di documento — lo redigo audit-ready.",
+    ("doc_gen",      AvatarState.GUIDANCE,  "it"): "Scegli un framework e un tipo di documento, poi aggiungi una frase di contesto.",
     ("doc_gen",      AvatarState.ATTENTIVE, "it"): "Aggiungi qualche riga di contesto (scope, settore, tool) per rendere il draft più accurato.",
+    ("doc_gen",      AvatarState.READY,     "it"): "Input ok. Clicca Genera quando vuoi.",
     ("doc_gen",      AvatarState.THINKING,  "it"): "Sto redigendo — seleziono le clausole, cito i riferimenti…",
-    ("doc_gen",      AvatarState.SUCCESS,   "it"): "Draft pronto. Rileggilo per intero e adattalo alla tua organizzazione prima della pubblicazione.",
+    ("doc_gen",      AvatarState.SUCCESS,   "it"): "Il draft è pronto nel pannello a destra. Rileggilo per intero e adattalo alla tua organizzazione prima di pubblicare.",
     ("doc_gen",      AvatarState.ERROR,     "it"): "Il generatore ha riscontrato un problema. Riprova o semplifica il contesto.",
 
-    ("dashboard",    AvatarState.IDLE,      "it"): "Ecco la fotografia live della tua compliance. Clicca un framework per il dettaglio.",
+    ("dashboard",    AvatarState.IDLE,      "it"): "Ecco la fotografia live della tua compliance. Clicca un KPI per la vista filtrata.",
     ("registry",     AvatarState.IDLE,      "it"): "Finding raggruppati per documento sorgente. Aggiorna lo stato operativo durante il triage.",
     ("library",      AvatarState.IDLE,      "it"): "Scegli un framework per esplorarne i controlli. Posso spiegartene uno qualsiasi a parole semplici.",
 }
@@ -413,6 +457,85 @@ def _css() -> str:
 .grace-avatar.state-error .mouth {{ d: path("M 94 120 L 106 120"); }}
 .grace-avatar.state-error .halo {{ opacity: 0.2 !important; }}
 
+/* READY — eyes brighter+wider, soft halo intensification, brows up */
+.grace-avatar.state-ready .brow-l,
+.grace-avatar.state-ready .brow-r {{ transform: translateY(-1.4px); }}
+.grace-avatar.state-ready .eye-l,
+.grace-avatar.state-ready .eye-r {{ transform: scaleY(1.08); }}
+.grace-avatar.state-ready .halo {{
+  filter: brightness(1.18) saturate(1.1);
+}}
+
+/* GUIDANCE — gentle head tilt + slow brow-up, soft repeated halo pulse */
+.grace-avatar.state-guidance .head {{
+  transform: rotate(-2deg);
+  transform-origin: 100px 130px;
+}}
+.grace-avatar.state-guidance .brow-l,
+.grace-avatar.state-guidance .brow-r {{ transform: translateY(-0.6px); }}
+@keyframes grace-guidance-pulse {{
+  0%, 100% {{ opacity: 0.45; transform: scale(1); }}
+  50%      {{ opacity: 0.75; transform: scale(1.04); }}
+}}
+.grace-avatar.state-guidance .halo {{
+  animation: grace-guidance-pulse 3s ease-in-out infinite;
+  transform-box: fill-box; transform-origin: center;
+}}
+
+/* ── LOADING-ANALYSIS specifics: scanning line sweep ──
+   Reads as 'GRACE is reading/processing the document'. A thin teal
+   line moves vertically across the bust, suggesting OCR/scanning.
+   The pupils' horizontal scan animation (state-analyzing rule above)
+   reinforces the same metaphor. */
+@keyframes grace-scan-line {{
+  0%   {{ transform: translateY(-20px); opacity: 0; }}
+  15%  {{ opacity: 0.9; }}
+  85%  {{ opacity: 0.9; }}
+  100% {{ transform: translateY(190px); opacity: 0; }}
+}}
+.grace-avatar .scan-overlay {{ opacity: 0; }}
+.grace-avatar.state-analyzing .scan-overlay,
+.grace-avatar.state-thinking  .scan-overlay {{
+  opacity: 1;
+}}
+.grace-avatar.state-analyzing .scan-line,
+.grace-avatar.state-thinking  .scan-line {{
+  animation: grace-scan-line 1.7s linear infinite;
+  transform-box: fill-box; transform-origin: center;
+}}
+/* Faster border shimmer during loading — reinforces 'working' */
+.grace-avatar-frame.is-loading::before {{
+  animation-duration: 1.8s !important;
+  opacity: 0.85;
+}}
+
+/* ── SUCCESS-ANALYSIS: single completion burst around the halo ──
+   A teal ring expands outward from the bust center exactly once,
+   then fades. Plus the halo briefly brightens. State-success on the
+   frame container drives a soft green-tinged glow border. */
+@keyframes grace-success-burst {{
+  0%   {{ r: 50; opacity: 0.0; }}
+  20%  {{ opacity: 0.55; }}
+  100% {{ r: 92; opacity: 0.0; }}
+}}
+.grace-avatar .success-burst {{ opacity: 0; }}
+.grace-avatar.state-success .success-burst {{
+  animation: grace-success-burst 1.1s ease-out 1 forwards;
+}}
+.grace-avatar.state-success .halo {{ filter: brightness(1.25); }}
+.grace-avatar-frame.is-success {{
+  border-color: #34D399 !important;
+  box-shadow:
+    0 0 0 1px rgba(52,211,153,0.25),
+    0 12px 32px rgba(0,0,0,0.55),
+    0 4px 12px rgba(52,211,153,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.10) !important;
+}}
+.grace-avatar-frame.is-error {{
+  border-color: #F87171 !important;
+}}
+
+
 /* SPEAKING — mouth opens & closes */
 @keyframes grace-speak {{
   0%, 100% {{ transform: scaleY(1); }}
@@ -597,6 +720,23 @@ def _svg(state: AvatarState, speaking: bool = False) -> str:
       Q 70 70 62 80 Z"
       fill="url(#ga-hair)"/>
   </g>
+
+  <!-- Always-present overlays for loading + success states.
+       Hidden by default; CSS unhides them per state. -->
+  <defs>
+    <linearGradient id="ga-scan" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="{t['halo']}" stop-opacity="0"/>
+      <stop offset="50%"  stop-color="{t['halo']}" stop-opacity="1"/>
+      <stop offset="100%" stop-color="{t['halo']}" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <g class="scan-overlay">
+    <rect class="scan-line" x="32" y="40" width="136" height="2"
+          fill="url(#ga-scan)" rx="1"/>
+  </g>
+  <circle class="success-burst"
+          cx="100" cy="115" r="50"
+          fill="none" stroke="#34D399" stroke-width="2"/>
 </svg>
 """
 
@@ -631,11 +771,21 @@ def render_avatar(state: Optional[AvatarState] = None,
         f'<div class="grace-avatar-bubble">{resolved_message}</div>'
         if resolved_message else ""
     )
-    status_label = s.value.capitalize()
+    status_label = s.value.replace("_", " ").capitalize()
     pill = (
         f'<div class="grace-avatar-status">{status_label}</div>'
         if show_status_pill else ""
     )
+    # Map behavioural state → frame container class (drives the soft
+    # tinted border/halo around the whole card during loading, success
+    # and error — used together with the inner SVG state class).
+    frame_modifier = ""
+    if s in (AvatarState.ANALYZING, AvatarState.THINKING):
+        frame_modifier = " is-loading"
+    elif s == AvatarState.SUCCESS:
+        frame_modifier = " is-success"
+    elif s == AvatarState.ERROR:
+        frame_modifier = " is-error"
     return (
         '<!DOCTYPE html><html><head>'
         '<style>'
@@ -644,7 +794,7 @@ def render_avatar(state: Optional[AvatarState] = None,
         '</style>'
         + _css()
         + '</head><body>'
-        + '<div class="grace-avatar-frame">'
+        + f'<div class="grace-avatar-frame{frame_modifier}">'
         + _svg(s, speaking=speaking)
         + '<div class="grace-avatar-name">GRACE</div>'
         + '<div class="grace-avatar-role">GRC Virtual Analyst</div>'
