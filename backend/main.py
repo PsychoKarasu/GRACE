@@ -85,6 +85,38 @@ def health():
     }
 
 
+# ─── Admin (prototype only) ──────────────────────────────────────────
+
+@app.post("/api/v1/admin/reset")
+def reset_prototype_data():
+    """Wipe all user-generated data — uploaded/generated documents,
+    assessment runs, findings, gaps, translations and output documents.
+    Framework catalogs and the schema itself are untouched. Prototype-
+    only convenience endpoint, not safe for production use."""
+    from modules.database import get_db
+    conn = get_db()
+    tables = [
+        "finding_translations",
+        "gaps",
+        "findings",
+        "audit_events",
+        "assessment_runs",
+        "output_documents",
+        "documents",
+    ]
+    counts = {}
+    for table in tables:
+        try:
+            row = conn.execute(f"SELECT COUNT(*) as n FROM {table}").fetchone()
+            counts[table] = row["n"]
+            conn.execute(f"DELETE FROM {table}")
+        except Exception:
+            counts[table] = None
+    conn.commit()
+    conn.close()
+    return {"status": "reset_complete", "deleted": counts}
+
+
 # ─── Frameworks ──────────────────────────────────────────────────────
 
 @app.get("/api/v1/frameworks")
@@ -321,16 +353,25 @@ def get_findings(framework: Optional[str] = None, status: Optional[str] = None,
 
         with _cf.ThreadPoolExecutor(max_workers=min(8, len(pending))) as ex:
             for f, translated in ex.map(_translate_one, pending):
-                save_finding_translation(
-                    f["finding_id"], language,
-                    translated["description"],
-                    translated["recommended_action"],
-                    translated["regulatory_reference"],
-                )
+                # Apply the translated content in-flight regardless of
+                # outcome — when ok=False the originals stay in place,
+                # which is the safest fallback for the UI.
                 f["description"]          = translated["description"]
                 f["recommended_action"]   = translated["recommended_action"]
                 f["regulatory_reference"] = translated["regulatory_reference"]
                 f["language"]             = language
+                # CRITICAL: only persist to the translation cache when
+                # the call actually succeeded. Caching failed calls is
+                # what made the "first finding stays in EN" bug
+                # permanent — the originals were saved under (fid,
+                # target_lang) and every subsequent view served them.
+                if translated.get("ok"):
+                    save_finding_translation(
+                        f["finding_id"], language,
+                        translated["description"],
+                        translated["recommended_action"],
+                        translated["regulatory_reference"],
+                    )
 
     return {"findings": findings}
 

@@ -52,6 +52,11 @@ TRANSLATIONS = {
         "sidebar.engine_degraded":    "GRACE Engine: Degraded",
         "sidebar.engine_offline":     "GRACE Engine: Offline",
         "sidebar.api_label":          "API: {api}",
+        "sidebar.reset_section":      "Reset prototype",
+        "sidebar.reset_help":         "Delete all uploaded/generated documents, assessment runs, findings and translations. The framework catalog is preserved.",
+        "sidebar.reset_confirm":      "Yes, delete everything",
+        "sidebar.reset_done":         "Prototype data cleared.",
+        "sidebar.reset_failed":       "Reset failed: {detail}",
         "topbar.language":            "Language",
         "topbar.theme.light":         "Light",
         "topbar.theme.dark":          "Dark",
@@ -182,6 +187,11 @@ TRANSLATIONS = {
         "sidebar.engine_degraded":    "Motore GRACE: Degradato",
         "sidebar.engine_offline":     "Motore GRACE: Offline",
         "sidebar.api_label":          "API: {api}",
+        "sidebar.reset_section":      "Reset prototipo",
+        "sidebar.reset_help":         "Cancella tutti i documenti caricati/generati, le run di assessment, i finding e le traduzioni. Il catalogo dei framework resta intatto.",
+        "sidebar.reset_confirm":      "Sì, cancella tutto",
+        "sidebar.reset_done":         "Dati prototipo cancellati.",
+        "sidebar.reset_failed":       "Reset fallito: {detail}",
         "topbar.language":            "Lingua",
         "topbar.theme.light":         "Chiaro",
         "topbar.theme.dark":          "Scuro",
@@ -478,19 +488,23 @@ def inject_css():
   margin: 0 !important; font-size: 1.05rem !important;
 }}
 
-/* ── Finding "Update" button visibility in dark mode ── */
+/* ── Finding "Update" button: black text on white for max contrast ── */
 .finding-update .stButton button {{
-  background: var(--surface-alt) !important;
-  color: var(--text) !important;
-  border: 1px solid var(--accent) !important;
-  font-weight: 600 !important;
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid var(--border) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.3px;
 }}
+.finding-update .stButton button * {{ color: #000000 !important; }}
+.finding-update .stButton button p {{ color: #000000 !important; }}
 .finding-update .stButton button:hover {{
   background: var(--accent) !important;
   color: #FFFFFF !important;
   border-color: var(--accent) !important;
 }}
-.finding-update .stButton button * {{ color: inherit !important; }}
+.finding-update .stButton button:hover *,
+.finding-update .stButton button:hover p {{ color: #FFFFFF !important; }}
 
 /* ── Sidebar brand panel (circular GRACE symbol) ── */
 .grace-side-brand {{
@@ -1017,6 +1031,28 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
     st.caption(t("sidebar.api_label", api=API))
+
+    # ── Prototype reset (with explicit confirmation) ──────────────
+    st.markdown("---")
+    with st.expander("🧹 " + t("sidebar.reset_section"), expanded=False):
+        st.caption(t("sidebar.reset_help"))
+        if st.button(t("sidebar.reset_confirm"), key="reset_btn",
+                     type="primary", use_container_width=True):
+            try:
+                resp = requests.post(f"{API}/api/v1/admin/reset", timeout=15)
+                if resp.ok:
+                    # Drop frontend-side caches too, so the UI doesn't
+                    # show stale findings/frameworks from before the wipe.
+                    st.cache_data.clear()
+                    for k in list(st.session_state.keys()):
+                        if k.startswith(("ctrls_", "fw_data_")):
+                            st.session_state.pop(k, None)
+                    st.success(t("sidebar.reset_done"))
+                    st.rerun()
+                else:
+                    st.error(t("sidebar.reset_failed", detail=resp.text[:200]))
+            except Exception as e:
+                st.error(t("sidebar.reset_failed", detail=str(e)))
 
 # Set the default avatar state for the active page (page-level handlers
 # may override via avatar.set_state(...) after specific events).
