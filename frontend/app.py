@@ -976,8 +976,11 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
 .grace-side-brand-compact .brand-name {{
   font-family: var(--font-display);
   font-size: 1.72rem; font-weight: 800;
-  /* Fixed navy regardless of theme — sits on the light card. */
-  color: #163265;
+  /* Brand card is always light, so the wordmark stays dark navy on
+     BOTH themes. !important is needed because the global sidebar
+     rule '[data-testid=stSidebar] * {{ color: var(--text) !important }}'
+     would otherwise paint it light in dark mode. */
+  color: #163265 !important;
   letter-spacing: 4px;
   margin-top: 4px;
   line-height: 1;
@@ -986,7 +989,7 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
   font-family: var(--font-display);
   font-size: 0.74rem; font-weight: 600;
   letter-spacing: 0.5px;
-  color: #5B6B85;
+  color: #5B6B85 !important;
   line-height: 1.3;
   margin-top: 2px;
   padding: 0 4px;
