@@ -296,6 +296,221 @@ def run_assessment_sync(body: AssessmentRequest):
         raise HTTPException(500, detail=str(e))
 
 
+# ─── Ask GRACE: unified natural-language workspace ───────────────────
+#
+# Single entry point that routes the request to the right downstream
+# pipeline. Keeps the old endpoints intact (callers like the legacy
+# Assessment widget can still hit them), but the new Ask GRACE panel
+# in the UI talks ONLY to /api/v1/ask. Intent classification is a
+# straightforward keyword heuristic today — well-isolated so we can
+# swap it for a Claude-based router later without touching the
+# dispatch logic.
+
+class AskRequest(BaseModel):
+    query: str
+    document_ids: Optional[list] = None
+    framework_id: Optional[str] = None
+    language: Optional[str] = "en"
+
+
+_INTENT_KEYWORDS = {
+    "explain":         ["explain ", "spiega ", "what is ", "cosa è ", "cos'è "],
+    "query_findings":  ["finding", "registr", "open", "aperti", "critical", "critici",
+                        "list ", "show me", "mostra", "summari", "riassum"],
+    # 'analyze_new' is inferred from STRUCTURED signals (document_ids +
+    # framework_id), not keywords — see classify_intent below.
+}
+
+
+def classify_intent(query: str, has_docs: bool, has_framework: bool) -> str:
+    """Lightweight intent router.
+
+    Priority:
+      1. analyze_new   — user attached/pasted content AND picked a framework
+      2. explain       — query starts with 'explain X', 'what is X' …
+      3. query_findings — query mentions findings/registry/critical/etc.
+      4. free_qa       — everything else
+    """
+    q = (query or "").strip().lower()
+    if has_docs and has_framework:
+        return "analyze_new"
+    for kw in _INTENT_KEYWORDS["explain"]:
+        if q.startswith(kw):
+            return "explain"
+    for kw in _INTENT_KEYWORDS["query_findings"]:
+        if kw in q:
+            return "query_findings"
+    return "free_qa"
+
+
+def _free_qa_response(query: str, framework_id: Optional[str], language: str) -> str:
+    """Generic Claude Q&A about GRC. Lightweight system prompt that
+    keeps GRACE on-topic without long-context overhead."""
+    from modules.grc_engine import get_client, _language_instruction
+    system = (
+        "You are GRACE, an AI GRC (Governance, Risk, Assurance & Compliance) "
+        "analyst. Reply to the user's question concisely, with practical "
+        "framing. Cite framework articles or control IDs when relevant. If "
+        "the question is outside GRC scope, say so briefly and redirect to "
+        "what GRACE can help with."
+        + _language_instruction(language, mode="prose")
+    )
+    user_msg = query
+    if framework_id:
+        user_msg = f"(Context: user's working framework is {framework_id})\n\n{query}"
+    try:
+        msg = get_client().messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=900,
+            system=system,
+            messages=[{"role": "user", "content": user_msg}],
+        )
+        return msg.content[0].text
+    except Exception as e:
+        return f"_Couldn't reach the model: {e}_"
+
+
+def _findings_summary_response(query: str, language: str) -> tuple[str, list]:
+    """Summarise the findings table in the user's words via Claude.
+    Returns (markdown, citations)."""
+    findings = list_findings(limit=50)
+    if not findings:
+        return ("_No findings in the registry yet — run a Gap Analysis to populate it._", [])
+    # Build a compact tabular context for Claude
+    rows = []
+    for f in findings[:30]:
+        rows.append(
+            f"- [{f.get('severity','?').upper()}] {f.get('framework','')} "
+            f"{f.get('control_id','')} · {f.get('control_title','')[:80]} "
+            f"(status: {f.get('compliance_status','?')}, op: {f.get('operational_status','?')})"
+        )
+    from modules.grc_engine import get_client, _language_instruction
+    system = (
+        "You are GRACE, an AI GRC analyst. You will be given a list of "
+        "findings from the user's registry. Answer the user's question by "
+        "summarising / filtering / explaining those findings. Be concise, "
+        "highlight critical and high severity items first, and reference "
+        "control IDs verbatim."
+        + _language_instruction(language, mode="prose")
+    )
+    user_msg = (
+        f"User question: {query}\n\n"
+        f"Findings registry ({len(findings)} total, showing top 30):\n"
+        + "\n".join(rows)
+    )
+    try:
+        msg = get_client().messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=900,
+            system=system,
+            messages=[{"role": "user", "content": user_msg}],
+        )
+        text = msg.content[0].text
+    except Exception as e:
+        text = f"_Couldn't reach the model: {e}_"
+    citations = [
+        {"type": "finding", "id": f["finding_id"],
+         "label": f"{f.get('framework','')} {f.get('control_id','')}"}
+        for f in findings[:8]
+    ]
+    return (text, citations)
+
+
+@app.post("/api/v1/ask")
+def ask_grace(body: AskRequest):
+    """Unified Ask-GRACE dispatcher. Returns a flexible envelope:
+
+    {
+      "intent":         "analyze_new" | "explain" | "query_findings" | "free_qa",
+      "response_type":  "analysis"    | "explanation" | "findings_qa" | "qa",
+      "response_text":  "<markdown>",                           # for non-analysis
+      "result":         {...gap_analysis result...} (optional), # for analysis
+      "finding_ids":    [...] (optional),
+      "citations":      [{"type": "...", "id": "...", "label": "..."}]
+    }
+    """
+    document_ids = body.document_ids or []
+    has_docs = bool(document_ids)
+    has_fw   = bool(body.framework_id)
+    intent   = classify_intent(body.query or "", has_docs, has_fw)
+    language = body.language or "en"
+
+    if intent == "analyze_new":
+        # Concatenate text from all attached docs into one analysis input,
+        # then run the existing gap_analysis pipeline.
+        merged_chunks = []
+        titles = []
+        for did in document_ids:
+            d = get_document(did)
+            if d:
+                merged_chunks.append(d["content_text"])
+                titles.append(d["title"])
+        merged_text  = "\n\n---\n\n".join(merged_chunks)
+        merged_title = " + ".join(titles) if titles else "Untitled"
+
+        run_id = create_run(document_ids[0], body.framework_id, None, "ask_grace")
+        try:
+            result = run_gap_analysis(
+                document_text=merged_text,
+                document_title=merged_title,
+                framework_id=body.framework_id,
+                controls_scope=None,
+                language=language,
+            )
+            finding_ids = save_findings(run_id, document_ids[0], result, language=language)
+            complete_run(run_id, "completed")
+            return {
+                "intent":        intent,
+                "response_type": "analysis",
+                "result":        result,
+                "finding_ids":   finding_ids,
+                "run_id":        run_id,
+                "citations":     [{"type": "document", "id": did, "label": ttl}
+                                  for did, ttl in zip(document_ids, titles)],
+            }
+        except Exception as e:
+            complete_run(run_id, "error", str(e))
+            return {"intent": intent, "response_type": "error",
+                    "response_text": f"_Analysis failed: {e}_", "citations": []}
+
+    if intent == "explain":
+        # Try to parse 'explain CONTROL_ID' or 'spiega CONTROL_ID'.
+        # Fall back to free_qa if no recognisable control ID.
+        import re as _re
+        m = _re.search(r"([A-Z]+\.?[A-Z0-9.\-]+|Art\.\d+(?:\.\d+)*\.?[a-z]?)", body.query or "")
+        if m and body.framework_id:
+            ctrl_id = m.group(1)
+            from modules.grc_engine import explain_control
+            text = explain_control(body.framework_id, ctrl_id, language=language)
+            return {
+                "intent":        intent,
+                "response_type": "explanation",
+                "response_text": text,
+                "citations":     [{"type": "control", "id": ctrl_id,
+                                   "label": f"{body.framework_id} · {ctrl_id}"}],
+            }
+        # No control ID matched → free Q&A
+        intent = "free_qa"
+
+    if intent == "query_findings":
+        text, citations = _findings_summary_response(body.query, language)
+        return {
+            "intent":        intent,
+            "response_type": "findings_qa",
+            "response_text": text,
+            "citations":     citations,
+        }
+
+    # free_qa fallback
+    text = _free_qa_response(body.query, body.framework_id, language)
+    return {
+        "intent":        "free_qa",
+        "response_type": "qa",
+        "response_text": text,
+        "citations":     [],
+    }
+
+
 # ─── Findings ────────────────────────────────────────────────────────
 
 @app.get("/api/v1/findings")

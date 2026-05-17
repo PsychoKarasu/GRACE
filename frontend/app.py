@@ -61,14 +61,35 @@ TRANSLATIONS = {
         "topbar.theme.light":         "Light",
         "topbar.theme.dark":          "Dark",
         "topbar.tagline":             "Governance · Risk · Assurance · Compliance Engine",
-        "nav.gap_analysis":           "Gap Analysis",
+        "nav.gap_analysis":           "Ask GRACE",
         "nav.doc_gen":                "Document Generation",
         "nav.dashboard":              "Governance Dashboard",
         "nav.registry":               "Finding Registry",
         "nav.library":                "Framework Library",
-        "ga.header":                  "Gap Analysis",
-        "ga.intro":                   "Upload a document and receive a structured, framework-aligned compliance assessment in seconds.",
+        "ga.header":                  "Ask GRACE",
+        "ga.intro":                   "Analyse, ask or add context — one natural-language workspace over your GRC content.",
         "ga.input":                   "Input",
+        "ga.ws.query_label":          "Ask GRACE",
+        "ga.ws.query_placeholder":    "Ask GRACE to analyse a document, explain a finding, summarise results, or compare frameworks…",
+        "ga.ws.query_examples":       "Try: \"Analyse this against ISO 27001\" · \"Show me critical open findings\" · \"Explain control A.5.1\"",
+        "ga.ws.add_context":          "Add context (optional)",
+        "ga.ws.paste_label":          "Paste policy text",
+        "ga.ws.upload_label":         "Attach documents (PDF, DOCX, TXT) — multiple allowed",
+        "ga.ws.active_context":       "Active context",
+        "ga.ws.ctx_paste":            "Pasted text ({n} chars)",
+        "ga.ws.ctx_files":            "{n} file(s) attached",
+        "ga.ws.ctx_framework":        "Framework: {fw}",
+        "ga.ws.no_framework":         "No framework selected",
+        "ga.ws.submit":               "Ask GRACE",
+        "ga.ws.uploading":            "Uploading documents…",
+        "ga.ws.thinking":             "Thinking…",
+        "ga.ws.no_input":             "Type a question to get started, or attach a document and pick a framework to run an analysis.",
+        "ga.ws.intent_analysis":      "Analysis",
+        "ga.ws.intent_explanation":   "Explanation",
+        "ga.ws.intent_findings_qa":   "Findings Q&A",
+        "ga.ws.intent_qa":            "Conversation",
+        "ga.ws.intent_error":         "Error",
+        "ga.ws.cites":                "References",
         "ga.select_framework":        "Framework",
         "ga.coming_soon_info":        "This framework will be available in Phase 3 of the GRACE rollout.",
         "ga.doc_source":              "Document source",
@@ -198,14 +219,35 @@ TRANSLATIONS = {
         "topbar.theme.light":         "Chiaro",
         "topbar.theme.dark":          "Scuro",
         "topbar.tagline":             "Governance · Risk · Assurance · Compliance Engine",
-        "nav.gap_analysis":           "Analisi dei Gap",
+        "nav.gap_analysis":           "Ask GRACE",
         "nav.doc_gen":                "Generazione Documenti",
         "nav.dashboard":              "Dashboard Governance",
         "nav.registry":               "Registro Findings",
         "nav.library":                "Libreria Framework",
-        "ga.header":                  "Analisi dei Gap",
-        "ga.intro":                   "Carica un documento e ottieni in pochi secondi un assessment di conformità strutturato e allineato al framework.",
+        "ga.header":                  "Ask GRACE",
+        "ga.intro":                   "Analizza, chiedi o aggiungi contesto — un unico workspace in linguaggio naturale sui tuoi contenuti GRC.",
         "ga.input":                   "Input",
+        "ga.ws.query_label":          "Chiedi a GRACE",
+        "ga.ws.query_placeholder":    "Chiedi a GRACE di analizzare un documento, spiegare un finding, riassumere i risultati o confrontare framework…",
+        "ga.ws.query_examples":       "Prova: \"Analizza questo rispetto a ISO 27001\" · \"Mostra i finding critici aperti\" · \"Spiega il controllo A.5.1\"",
+        "ga.ws.add_context":          "Aggiungi contesto (opzionale)",
+        "ga.ws.paste_label":          "Incolla il testo di una policy",
+        "ga.ws.upload_label":         "Allega documenti (PDF, DOCX, TXT) — multipli ammessi",
+        "ga.ws.active_context":       "Contesto attivo",
+        "ga.ws.ctx_paste":            "Testo incollato ({n} caratteri)",
+        "ga.ws.ctx_files":            "{n} file allegati",
+        "ga.ws.ctx_framework":        "Framework: {fw}",
+        "ga.ws.no_framework":         "Nessun framework selezionato",
+        "ga.ws.submit":               "Chiedi a GRACE",
+        "ga.ws.uploading":            "Carico i documenti…",
+        "ga.ws.thinking":             "Sto pensando…",
+        "ga.ws.no_input":             "Scrivi una domanda per iniziare, oppure allega un documento e scegli un framework per lanciare un'analisi.",
+        "ga.ws.intent_analysis":      "Analisi",
+        "ga.ws.intent_explanation":   "Spiegazione",
+        "ga.ws.intent_findings_qa":   "Q&A Finding",
+        "ga.ws.intent_qa":            "Conversazione",
+        "ga.ws.intent_error":         "Errore",
+        "ga.ws.cites":                "Riferimenti",
         "ga.select_framework":        "Framework",
         "ga.coming_soon_info":        "Questo framework sarà disponibile nella Fase 3 del rollout GRACE.",
         "ga.doc_source":              "Origine documento",
@@ -1640,219 +1682,264 @@ with _main_col:
     if page == "gap_analysis":
         page_hero(t("ga.header"), t("ga.intro"))
 
+        # ── Helper: render the response envelope from /api/v1/ask ──
+        def _render_ask_response(resp: dict, framework_label: str = ""):
+            """Generic renderer that handles every response_type the
+            ask endpoint can return. Kept inline so each page handler
+            can call it without indirection."""
+            rt = resp.get("response_type", "qa")
+            intent_label = {
+                "analysis":    t("ga.ws.intent_analysis"),
+                "explanation": t("ga.ws.intent_explanation"),
+                "findings_qa": t("ga.ws.intent_findings_qa"),
+                "qa":          t("ga.ws.intent_qa"),
+                "error":       t("ga.ws.intent_error"),
+            }.get(rt, rt)
+            intent_color = {
+                "analysis":    "var(--accent)",
+                "explanation": "#0EA5E9",
+                "findings_qa": "#EAB308",
+                "qa":          "#94A3B8",
+                "error":       "#DC2626",
+            }.get(rt, "var(--text-dim)")
+            st.markdown(
+                f"<div style='display:inline-flex;align-items:center;gap:6px;"
+                f"background:color-mix(in srgb, {intent_color} 14%, transparent);"
+                f"border:1px solid color-mix(in srgb, {intent_color} 35%, transparent);"
+                f"color:{intent_color};padding:3px 10px;border-radius:999px;"
+                f"font-family:var(--font-display);font-size:0.7rem;font-weight:700;"
+                f"letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px'>"
+                f"{intent_label}</div>",
+                unsafe_allow_html=True,
+            )
+
+            # Analysis: rich result UI (overall card + finding cards)
+            if rt == "analysis":
+                result = resp.get("result", {})
+                overall_score  = result.get("overall_coverage_score", 0)
+                overall_status = result.get("overall_status", "partial")
+                color = "#16A34A" if overall_score >= 80 else "#EA580C" if overall_score >= 40 else "#DC2626"
+                st.markdown(f"""
+<div class="page-hero" style="margin-top:0">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px">
+    <div>
+      <div style="font-weight:700;color:var(--primary);font-size:1.05rem">{framework_label}</div>
+      <div style="color:var(--text-dim);font-size:0.85rem">{', '.join(c.get('label','') for c in resp.get('citations',[])[:3])}</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:2rem;font-weight:700;color:{color};line-height:1">{overall_score}%</div>
+      {status_badge(overall_status)}
+    </div>
+  </div>
+  {score_bar(overall_score, color)}
+  <div style="margin-top:10px;color:var(--text);font-size:0.9rem;line-height:1.5">
+    {result.get('executive_summary','Assessment completed.')}
+  </div>
+</div>
+""", unsafe_allow_html=True)
+                for ctrl in result.get("controls", []):
+                    sev = ctrl.get("severity", "medium")
+                    st.markdown(f"""
+<div class="finding-card {sev}">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div>
+      <span class="ctrl-id">{ctrl.get('control_id','')}</span>
+      <span class="ctrl-title"> · {ctrl.get('control_title','')}</span>
+    </div>
+    <div style="display:flex;gap:6px">
+      {status_badge(ctrl.get('status','no_evidence'))}
+      {severity_badge(sev)}
+    </div>
+  </div>
+  <div class="finding-body">{ctrl.get('finding','')}</div>
+  <div class="rem">
+    <strong>{t('ga.remediation')}:</strong> {ctrl.get('remediation','')}
+    <div class="reg-ref" style="margin-top:4px">{ctrl.get('regulatory_reference','')}</div>
+  </div>
+</div>""", unsafe_allow_html=True)
+                with st.expander(t("ga.evidence_required")):
+                    for ctrl in result.get("controls", []):
+                        if ctrl.get("evidence_required"):
+                            st.markdown(f"**{ctrl.get('control_id')} — {ctrl.get('control_title')}**")
+                            for ev in ctrl.get("evidence_required", []):
+                                st.markdown(f"  - {ev}")
+                return
+
+            # Plain markdown response for explanation / findings_qa / qa / error
+            st.markdown(resp.get("response_text", ""))
+            cites = resp.get("citations") or []
+            if cites:
+                st.markdown(f"<div class='section-sub' style='margin-top:14px'>{t('ga.ws.cites')}</div>",
+                            unsafe_allow_html=True)
+                for c in cites[:8]:
+                    st.markdown(f"<div class='recent-row'><span class='doc-name'>{c.get('label','')}</span>"
+                                f"<span class='meta'>{c.get('type','')}</span></div>",
+                                unsafe_allow_html=True)
+
+        # ── Layout ────────────────────────────────────────────────
         col1, col2 = st.columns([1.2, 1])
 
         with col1:
-            st.markdown(f'<div class="section-sub">{t("ga.input")}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="section-sub">{t("ga.ws.query_label")}</div>',
+                        unsafe_allow_html=True)
 
+            # 1) Framework selector (still useful for analysis intent)
             fw_data = api_get("/api/v1/frameworks")
-            fw_options = {}
+            fw_options = {"— " + t("ga.ws.no_framework") + " —": None}
             if fw_data:
                 for fw in fw_data.get("frameworks", []):
                     if not fw.get("coming_soon"):
                         fw_options[fw["name"]] = fw["id"]
                     else:
-                        fw_options[f"{fw['name']} *(coming soon)*"] = None
-
-            selected_fw_name = st.selectbox(t("ga.select_framework"), list(fw_options.keys()))
+                        fw_options[f"{fw['name']}  (coming soon)"] = None
+            selected_fw_name = st.selectbox(t("ga.select_framework"),
+                                            list(fw_options.keys()),
+                                            key="ask_framework")
             selected_fw_id   = fw_options.get(selected_fw_name)
 
-            if not selected_fw_id:
-                st.info(t("ga.coming_soon_info"))
-                st.stop()
+            # 2) Main query field — the centre of the new flow
+            query_text = st.text_area(
+                t("ga.ws.query_label"),
+                key="ask_query",
+                height=160,
+                placeholder=t("ga.ws.query_placeholder"),
+                label_visibility="collapsed",
+            )
+            st.caption(t("ga.ws.query_examples"))
 
-            input_methods = {"paste": t("ga.opt_paste"), "upload": t("ga.opt_upload"), "example": t("ga.opt_example")}
-            input_method = st.radio(t("ga.doc_source"), list(input_methods.keys()),
-                                    format_func=lambda k: input_methods[k], horizontal=True)
+            # 3) Optional context (paste + upload, both at once)
+            with st.expander(t("ga.ws.add_context"), expanded=False):
+                pasted_context = st.text_area(
+                    t("ga.ws.paste_label"),
+                    key="ask_paste",
+                    height=140,
+                    placeholder=t("ga.paste_placeholder"),
+                )
+                uploaded_files = st.file_uploader(
+                    t("ga.ws.upload_label"),
+                    type=["pdf", "docx", "txt"],
+                    accept_multiple_files=True,
+                    key="ask_files",
+                )
 
-            document_text = ""
-            document_title = ""
-            uploaded = None
+            # 4) Active context chips (live, shows what GRACE will see)
+            chips = []
+            if (pasted_context or "").strip():
+                chips.append(t("ga.ws.ctx_paste", n=len(pasted_context.strip())))
+            if uploaded_files:
+                chips.append(t("ga.ws.ctx_files", n=len(uploaded_files)))
+            if selected_fw_id:
+                chips.append(t("ga.ws.ctx_framework", fw=selected_fw_name))
+            if chips:
+                st.markdown(
+                    f"<div class='section-sub' style='margin-top:14px'>{t('ga.ws.active_context')}</div>",
+                    unsafe_allow_html=True,
+                )
+                st.markdown(
+                    "<div style='display:flex;flex-wrap:wrap;gap:6px'>" +
+                    "".join(f"<span class='badge badge-blue'>{c}</span>" for c in chips) +
+                    "</div>",
+                    unsafe_allow_html=True,
+                )
 
-            if input_method == "paste":
-                document_title = st.text_input(t("ga.doc_title"), value="Security Policy v1.0")
-                document_text = st.text_area(t("ga.doc_content"), height=200, placeholder=t("ga.paste_placeholder"))
-            elif input_method == "upload":
-                uploaded = st.file_uploader(t("ga.upload_label"), type=["pdf","docx","txt"])
-                if uploaded:
-                    document_title = uploaded.name
-            elif input_method == "example":
-                examples = {
-                    "Access Control Policy (partial)": (
-                        "Access Control Policy v2.1\nOwner: IT Security\nVersion: 2.1\n\n"
-                        "1. PURPOSE\nThis policy defines the access control requirements for all information systems.\n\n"
-                        "2. SCOPE\nThis policy applies to all employees and contractors.\n\n"
-                        "3. ACCESS CONTROL REQUIREMENTS\n"
-                        "All users must authenticate with a username and password before accessing company systems. "
-                        "Remote access requires VPN. Administrators have elevated access for system management. "
-                        "New employees receive access based on their job role. "
-                        "When employees leave, their accounts are disabled.\n\n"
-                        "4. PASSWORD REQUIREMENTS\nPasswords must be at least 8 characters. "
-                        "Passwords must be changed every 90 days.\n\n"
-                        "5. RESPONSIBILITIES\nIT department is responsible for implementing access controls. "
-                        "Managers approve access requests."
-                    ),
-                    "Privacy Policy (GDPR)": (
-                        "Privacy Policy — Brightstar Ltd\nLast updated: January 2026\n\n"
-                        "We collect personal information when you use our services. "
-                        "This includes your name, email address, and usage data. "
-                        "We use your information to provide our services and improve user experience. "
-                        "We may share your data with third-party service providers who assist us. "
-                        "You can request deletion of your data by contacting privacy@brightstar.com. "
-                        "We retain data for 3 years after your last interaction. "
-                        "We use cookies to improve our website. "
-                        "For questions about your privacy, contact our Data Protection Officer at dpo@brightstar.com."
-                    ),
-                    "Incident Response Procedure": (
-                        "Incident Response Procedure v1.0\n"
-                        "1. DETECTION: Security incidents are detected via SIEM alerts and employee reports.\n"
-                        "2. TRIAGE: The Security Operations team assesses the severity of each incident.\n"
-                        "3. CONTAINMENT: Affected systems are isolated to prevent spread.\n"
-                        "4. INVESTIGATION: Root cause analysis is performed.\n"
-                        "5. RECOVERY: Systems are restored from clean backups.\n"
-                        "6. LESSONS LEARNED: Post-incident review is conducted within 30 days.\n"
-                        "Note: Critical incidents must be reported to senior management within 24 hours."
-                    )
-                }
-                choice = st.selectbox(t("ga.choose_example"), list(examples.keys()))
-                document_title = choice
-                document_text  = examples[choice]
-                st.text_area(t("ga.doc_preview"), document_text, height=150, disabled=True)
-
-            run_clicked = st.button(t("ga.run_button"), type="primary", use_container_width=True)
+            ask_clicked = st.button(t("ga.ws.submit"),
+                                    type="primary", use_container_width=True,
+                                    key="ask_submit")
 
         with col2:
-            st.markdown(f'<div class="section-sub">{t("ga.copilot_response")}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="section-sub">{t("ga.copilot_response")}</div>',
+                        unsafe_allow_html=True)
             result_container = st.container()
 
-        # ── Avatar state machine: GUIDANCE vs READY based on field
-        # completion. Only set a new state if we're not already in a
-        # post-action terminal state (SUCCESS / ERROR / WARNING) so the
-        # completion message stays visible until the user does
-        # something next.
-        _terminal = (AvatarState.SUCCESS, AvatarState.ERROR, AvatarState.WARNING)
-        if get_avatar_state() not in _terminal:
-            _has_doc = bool(document_text) or (input_method == "upload" and uploaded is not None)
-            set_avatar_state(
-                AvatarState.READY if (selected_fw_id and _has_doc) else AvatarState.GUIDANCE
-            )
+        # ── Avatar state machine (READY / GUIDANCE) ───────────────
+        _terminal_ga = (AvatarState.SUCCESS, AvatarState.ERROR, AvatarState.WARNING)
+        if get_avatar_state() not in _terminal_ga:
+            # Any of: a query OR a doc + framework constitutes "ready".
+            has_query = bool((query_text or "").strip())
+            has_ctx   = bool((pasted_context or "").strip()) or bool(uploaded_files)
+            ready = has_query or (has_ctx and selected_fw_id)
+            set_avatar_state(AvatarState.READY if ready else AvatarState.GUIDANCE)
 
-        if run_clicked:
-            if not document_text and input_method != "upload":
-                st.warning(t("ga.provide_content"))
+        if ask_clicked:
+            if not (query_text or "").strip() and not pasted_context and not uploaded_files:
+                st.warning(t("ga.ws.no_input"))
                 st.stop()
 
             with result_container:
-                with st.spinner(t("ga.registering")):
-                    if input_method == "upload" and uploaded:
-                        files = {"file": (uploaded.name, uploaded.getvalue(), uploaded.type)}
-                        resp = requests.post(f"{API}/api/v1/documents/upload",
-                                             files=files, data={"owner":"demo"})
-                        doc_result = resp.json() if resp.ok else {}
-                    else:
-                        doc_result = api_post("/api/v1/documents/text",
-                                              {"title": document_title, "content": document_text})
+                # 1) Materialise every context source as a document_id
+                #    (the backend works on registered documents).
+                document_ids: list = []
+                with st.spinner(t("ga.ws.uploading")):
+                    if (pasted_context or "").strip():
+                        r = api_post("/api/v1/documents/text", {
+                            "title":   "Pasted context",
+                            "content": pasted_context,
+                        })
+                        if r.get("document_id"):
+                            document_ids.append(r["document_id"])
+                    for upl in (uploaded_files or []):
+                        files = {"file": (upl.name, upl.getvalue(), upl.type)}
+                        rr = requests.post(f"{API}/api/v1/documents/upload",
+                                           files=files, data={"owner": "demo"},
+                                           timeout=60)
+                        if rr.ok:
+                            j = rr.json()
+                            if j.get("document_id"):
+                                document_ids.append(j["document_id"])
 
-                    if "document_id" not in doc_result:
-                        st.error(t("ga.registration_failed", detail=str(doc_result)))
-                        st.stop()
-                    doc_id = doc_result["document_id"]
-
+                # 2) Dispatch via the unified /ask endpoint
                 set_avatar_state(AvatarState.ANALYZING)
-                with st.spinner(t("ga.analyzing")):
-                    assessment = api_post("/api/v1/assessments/run-sync", {
-                        "document_id": doc_id,
-                        "framework": selected_fw_id,
-                        "channel": "web_demo",
-                        "language": get_lang(),
+                with st.spinner(t("ga.ws.thinking")):
+                    ask_resp = api_post("/api/v1/ask", {
+                        "query":         (query_text or "").strip(),
+                        "document_ids":  document_ids,
+                        "framework_id":  selected_fw_id,
+                        "language":      get_lang(),
                     })
 
-                if "error" in assessment:
+                if not isinstance(ask_resp, dict) or "error" in ask_resp:
                     set_avatar_state(AvatarState.ERROR)
-                    st.session_state["avatar_message"] = (
-                        "I couldn't complete the assessment. Check the document and try again."
-                        if get_lang() == "en" else
-                        "Non sono riuscita a completare l'analisi. Controlla il documento e riprova."
-                    )
-                    st.error(t("ga.assessment_failed", detail=assessment['error']))
+                    st.error(t("ga.assessment_failed",
+                               detail=str(ask_resp.get("error", "unknown"))))
                     st.stop()
 
-                result = assessment.get("result", {})
-                overall_score = result.get("overall_coverage_score", 0)
-                overall_status = result.get("overall_status","partial")
-                # Map result → avatar mood + a dynamic, score-aware line.
+                # 3) Avatar mood + dynamic message based on the response
+                rt = ask_resp.get("response_type", "qa")
                 _lang = get_lang()
-                if overall_score >= 80:
+                if rt == "analysis":
+                    result = ask_resp.get("result", {})
+                    score = result.get("overall_coverage_score", 0)
+                    if score >= 80:
+                        set_avatar_state(AvatarState.SUCCESS)
+                        st.session_state["avatar_message"] = (
+                            f"Solid coverage at {score}%. Open Finding Registry for the full triage."
+                            if _lang == "en" else
+                            f"Copertura solida al {score}%. Apri il Registro Findings per il triage completo."
+                        )
+                    elif score < 40:
+                        set_avatar_state(AvatarState.WARNING)
+                        st.session_state["avatar_message"] = (
+                            f"Only {score}% coverage — open the findings below, critical-first."
+                            if _lang == "en" else
+                            f"Solo {score}% di copertura — apri i finding qui sotto, partendo dai critici."
+                        )
+                    else:
+                        set_avatar_state(AvatarState.ATTENTIVE)
+                        st.session_state["avatar_message"] = (
+                            f"Partial coverage at {score}%. Let's prioritise medium/high severity items."
+                            if _lang == "en" else
+                            f"Copertura parziale al {score}%. Prioritizziamo i finding medi/alti."
+                        )
+                else:
                     set_avatar_state(AvatarState.SUCCESS)
                     st.session_state["avatar_message"] = (
-                        f"Solid coverage at {overall_score}%. Let's review the strong points and the residual gaps."
+                        "Here's what I found — check the response panel on the right."
                         if _lang == "en" else
-                        f"Copertura solida al {overall_score}%. Vediamo i punti di forza e i gap residui."
+                        "Ecco cosa ho trovato — controlla il pannello di risposta a destra."
                     )
-                elif overall_score < 40:
-                    set_avatar_state(AvatarState.WARNING)
-                    st.session_state["avatar_message"] = (
-                        f"Only {overall_score}% coverage — several gaps to address. Open the findings below, critical-first."
-                        if _lang == "en" else
-                        f"Solo {overall_score}% di copertura — diversi gap da affrontare. Apri i finding qui sotto, partendo dai critici."
-                    )
-                else:
-                    set_avatar_state(AvatarState.ATTENTIVE)
-                    st.session_state["avatar_message"] = (
-                        f"Partial coverage at {overall_score}%. Plenty of room to harden — let's prioritise the medium/high severity items."
-                        if _lang == "en" else
-                        f"Copertura parziale al {overall_score}%. C'è margine — prioritizziamo i finding medi/alti."
-                    )
-                color = "#16A34A" if overall_score >= 80 else "#EA580C" if overall_score >= 40 else "#DC2626"
 
-                st.markdown(f"""
-    <div class="page-hero" style="margin-top:0">
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px">
-        <div>
-          <div style="font-weight:700;color:var(--primary);font-size:1.05rem">{selected_fw_name}</div>
-          <div style="color:var(--text-dim);font-size:0.85rem">{document_title}</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:2rem;font-weight:700;color:{color};line-height:1">{overall_score}%</div>
-          {status_badge(overall_status)}
-        </div>
-      </div>
-      {score_bar(overall_score, color)}
-      <div style="margin-top:10px;color:var(--text);font-size:0.9rem;line-height:1.5">
-        {result.get('executive_summary','Assessment completed.')}
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-                controls = result.get("controls", [])
-                for ctrl in controls:
-                    severity = ctrl.get("severity","medium")
-                    st.markdown(f"""
-    <div class="finding-card {severity}">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-        <div>
-          <span class="ctrl-id">{ctrl.get('control_id','')}</span>
-          <span class="ctrl-title"> · {ctrl.get('control_title','')}</span>
-        </div>
-        <div style="display:flex;gap:6px">
-          {status_badge(ctrl.get('status','no_evidence'))}
-          {severity_badge(severity)}
-        </div>
-      </div>
-      <div class="finding-body">{ctrl.get('finding','')}</div>
-      <div class="rem">
-        <strong>{t('ga.remediation')}:</strong> {ctrl.get('remediation','')}
-        <div class="reg-ref" style="margin-top:4px">{ctrl.get('regulatory_reference','')}</div>
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-                with st.expander(t("ga.evidence_required")):
-                    for ctrl in controls:
-                        if ctrl.get("evidence_required"):
-                            st.markdown(f"**{ctrl.get('control_id')} — {ctrl.get('control_title')}**")
-                            for ev in ctrl.get("evidence_required", []):
-                                st.markdown(f"  - {ev}")
+                # 4) Render
+                _render_ask_response(ask_resp, framework_label=selected_fw_name or "")
 
 
     # ════════════════════════════════════════════════════════════════
