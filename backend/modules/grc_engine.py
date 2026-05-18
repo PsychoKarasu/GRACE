@@ -536,6 +536,65 @@ def _generic_doc_prompt(fw: str, ctx: dict, lang: str):
     return system, user
 
 
+# ─── Cross-framework control mapping (orchestrator) ───────────────
+
+def get_or_compute_mappings(source_framework: str,
+                             source_control_id: str) -> list[dict]:
+    """Return the list of semantically equivalent controls in other
+    active frameworks for the given source control.
+
+    Cache-on-demand:
+    - if the cache already has rows for this (framework, control_id),
+      we return them straight from SQLite — no Claude call;
+    - otherwise we ask Claude via control_mapper.find_equivalent_controls,
+      persist the result, and return it.
+
+    Empty list is a valid 'we computed this and found nothing' answer.
+    Any failure (Claude transport, JSON parse, Pydantic validation,
+    unknown framework) is swallowed and logged — the caller, typically
+    the Findings Registry, should never crash because a mapping call
+    failed. The DB stays empty so the next view tries again.
+    """
+    # Lazy import keeps grc_engine importable in environments where the
+    # database isn't initialised yet (e.g. unit tests for prompt builders).
+    from . import database, control_mapper
+
+    try:
+        if database.has_mappings(source_framework, source_control_id):
+            return database.get_mappings_for_control(
+                source_framework, source_control_id)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("mapping cache lookup failed for %s/%s: %s",
+                       source_framework, source_control_id, e)
+        # fall through and try to compute — at worst we'll fail the same way
+
+    try:
+        mappings = control_mapper.find_equivalent_controls(
+            source_framework, source_control_id)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("control mapping failed for %s/%s: %s",
+                       source_framework, source_control_id, e)
+        return []
+
+    try:
+        database.save_mappings(source_framework, source_control_id, mappings)
+    except Exception as e:  # noqa: BLE001
+        # persistence failed but we still have a valid result — return it
+        # so the current view isn't degraded; next view will retry the save.
+        logger.warning("mapping persistence failed for %s/%s: %s",
+                       source_framework, source_control_id, e)
+        return mappings
+
+    # Re-read through the same accessor so the caller always sees the
+    # canonical ordering (confidence desc, framework asc) and the
+    # generated_at timestamp the DB just stamped.
+    try:
+        return database.get_mappings_for_control(
+            source_framework, source_control_id)
+    except Exception:
+        return mappings
+
+
 # ─── Explain a control ────────────────────────────────────────────
 
 def explain_control(framework_id: str, control_id: str, language: str = "en") -> str:
