@@ -17,12 +17,14 @@ import docx2txt
 from modules.database import (
     init_db, register_document, get_document, list_documents,
     create_run, complete_run, get_run, list_runs,
-    save_findings, list_findings, update_operational_status,
-    get_kpi_summary, save_output_document, list_output_documents
+    save_findings, list_findings, get_finding, update_operational_status,
+    get_kpi_summary, save_output_document, list_output_documents,
+    count_mappings,
 )
 from modules.grc_engine import (
     run_gap_analysis, generate_document, explain_control,
-    list_supported_frameworks, load_framework
+    list_supported_frameworks, load_framework,
+    get_or_compute_mappings,
 )
 
 app = FastAPI(
@@ -544,6 +546,19 @@ def get_findings(framework: Optional[str] = None, status: Optional[str] = None,
 
     findings = list_findings(framework, status, limit, operational_status)
 
+    # Decorate every finding with `cross_framework_count` — purely from
+    # the cache, no Claude call here. The badge in the Registry header
+    # uses this; first time a finding is opened the count may be 0
+    # (lazy on detail expand), but on subsequent loads it shows the real
+    # number. Invariant: this MUST be cheap — list_findings is on the
+    # hot path of the registry page.
+    for f in findings:
+        try:
+            f["cross_framework_count"] = count_mappings(
+                f.get("framework", ""), f.get("control_id", ""))
+        except Exception:
+            f["cross_framework_count"] = 0
+
     if not language or language not in ("en", "it"):
         return {"findings": findings}
 
@@ -623,6 +638,29 @@ def patch_finding_status(finding_id: str, body: StatusUpdate):
         raise HTTPException(400, detail=f"Invalid status. Must be one of: {valid}")
     update_operational_status(finding_id, body.operational_status, body.actor)
     return {"finding_id": finding_id, "operational_status": body.operational_status}
+
+
+@app.get("/api/v1/findings/{finding_id}/cross-framework-impact")
+def get_cross_framework_impact(finding_id: str):
+    """Resolve the finding to its (framework, control_id) then ask the
+    engine for the list of semantically equivalent controls in OTHER
+    active frameworks. Cache-on-first-call, instant on subsequent calls.
+
+    Returns an empty `mappings` list when the cache lookup + LLM call
+    both yield nothing — the Registry UI shows a friendly empty state in
+    that case.
+    """
+    finding = get_finding(finding_id)
+    if not finding:
+        raise HTTPException(404, detail="Finding not found")
+    mappings = get_or_compute_mappings(
+        finding["framework"], finding["control_id"])
+    return {
+        "finding_id":        finding_id,
+        "source_framework":  finding["framework"],
+        "source_control_id": finding["control_id"],
+        "mappings":          mappings,
+    }
 
 
 # ─── Document Generation ─────────────────────────────────────────────

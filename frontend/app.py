@@ -213,6 +213,15 @@ TRANSLATIONS = {
         "reg.update_op_status":       "Update operational status",
         "reg.update_button":          "Update",
         "reg.status_updated":         "Status updated.",
+        "reg.xframework_title":       "🔗 Cross-Framework Impact",
+        "reg.xframework_empty":       "No equivalent controls found in other active frameworks.",
+        "reg.xframework_loading":     "Mapping controls across frameworks…",
+        "reg.xframework_failed":      "Could not load cross-framework mappings.",
+        "reg.xframework_confidence":  "Confidence",
+        "reg.xframework_badge":       "🔗 +{n}",
+        "xfw.high":                   "High",
+        "xfw.medium":                 "Medium",
+        "xfw.low":                    "Low",
         "lib.header":                 "Framework Library",
         "lib.intro":                  "25 international frameworks — P0 frameworks active in this prototype.",
         "lib.coming_phase3":          "🚧  Coming Phase 3",
@@ -371,6 +380,15 @@ TRANSLATIONS = {
         "reg.update_op_status":       "Aggiorna stato operativo",
         "reg.update_button":          "Aggiorna",
         "reg.status_updated":         "Stato aggiornato.",
+        "reg.xframework_title":       "🔗 Impatto Multi-Framework",
+        "reg.xframework_empty":       "Nessun controllo equivalente trovato negli altri framework attivi.",
+        "reg.xframework_loading":     "Mappatura controlli tra framework…",
+        "reg.xframework_failed":      "Impossibile caricare le mappature multi-framework.",
+        "reg.xframework_confidence":  "Confidenza",
+        "reg.xframework_badge":       "🔗 +{n}",
+        "xfw.high":                   "Alta",
+        "xfw.medium":                 "Media",
+        "xfw.low":                    "Bassa",
         "lib.header":                 "Libreria Framework",
         "lib.intro":                  "25 framework internazionali — i framework P0 sono attivi in questo prototipo.",
         "lib.coming_phase3":          "🚧  In arrivo in Fase 3",
@@ -806,6 +824,46 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
 .badge-gray   {{ background:#F3F4F6; color:#374151; border-color:#D1D5DB; }}
 .badge-teal   {{ background:#CCFBF1; color:#115E59; border-color:#5EEAD4; }}
 .badge-blue   {{ background:#DBEAFE; color:#1E40AF; border-color:#93C5FD; }}
+
+/* ── Cross-framework impact (small pill matching .badge sizing) ── */
+.xframework-badge {{
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 600;
+  font-family: var(--font-display); letter-spacing: 0.3px;
+  background: #EEF2FF; color: #3730A3; border: 1px solid #C7D2FE;
+}}
+.xfw-conf {{
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.3px;
+  font-family: var(--font-display); border: 1px solid transparent;
+}}
+.xfw-conf.high   {{ background:#D1FAE5; color:#065F46; border-color:#86EFAC; }}
+.xfw-conf.medium {{ background:#FEF9C3; color:#854D0E; border-color:#FDE68A; }}
+.xfw-conf.low    {{ background:#F3F4F6; color:#374151; border-color:#D1D5DB; }}
+.xfw-row {{
+  padding: 10px 12px; margin: 6px 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px;
+}}
+.xfw-row .xfw-head {{
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 0.85rem;
+}}
+.xfw-row .xfw-fw {{
+  font-family: var(--font-mono); font-size: 0.78rem;
+  color: var(--text-dim); background: var(--surface-alt);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 1px 6px;
+}}
+.xfw-row .xfw-ctrl {{
+  font-family: var(--font-mono); font-weight: 700; color: var(--primary);
+}}
+.xfw-row .xfw-title {{ color: var(--text); }}
+.xfw-row .xfw-rat {{
+  margin-top: 6px; font-size: 0.82rem; color: var(--text-dim);
+  line-height: 1.45;
+}}
 
 /* ── Finding card ── */
 .finding-card {{
@@ -2330,7 +2388,14 @@ with _main_col:
 
         OP_STATUSES = ["new","acknowledged","in_progress","resolved","accepted_risk","closed","dismissed"]
         VERDICTS = ["non_compliant","partial","compliant","no_evidence","not_applicable"]
-        FRAMEWORKS = ["ISO27001:2022","GDPR","SOC2","NIS2"]
+        # All 10 active frameworks — kept in lock-step with
+        # backend.modules.grc_engine.list_supported_frameworks(). Adding
+        # a new framework here without activating it in the engine would
+        # surface a filter for which the API has no data.
+        FRAMEWORKS = [
+            "ISO27001:2022","GDPR","SOC2","NIS2","NISTCSF2.0",
+            "PCI-DSS4.0.1","HIPAA","DORA","ISO42001","EUAIACT",
+        ]
         ALL = "__ALL__"
 
         # Pre-fill from dashboard KPI click-through, if any.
@@ -2397,6 +2462,16 @@ with _main_col:
                 with st.expander(f"📄  {doc_title}  ·  {summary}  ·  {t(f'severity.{worst_sev}')}"):
                     for f in doc_findings:
                         severity = f.get("severity","medium")
+                        # cross_framework_count comes from the cache only
+                        # (cheap COUNT), so the badge stays 0 until the
+                        # user expands the impact panel — that's where
+                        # the on-demand Claude call happens.
+                        xfw_n = int(f.get("cross_framework_count") or 0)
+                        xfw_badge_html = (
+                            f"<span class='xframework-badge'>"
+                            f"{t('reg.xframework_badge', n=xfw_n)}</span>"
+                            if xfw_n > 0 else ""
+                        )
                         # The backend lazily translates the user-facing fields
                         # to the requested UI language and caches the result,
                         # so no "Generated in IT" chip is needed any more.
@@ -2405,9 +2480,10 @@ with _main_col:
                             f"<div style='display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap'>"
                             f"<div><span class='ctrl-id'>{f.get('control_id','')}</span>"
                             f"<span class='ctrl-title'> · {f.get('control_title','')}</span></div>"
-                            f"<div style='display:flex;gap:6px'>"
+                            f"<div style='display:flex;gap:6px;align-items:center;flex-wrap:wrap'>"
                             f"{status_badge(f.get('compliance_status','no_evidence'))}"
                             f"{severity_badge(severity)}"
+                            f"{xfw_badge_html}"
                             f"</div></div>"
                             f"<div class='finding-body'>{f.get('description','')}</div>"
                             f"<div class='rem'><strong>{t('reg.remediation')}:</strong> {f.get('recommended_action','')}"
@@ -2415,6 +2491,47 @@ with _main_col:
                             f"</div></div>",
                             unsafe_allow_html=True,
                         )
+
+                        # ── Cross-framework impact (lazy, cached) ──
+                        # Collapsed by default — the heavy Claude call
+                        # only fires the first time a user expands this
+                        # panel for a given finding. Response is cached
+                        # in session_state so subsequent reruns
+                        # (theme toggle, status update) don't refetch.
+                        _xfw_cache_key = f"xfw_{f['finding_id']}"
+                        with st.expander(t("reg.xframework_title"), expanded=False):
+                            if _xfw_cache_key not in st.session_state:
+                                with st.spinner(t("reg.xframework_loading")):
+                                    st.session_state[_xfw_cache_key] = api_get(
+                                        f"/api/v1/findings/{f['finding_id']}"
+                                        f"/cross-framework-impact"
+                                    )
+                            xfw_resp = st.session_state.get(_xfw_cache_key)
+                            if xfw_resp is None:
+                                st.warning(t("reg.xframework_failed"))
+                            else:
+                                xfw_list = xfw_resp.get("mappings", []) or []
+                                if not xfw_list:
+                                    st.info(t("reg.xframework_empty"))
+                                else:
+                                    for m in xfw_list:
+                                        conf = (m.get("confidence") or "low").lower()
+                                        if conf not in ("high", "medium", "low"):
+                                            conf = "low"
+                                        st.markdown(
+                                            f"<div class='xfw-row'>"
+                                            f"<div class='xfw-head'>"
+                                            f"<span class='xfw-fw'>{m.get('target_framework','')}</span>"
+                                            f"<span class='xfw-ctrl'>{m.get('target_control_id','')}</span>"
+                                            f"<span class='xfw-title'>· {m.get('target_control_title','')}</span>"
+                                            f"<span class='xfw-conf {conf}'>"
+                                            f"{t('reg.xframework_confidence')}: {t(f'xfw.{conf}')}"
+                                            f"</span>"
+                                            f"</div>"
+                                            f"<div class='xfw-rat'>{m.get('rationale','')}</div>"
+                                            f"</div>",
+                                            unsafe_allow_html=True,
+                                        )
 
                         op_st = f.get('operational_status','')
                         st.markdown('<div class="finding-update">', unsafe_allow_html=True)
