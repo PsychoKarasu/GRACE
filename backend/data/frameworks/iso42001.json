@@ -1,0 +1,312 @@
+{
+  "framework_id": "ISO42001",
+  "version": "ISO/IEC 42001:2023",
+  "name": "ISO/IEC 42001:2023 — AI Management System",
+  "total_controls": 38,
+  "controls": [
+    {
+      "control_id": "A.2.2",
+      "domain": "Policies Related to AI",
+      "title": "AI policy",
+      "description": "A formal AI policy shall be established, documented, and communicated. The policy includes commitment to responsible AI development/use, alignment with organisational values and legal obligations, and a framework for setting AI objectives. Signed by top management.",
+      "keywords": ["AI policy", "responsible AI", "top management", "objectives"],
+      "evidence_types": ["AI policy document", "Management approval", "Distribution records", "Policy framework"]
+    },
+    {
+      "control_id": "A.2.3",
+      "domain": "Policies Related to AI",
+      "title": "Alignment with other organisational policies",
+      "description": "AI-specific requirements shall be incorporated into existing organisational policies (HR, procurement, IT, data governance, information security) where those policies affect or are affected by AI systems.",
+      "keywords": ["policy alignment", "integration", "cross-functional", "HR policy", "procurement"],
+      "evidence_types": ["Updated HR policy", "Updated procurement policy", "Data governance policy", "Policy mapping matrix"]
+    },
+    {
+      "control_id": "A.2.4",
+      "domain": "Policies Related to AI",
+      "title": "Review of the AI policy",
+      "description": "The AI policy shall be reviewed at planned intervals and when significant changes occur, to ensure its continuing suitability, adequacy, and effectiveness.",
+      "keywords": ["policy review", "annual review", "policy maintenance", "change management"],
+      "evidence_types": ["Review records", "Change log", "Review schedule", "Management review minutes"]
+    },
+    {
+      "control_id": "A.3.2",
+      "domain": "Internal Organisation",
+      "title": "AI roles and responsibilities",
+      "description": "Roles and responsibilities for AI governance shall be defined, assigned, communicated, and documented. Includes accountability for individual AI systems, data governance, and AIMS oversight. RACI matrix recommended.",
+      "keywords": ["roles", "responsibilities", "RACI", "AI governance", "accountability"],
+      "evidence_types": ["RACI matrix", "Org chart with AI roles", "Job descriptions", "Role definitions"]
+    },
+    {
+      "control_id": "A.3.3",
+      "domain": "Internal Organisation",
+      "title": "Reporting of concerns",
+      "description": "Mechanisms shall be established for personnel to raise concerns about AI systems — ethical concerns, bias observations, unexpected outputs, policy non-compliance — without fear of reprisal.",
+      "keywords": ["raise concerns", "whistleblowing", "ethical concerns", "bias reporting"],
+      "evidence_types": ["Reporting mechanism", "Anonymous channel", "Concerns procedure", "Records of raised concerns"]
+    },
+    {
+      "control_id": "A.4.2",
+      "domain": "Resources for AI Systems",
+      "title": "Resource documentation",
+      "description": "Resources required to develop, deploy, operate, and maintain AI systems shall be identified and documented — compute, data, tooling, human resources.",
+      "keywords": ["resources", "compute", "data", "tooling", "human resources"],
+      "evidence_types": ["Resource inventory", "Capacity plans", "Resource allocation records"]
+    },
+    {
+      "control_id": "A.4.3",
+      "domain": "Resources for AI Systems",
+      "title": "Data resources",
+      "description": "Policies and controls shall govern acquisition, management, and quality assurance of data resources used in AI systems — training, validation, and test data.",
+      "keywords": ["data resources", "training data", "validation data", "test data", "data governance"],
+      "evidence_types": ["Data governance policy", "Data quality procedures", "Data inventory", "QA records"]
+    },
+    {
+      "control_id": "A.4.4",
+      "domain": "Resources for AI Systems",
+      "title": "Tooling resources",
+      "description": "Controls shall govern selection, procurement, and management of AI tooling — development frameworks, model libraries, evaluation platforms.",
+      "keywords": ["tooling", "AI frameworks", "model libraries", "MLOps platforms"],
+      "evidence_types": ["Tool inventory", "Tool approval records", "Procurement records", "Evaluation criteria"]
+    },
+    {
+      "control_id": "A.4.5",
+      "domain": "Resources for AI Systems",
+      "title": "System and computing resources",
+      "description": "Controls shall govern compute infrastructure used for AI development and deployment: provisioning, access control, capacity management, decommissioning.",
+      "keywords": ["compute resources", "GPU", "infrastructure", "cloud AI", "capacity"],
+      "evidence_types": ["Compute inventory", "Capacity plans", "Access control records", "Decommissioning records"]
+    },
+    {
+      "control_id": "A.4.6",
+      "domain": "Resources for AI Systems",
+      "title": "Human resources",
+      "description": "AI-specific competency requirements shall be documented. Training programmes for AI developers, operators, and business users. Awareness programme for all staff interacting with or affected by AI.",
+      "keywords": ["competency", "AI training", "awareness", "skills"],
+      "evidence_types": ["Competency framework", "Training program", "Training completion records", "Awareness materials"]
+    },
+    {
+      "control_id": "A.5.2",
+      "domain": "Assessing Impacts of AI Systems",
+      "title": "AI system impact assessment process",
+      "description": "A documented process for assessing impacts of AI systems shall be established and maintained — defining scope, methodology, frequency, roles, and how assessment results inform control selection and treatment decisions.",
+      "keywords": ["impact assessment", "AI impact", "AIIA", "assessment process"],
+      "evidence_types": ["Impact assessment process", "Methodology document", "Assessment templates", "Procedure"]
+    },
+    {
+      "control_id": "A.5.3",
+      "domain": "Assessing Impacts of AI Systems",
+      "title": "Documentation of AI system impact assessments",
+      "description": "Results of AI system impact assessments shall be documented, retained, and updated when significant changes occur to the AI system or its operating context.",
+      "keywords": ["impact assessment records", "documentation", "retention", "updates"],
+      "evidence_types": ["Completed impact assessments", "Retention policy", "Update history", "AIIA repository"]
+    },
+    {
+      "control_id": "A.5.4",
+      "domain": "Assessing Impacts of AI Systems",
+      "title": "Impact on individuals or groups",
+      "description": "Impact assessment shall evaluate how AI outputs may affect individual rights, wellbeing, and autonomy — discrimination, profiling, automated decision-making without meaningful human review, disproportionate impacts on vulnerable groups.",
+      "keywords": ["individual rights", "discrimination", "profiling", "vulnerable groups", "fairness"],
+      "evidence_types": ["Fairness analysis", "Bias testing reports", "Protected attribute review", "Vulnerable group analysis"]
+    },
+    {
+      "control_id": "A.5.5",
+      "domain": "Assessing Impacts of AI Systems",
+      "title": "Societal impacts",
+      "description": "Impact assessment shall evaluate broader societal impacts: misinformation generation, labour market effects, environmental impact of compute, reinforcement of systemic bias at scale, erosion of human autonomy.",
+      "keywords": ["societal impact", "misinformation", "environmental", "labour market", "systemic bias"],
+      "evidence_types": ["Societal impact analysis", "Environmental assessment", "Stakeholder analysis", "Ethical review"]
+    },
+    {
+      "control_id": "A.6.1.2",
+      "domain": "AI System Life Cycle - Management Guidance",
+      "title": "Objectives for responsible AI development",
+      "description": "Specific, measurable objectives for responsible AI development shall be established, documented, and monitored. Align with AI policy and responsible AI principles (fairness, transparency, accountability, safety, reliability).",
+      "keywords": ["responsible AI", "objectives", "fairness", "transparency", "accountability"],
+      "evidence_types": ["Responsible AI objectives", "KPI dashboard", "Monitoring records", "Principles document"]
+    },
+    {
+      "control_id": "A.6.1.3",
+      "domain": "AI System Life Cycle - Management Guidance",
+      "title": "Processes for responsible AI design and development",
+      "description": "Formal processes shall govern AI system design and development to embed responsible AI principles: fairness-aware design, design decisions documentation, explainability proportionate to AI impact level, human oversight at key gates.",
+      "keywords": ["responsible design", "fairness-aware", "explainability", "human oversight"],
+      "evidence_types": ["Design process documentation", "Stage-gate procedure", "Explainability requirements", "Oversight checkpoints"]
+    },
+    {
+      "control_id": "A.6.2.2",
+      "domain": "AI System Life Cycle - Life Cycle",
+      "title": "AI system requirements and specification",
+      "description": "Requirements for each AI system shall be documented — intended purpose, performance criteria, operating conditions, input/output specifications, applicable constraints (legal, ethical, technical).",
+      "keywords": ["requirements", "specification", "intended purpose", "performance criteria"],
+      "evidence_types": ["Requirements document per system", "Specification document", "Constraints register"]
+    },
+    {
+      "control_id": "A.6.2.3",
+      "domain": "AI System Life Cycle - Life Cycle",
+      "title": "Documentation of AI system design and development",
+      "description": "Design decisions, architecture choices, model versions, hyperparameters, and development rationale shall be documented to support reproducibility, auditability, and accountability.",
+      "keywords": ["design documentation", "model versions", "hyperparameters", "reproducibility"],
+      "evidence_types": ["Design documents", "Model cards", "Experiment tracking", "Version control records"]
+    },
+    {
+      "control_id": "A.6.2.4",
+      "domain": "AI System Life Cycle - Life Cycle",
+      "title": "AI system verification and validation",
+      "description": "Testing protocols shall be applied before deployment: performance benchmarking, fairness and bias testing across demographic groups, adversarial testing, edge case validation, go/no-go authorisation criteria.",
+      "keywords": ["V&V", "verification", "validation", "bias testing", "adversarial testing"],
+      "evidence_types": ["V&V protocols", "Bias test results", "Adversarial test results", "Go/no-go records"]
+    },
+    {
+      "control_id": "A.6.2.5",
+      "domain": "AI System Life Cycle - Life Cycle",
+      "title": "AI system deployment",
+      "description": "Controlled deployment process shall govern AI system releases: staged rollout, deployment authorisation, risk and impact assessment sign-off, rollback procedures.",
+      "keywords": ["deployment", "release", "staged rollout", "rollback", "authorisation"],
+      "evidence_types": ["Deployment procedure", "Authorisation records", "Rollback procedures", "Staged rollout plan"]
+    },
+    {
+      "control_id": "A.6.2.6",
+      "domain": "AI System Life Cycle - Life Cycle",
+      "title": "AI system operation and monitoring",
+      "description": "Continuous monitoring of AI systems in production shall detect performance drift, output quality degradation, and bias. Alert thresholds and remediation processes defined.",
+      "keywords": ["monitoring", "model drift", "performance monitoring", "production AI"],
+      "evidence_types": ["Monitoring configuration", "Drift detection alerts", "Performance dashboards", "Remediation procedures"]
+    },
+    {
+      "control_id": "A.6.2.7",
+      "domain": "AI System Life Cycle - Life Cycle",
+      "title": "AI system technical documentation",
+      "description": "Comprehensive technical documentation per AI system — specifications, intended use, known limitations, performance data, failure modes. Supports transparency obligations and third-party assessment.",
+      "keywords": ["technical documentation", "model card", "system card", "limitations"],
+      "evidence_types": ["Technical documentation", "Model cards", "Failure modes register", "Specifications"]
+    },
+    {
+      "control_id": "A.6.2.8",
+      "domain": "AI System Life Cycle - Life Cycle",
+      "title": "AI system event logs",
+      "description": "AI systems shall record event logs sufficient to support incident investigation, audit, performance monitoring, and accountability. Log retention periods and access controls defined.",
+      "keywords": ["event logs", "audit logs", "AI logging", "retention"],
+      "evidence_types": ["Logging configuration", "Retention policy", "Access controls on logs", "Log samples"]
+    },
+    {
+      "control_id": "A.7.2",
+      "domain": "Data for AI Systems",
+      "title": "Data for development and enhancement",
+      "description": "Governance framework shall define how data is managed across the full AI data lifecycle: acquisition, quality assurance, labelling, versioning, bias testing, retention, secure deletion.",
+      "keywords": ["data lifecycle", "data governance", "labelling", "versioning"],
+      "evidence_types": ["Data governance framework", "Data lifecycle procedures", "Versioning records", "Deletion procedures"]
+    },
+    {
+      "control_id": "A.7.3",
+      "domain": "Data for AI Systems",
+      "title": "Acquisition of data",
+      "description": "Controls shall govern sourcing of training, validation, and test data: legal basis, consent requirements, provenance documentation, prohibition on use of unlawfully obtained data.",
+      "keywords": ["data acquisition", "legal basis", "consent", "provenance"],
+      "evidence_types": ["Data sourcing policy", "Legal basis records", "Consent records", "Provenance documentation"]
+    },
+    {
+      "control_id": "A.7.4",
+      "domain": "Data for AI Systems",
+      "title": "Quality of data for AI systems",
+      "description": "Data quality criteria shall be defined for training, validation, and test data — completeness, accuracy, representativeness, recency — and tested before data is used.",
+      "keywords": ["data quality", "completeness", "accuracy", "representativeness"],
+      "evidence_types": ["Data quality criteria", "Quality test results", "Quality gates", "Quality monitoring"]
+    },
+    {
+      "control_id": "A.7.5",
+      "domain": "Data for AI Systems",
+      "title": "Data provenance",
+      "description": "Origin, chain of custody, and transformation history of data used in AI systems shall be documented and traceable. Supports accountability, bias identification, regulatory compliance.",
+      "keywords": ["provenance", "lineage", "chain of custody", "traceability"],
+      "evidence_types": ["Data lineage records", "Provenance system", "Transformation logs", "Source documentation"]
+    },
+    {
+      "control_id": "A.7.6",
+      "domain": "Data for AI Systems",
+      "title": "Data preparation",
+      "description": "Processes for data cleaning, transformation, labelling, annotation shall include quality controls: human review of labelled data, inter-annotator agreement checks, identification and remediation of bias introduced in preparation steps.",
+      "keywords": ["data preparation", "labelling", "annotation", "inter-annotator agreement"],
+      "evidence_types": ["Data preparation procedures", "Annotation guidelines", "IAA records", "Bias remediation records"]
+    },
+    {
+      "control_id": "A.8.2",
+      "domain": "Information for Interested Parties",
+      "title": "System documentation and information for users",
+      "description": "Documentation and information about AI systems shall be provided to users and other interested parties at a level of detail proportionate to the AI system's impact — intended purpose, known limitations, how to interpret outputs.",
+      "keywords": ["user documentation", "transparency", "user information", "limitations"],
+      "evidence_types": ["User documentation", "Quick-start guides", "Interpretation guidance", "Limitations disclosure"]
+    },
+    {
+      "control_id": "A.8.3",
+      "domain": "Information for Interested Parties",
+      "title": "External reporting",
+      "description": "The organisation shall define what information about AI systems is reported externally, to whom, how frequently, and through what mechanism — regulatory disclosures, transparency reports, public-facing AI disclosures.",
+      "keywords": ["external reporting", "transparency report", "regulatory disclosure"],
+      "evidence_types": ["Reporting plan", "Transparency reports", "Regulatory submissions", "Public disclosures"]
+    },
+    {
+      "control_id": "A.8.4",
+      "domain": "Information for Interested Parties",
+      "title": "Communication of incidents",
+      "description": "AI-specific incident communication processes — internal escalation, notification to affected individuals where required, regulatory reporting, post-incident review and disclosure.",
+      "keywords": ["incident communication", "AI incident", "notification", "post-incident"],
+      "evidence_types": ["AI incident communication plan", "Notification templates", "Regulatory reporting procedure", "Post-incident reports"]
+    },
+    {
+      "control_id": "A.8.5",
+      "domain": "Information for Interested Parties",
+      "title": "Information for interested parties",
+      "description": "Stakeholders — customers, employees, regulators, public — shall be informed of their rights and what to expect from AI systems. A communication plan addresses what to communicate, when, and through which channel.",
+      "keywords": ["stakeholder communication", "rights", "communication plan"],
+      "evidence_types": ["Stakeholder communication plan", "Communications log", "Rights disclosure"]
+    },
+    {
+      "control_id": "A.9.2",
+      "domain": "Use of AI Systems",
+      "title": "Processes for responsible use",
+      "description": "Formal processes shall govern how the organisation uses AI systems responsibly — acceptable use criteria, human oversight of AI outputs, procedures for escalating or overriding AI decisions.",
+      "keywords": ["acceptable use", "responsible use", "human oversight", "AI use policy"],
+      "evidence_types": ["Acceptable use policy for AI", "Oversight procedures", "Override procedures", "Use guidelines"]
+    },
+    {
+      "control_id": "A.9.3",
+      "domain": "Use of AI Systems",
+      "title": "Objectives for responsible use",
+      "description": "Measurable objectives for responsible AI use shall be established and monitored, aligned to AI policy and responsible AI principles. These objectives drive continual improvement in AI use practices.",
+      "keywords": ["use objectives", "responsible use", "KPIs", "measurable"],
+      "evidence_types": ["Use objectives", "KPI dashboard", "Improvement plans", "Monitoring records"]
+    },
+    {
+      "control_id": "A.9.4",
+      "domain": "Use of AI Systems",
+      "title": "Intended use of the AI system",
+      "description": "Intended use of each AI system shall be documented, communicated, and enforced. Use beyond the documented intended purpose shall be identified, assessed, and controlled.",
+      "keywords": ["intended use", "purpose", "scope of use", "off-label"],
+      "evidence_types": ["Intended use documentation", "Use enforcement controls", "Off-label use assessment"]
+    },
+    {
+      "control_id": "A.10.2",
+      "domain": "Third-Party and Customer Relationships",
+      "title": "Allocating responsibilities",
+      "description": "Where AI systems involve multiple parties (providers, users, customers, partners), responsibilities for responsible AI governance shall be clearly allocated and documented — impact assessment, monitoring, incident response.",
+      "keywords": ["shared responsibility", "allocation", "multi-party", "RACI"],
+      "evidence_types": ["Responsibility allocation matrix", "Multi-party agreements", "RACI across organisations"]
+    },
+    {
+      "control_id": "A.10.3",
+      "domain": "Third-Party and Customer Relationships",
+      "title": "Suppliers",
+      "description": "AI supply chain risk management shall govern third-party AI providers — tiering by risk, due diligence questionnaires, contractual AI-specific clauses (data handling, bias controls, right to audit), ongoing supplier performance monitoring.",
+      "keywords": ["AI suppliers", "supply chain", "third-party AI", "due diligence"],
+      "evidence_types": ["AI supplier register", "Due diligence questionnaires", "AI-specific contract clauses", "Supplier monitoring"]
+    },
+    {
+      "control_id": "A.10.4",
+      "domain": "Third-Party and Customer Relationships",
+      "title": "Customers",
+      "description": "Where AI systems are deployed to customers, define what information customers receive about AI capabilities and limitations, customer obligations in responsible use, and how customer feedback and incidents are managed.",
+      "keywords": ["customer disclosure", "customer obligations", "customer feedback"],
+      "evidence_types": ["Customer disclosure materials", "Customer obligations document", "Feedback procedures", "Customer incident procedures"]
+    }
+  ]
+}
