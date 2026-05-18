@@ -168,6 +168,22 @@ async def upload_document(
             text = "\n".join(page.get_text() for page in doc)
     elif ext in (".docx", ".doc"):
         text = docx2txt.process(io.BytesIO(content_bytes))
+    elif ext == ".xlsx":
+        from openpyxl import load_workbook
+        wb = load_workbook(io.BytesIO(content_bytes), read_only=True, data_only=True)
+        parts = []
+        for sheet in wb.worksheets:
+            parts.append(f"# Sheet: {sheet.title}")
+            for row in sheet.iter_rows(values_only=True):
+                cells = ["" if v is None else str(v) for v in row]
+                if any(cells):
+                    parts.append("\t".join(cells))
+        text = "\n".join(parts)
+    elif ext == ".csv":
+        import csv
+        raw = content_bytes.decode("utf-8-sig", errors="replace")
+        reader = csv.reader(io.StringIO(raw))
+        text = "\n".join("\t".join(row) for row in reader)
     else:
         text = content_bytes.decode("utf-8", errors="replace")
 

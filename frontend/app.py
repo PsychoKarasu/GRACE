@@ -1947,7 +1947,7 @@ with _main_col:
                 )
                 uploaded_files = st.file_uploader(
                     t("ga.ws.upload_label"),
-                    type=["pdf", "docx", "txt"],
+                    type=["pdf", "docx", "txt", "csv", "xlsx"],
                     accept_multiple_files=True,
                     key="ask_files",
                 )
