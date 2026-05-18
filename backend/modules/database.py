@@ -154,6 +154,29 @@ def init_db():
         # When NULL is read, the caller falls back to the finding's
         # original title (still readable, just not localised).
         conn.execute("ALTER TABLE finding_translations ADD COLUMN control_title TEXT")
+    # Normalise any legacy findings/runs that were saved with Claude's
+    # human-readable framework name (e.g. "NIST CSF 2.0") instead of the
+    # canonical ID ("NISTCSF2.0") — these break the Registry filter.
+    _LEGACY_FW_REMAP = {
+        "NIST CSF 2.0":                 "NISTCSF2.0",
+        "NIST Cybersecurity Framework": "NISTCSF2.0",
+        "PCI DSS 4.0.1":                "PCI-DSS4.0.1",
+        "PCI DSS v4.0.1":               "PCI-DSS4.0.1",
+        "PCI-DSS 4.0.1":                "PCI-DSS4.0.1",
+        "ISO 42001":                    "ISO42001",
+        "ISO/IEC 42001":                "ISO42001",
+        "ISO/IEC 42001:2023":           "ISO42001",
+        "EU AI Act":                    "EUAIACT",
+        "EU AI Act 2024/1689":          "EUAIACT",
+        "ISO 27001":                    "ISO27001:2022",
+        "ISO/IEC 27001":                "ISO27001:2022",
+        "ISO/IEC 27001:2022":           "ISO27001:2022",
+    }
+    for legacy, canonical in _LEGACY_FW_REMAP.items():
+        conn.execute("UPDATE findings SET framework = ? WHERE framework = ?",
+                     (canonical, legacy))
+        conn.execute("UPDATE assessment_runs SET framework = ? WHERE framework = ?",
+                     (canonical, legacy))
     conn.commit()
     conn.close()
 
