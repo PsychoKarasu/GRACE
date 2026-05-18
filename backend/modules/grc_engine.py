@@ -266,7 +266,11 @@ def _parse_and_validate(raw: str, framework_id: str, document_title: str) -> dic
     if "controls" not in data:
         data["controls"] = []
 
-    data.setdefault("framework", framework_id)
+    # Always force the canonical framework_id — Claude sometimes echoes
+    # back a human-readable name like "NIST CSF 2.0" which then breaks
+    # downstream filters that key off the canonical ID (e.g. the
+    # Findings Registry framework dropdown).
+    data["framework"] = framework_id
     data.setdefault("document_analyzed", document_title)
     data.setdefault("overall_coverage_score", _compute_overall_score(data["controls"]))
     data.setdefault("overall_status", _compute_overall_status(data["overall_coverage_score"]))
