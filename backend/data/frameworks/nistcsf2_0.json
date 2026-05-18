@@ -1,0 +1,856 @@
+{
+  "framework_id": "NISTCSF2.0",
+  "version": "NIST CSF 2.0 (February 2024)",
+  "name": "NIST Cybersecurity Framework 2.0",
+  "total_controls": 106,
+  "controls": [
+    {
+      "control_id": "GV.OC-01",
+      "domain": "Govern - Organizational Context",
+      "title": "Organizational mission understood",
+      "description": "The organizational mission is understood and informs cybersecurity risk management.",
+      "keywords": ["mission", "organizational context", "cybersecurity strategy", "business objectives"],
+      "evidence_types": ["Mission statement", "Strategy documents", "Risk management policy", "Board-approved cybersecurity strategy"]
+    },
+    {
+      "control_id": "GV.OC-02",
+      "domain": "Govern - Organizational Context",
+      "title": "Stakeholder needs and expectations understood",
+      "description": "Internal and external stakeholders are understood, and their needs and expectations regarding cybersecurity risk management are understood and considered.",
+      "keywords": ["stakeholders", "stakeholder analysis", "expectations", "interested parties"],
+      "evidence_types": ["Stakeholder register", "Communication plan", "Stakeholder engagement records", "Customer/regulator requirements log"]
+    },
+    {
+      "control_id": "GV.OC-03",
+      "domain": "Govern - Organizational Context",
+      "title": "Legal, regulatory and contractual requirements managed",
+      "description": "Legal, regulatory, and contractual requirements regarding cybersecurity — including privacy and civil liberties obligations — are understood and managed.",
+      "keywords": ["legal", "regulatory", "contractual", "compliance obligations", "privacy"],
+      "evidence_types": ["Regulatory obligations register", "Compliance matrix", "Contracts repository", "Legal review records"]
+    },
+    {
+      "control_id": "GV.OC-04",
+      "domain": "Govern - Organizational Context",
+      "title": "Critical objectives, capabilities and services understood",
+      "description": "Critical objectives, capabilities, and services that stakeholders depend on or expect from the organization are understood and communicated.",
+      "keywords": ["critical services", "business capabilities", "objectives", "service catalogue"],
+      "evidence_types": ["Business impact analysis", "Service catalogue", "Critical function register", "Dependency map"]
+    },
+    {
+      "control_id": "GV.OC-05",
+      "domain": "Govern - Organizational Context",
+      "title": "External dependencies understood",
+      "description": "Outcomes, capabilities, and services that the organization depends on are understood and communicated.",
+      "keywords": ["dependencies", "external services", "supply chain", "third-party reliance"],
+      "evidence_types": ["Dependency inventory", "Supplier register", "Service-level agreements", "Third-party criticality assessment"]
+    },
+    {
+      "control_id": "GV.RM-01",
+      "domain": "Govern - Risk Management Strategy",
+      "title": "Risk management objectives established",
+      "description": "Risk management objectives are established and agreed to by organizational stakeholders.",
+      "keywords": ["risk management", "objectives", "risk strategy", "governance"],
+      "evidence_types": ["Risk management strategy", "Board-approved objectives", "Risk committee charter", "Risk policy"]
+    },
+    {
+      "control_id": "GV.RM-02",
+      "domain": "Govern - Risk Management Strategy",
+      "title": "Risk appetite and tolerance statements established",
+      "description": "Risk appetite and risk tolerance statements are established, communicated, and maintained.",
+      "keywords": ["risk appetite", "risk tolerance", "risk threshold", "risk acceptance"],
+      "evidence_types": ["Risk appetite statement", "Risk tolerance thresholds", "Board approval records", "Risk policy"]
+    },
+    {
+      "control_id": "GV.RM-03",
+      "domain": "Govern - Risk Management Strategy",
+      "title": "Cybersecurity integrated into enterprise risk management",
+      "description": "Cybersecurity risk management activities and outcomes are included in enterprise risk management processes.",
+      "keywords": ["enterprise risk", "ERM", "integration", "risk register"],
+      "evidence_types": ["Enterprise risk register", "ERM framework", "Risk committee minutes", "Integrated risk reports"]
+    },
+    {
+      "control_id": "GV.RM-04",
+      "domain": "Govern - Risk Management Strategy",
+      "title": "Strategic direction for risk response",
+      "description": "Strategic direction that describes appropriate risk response options is established and communicated.",
+      "keywords": ["risk response", "risk treatment", "risk options", "strategic direction"],
+      "evidence_types": ["Risk treatment policy", "Risk response strategy", "Risk treatment plans", "Decision authority matrix"]
+    },
+    {
+      "control_id": "GV.RM-05",
+      "domain": "Govern - Risk Management Strategy",
+      "title": "Lines of communication for cybersecurity risks",
+      "description": "Lines of communication across the organization are established for cybersecurity risks, including risks from suppliers and other third parties.",
+      "keywords": ["communication", "reporting lines", "escalation", "risk reporting"],
+      "evidence_types": ["Communication plan", "Risk reporting structure", "Escalation matrix", "Risk dashboards"]
+    },
+    {
+      "control_id": "GV.RM-06",
+      "domain": "Govern - Risk Management Strategy",
+      "title": "Standardized risk calculation method",
+      "description": "A standardized method for calculating, documenting, categorizing, and prioritizing cybersecurity risks is established and communicated.",
+      "keywords": ["risk assessment methodology", "risk scoring", "risk calculation", "prioritization"],
+      "evidence_types": ["Risk assessment methodology", "Risk scoring criteria", "Risk register template", "Risk categorization scheme"]
+    },
+    {
+      "control_id": "GV.RM-07",
+      "domain": "Govern - Risk Management Strategy",
+      "title": "Positive risks (opportunities) included",
+      "description": "Strategic opportunities (i.e., positive risks) are characterized and are included in organizational cybersecurity risk discussions.",
+      "keywords": ["opportunities", "positive risk", "strategic opportunity", "innovation"],
+      "evidence_types": ["Opportunity register", "Strategic risk discussions records", "Innovation review records"]
+    },
+    {
+      "control_id": "GV.RR-01",
+      "domain": "Govern - Roles & Responsibilities",
+      "title": "Leadership accountable for cybersecurity",
+      "description": "Organizational leadership is responsible and accountable for cybersecurity risk and fosters a culture that is risk-aware, ethical, and continually improving.",
+      "keywords": ["leadership", "accountability", "tone at the top", "culture", "board"],
+      "evidence_types": ["Board charter", "Leadership accountability statement", "Executive cybersecurity reports", "Culture survey"]
+    },
+    {
+      "control_id": "GV.RR-02",
+      "domain": "Govern - Roles & Responsibilities",
+      "title": "Roles, responsibilities and authorities established",
+      "description": "Roles, responsibilities, and authorities related to cybersecurity risk management are established, communicated, understood, and enforced.",
+      "keywords": ["RACI", "roles", "responsibilities", "authorities", "job descriptions"],
+      "evidence_types": ["RACI matrix", "Job descriptions", "Org chart", "Role definitions"]
+    },
+    {
+      "control_id": "GV.RR-03",
+      "domain": "Govern - Roles & Responsibilities",
+      "title": "Adequate resources allocated",
+      "description": "Adequate resources are allocated commensurate with the cybersecurity risk strategy, roles, responsibilities, and policies.",
+      "keywords": ["resources", "budget", "staffing", "investment"],
+      "evidence_types": ["Cybersecurity budget", "Headcount plan", "Resource allocation records", "Investment approvals"]
+    },
+    {
+      "control_id": "GV.RR-04",
+      "domain": "Govern - Roles & Responsibilities",
+      "title": "Cybersecurity in HR practices",
+      "description": "Cybersecurity is included in human resources practices.",
+      "keywords": ["human resources", "hiring", "onboarding", "background check", "termination"],
+      "evidence_types": ["HR policy", "Job description templates", "Background check procedure", "Termination checklist"]
+    },
+    {
+      "control_id": "GV.PO-01",
+      "domain": "Govern - Policy",
+      "title": "Cybersecurity policy established",
+      "description": "Policy for managing cybersecurity risks is established based on organizational context, cybersecurity strategy, and priorities and is communicated and enforced.",
+      "keywords": ["policy", "cybersecurity policy", "policy framework", "approved policy"],
+      "evidence_types": ["Cybersecurity policy", "Policy approval records", "Policy distribution records", "Acknowledgement evidence"]
+    },
+    {
+      "control_id": "GV.PO-02",
+      "domain": "Govern - Policy",
+      "title": "Cybersecurity policy reviewed and updated",
+      "description": "Policy for managing cybersecurity risks is reviewed, updated, communicated, and enforced to reflect changes in requirements, threats, technology, and organizational mission.",
+      "keywords": ["policy review", "policy update", "annual review", "policy maintenance"],
+      "evidence_types": ["Policy review records", "Change log", "Annual review schedule", "Updated policies"]
+    },
+    {
+      "control_id": "GV.OV-01",
+      "domain": "Govern - Oversight",
+      "title": "Strategy outcomes reviewed",
+      "description": "Cybersecurity risk management strategy outcomes are reviewed to inform and adjust strategy and direction.",
+      "keywords": ["strategy review", "outcomes", "oversight", "management review"],
+      "evidence_types": ["Strategy review records", "Management review minutes", "Outcomes report", "Adjustment decisions"]
+    },
+    {
+      "control_id": "GV.OV-02",
+      "domain": "Govern - Oversight",
+      "title": "Strategy adjusted for coverage",
+      "description": "The cybersecurity risk management strategy is reviewed and adjusted to ensure coverage of organizational requirements and risks.",
+      "keywords": ["coverage", "strategy adjustment", "review", "scope"],
+      "evidence_types": ["Strategy revision records", "Coverage gap analysis", "Management review minutes"]
+    },
+    {
+      "control_id": "GV.OV-03",
+      "domain": "Govern - Oversight",
+      "title": "Performance evaluated for adjustments",
+      "description": "Organizational cybersecurity risk management performance is evaluated and reviewed for adjustments needed.",
+      "keywords": ["performance evaluation", "KPI", "metrics", "review"],
+      "evidence_types": ["Performance metrics", "KPI dashboard", "Performance review records", "Adjustment plans"]
+    },
+    {
+      "control_id": "GV.SC-01",
+      "domain": "Govern - Supply Chain Risk Mgmt",
+      "title": "Supply chain risk management program established",
+      "description": "A cybersecurity supply chain risk management program, strategy, objectives, policies, and processes are established and agreed to by organizational stakeholders.",
+      "keywords": ["supply chain", "SCRM", "third-party risk", "vendor management", "C-SCRM"],
+      "evidence_types": ["SCRM policy", "SCRM strategy", "Program charter", "Stakeholder approvals"]
+    },
+    {
+      "control_id": "GV.SC-02",
+      "domain": "Govern - Supply Chain Risk Mgmt",
+      "title": "Supplier roles and responsibilities established",
+      "description": "Cybersecurity roles and responsibilities for suppliers, customers, and partners are established, communicated, and coordinated internally and externally.",
+      "keywords": ["supplier roles", "responsibilities", "coordination", "partners"],
+      "evidence_types": ["Supplier responsibility matrix", "Partner agreements", "Communication procedures"]
+    },
+    {
+      "control_id": "GV.SC-03",
+      "domain": "Govern - Supply Chain Risk Mgmt",
+      "title": "Supply chain risk integrated into ERM",
+      "description": "Cybersecurity supply chain risk management is integrated into cybersecurity and enterprise risk management, risk assessment, and improvement processes.",
+      "keywords": ["integration", "ERM", "risk assessment", "improvement"],
+      "evidence_types": ["Integrated risk register", "Process integration documentation", "Risk assessment results"]
+    },
+    {
+      "control_id": "GV.SC-04",
+      "domain": "Govern - Supply Chain Risk Mgmt",
+      "title": "Suppliers known and prioritized by criticality",
+      "description": "Suppliers are known and prioritized by criticality.",
+      "keywords": ["supplier inventory", "criticality", "tiering", "prioritization"],
+      "evidence_types": ["Supplier inventory", "Criticality classification", "Supplier tiering documentation"]
+    },
+    {
+      "control_id": "GV.SC-05",
+      "domain": "Govern - Supply Chain Risk Mgmt",
+      "title": "Cybersecurity requirements in supplier contracts",
+      "description": "Requirements to address cybersecurity risks in supply chains are established, prioritized, and integrated into contracts and other types of agreements with suppliers and other relevant third parties.",
+      "keywords": ["contracts", "supplier requirements", "agreements", "contractual clauses"],
+      "evidence_types": ["Standard contract clauses", "Master service agreements", "Supplier security requirements", "Signed contracts"]
+    },
+    {
+      "control_id": "GV.SC-06",
+      "domain": "Govern - Supply Chain Risk Mgmt",
+      "title": "Pre-engagement due diligence",
+      "description": "Planning and due diligence are performed to reduce risks before entering into formal supplier or other third-party relationships.",
+      "keywords": ["due diligence", "pre-engagement", "supplier assessment", "vendor evaluation"],
+      "evidence_types": ["Due diligence questionnaires", "Supplier risk assessment records", "Onboarding checklist"]
+    },
+    {
+      "control_id": "GV.SC-07",
+      "domain": "Govern - Supply Chain Risk Mgmt",
+      "title": "Supplier risks monitored over time",
+      "description": "The risks posed by a supplier, their products and services, and other third parties are understood, recorded, prioritized, assessed, responded to, and monitored over the course of the relationship.",
+      "keywords": ["ongoing monitoring", "supplier risk", "continuous assessment", "third-party monitoring"],
+      "evidence_types": ["Supplier risk register", "Periodic supplier reviews", "Monitoring dashboards", "Risk treatment records"]
+    },
+    {
+      "control_id": "GV.SC-08",
+      "domain": "Govern - Supply Chain Risk Mgmt",
+      "title": "Suppliers included in incident planning",
+      "description": "Relevant suppliers and other third parties are included in incident planning, response, and recovery activities.",
+      "keywords": ["incident planning", "supplier coordination", "joint response", "third-party incident"],
+      "evidence_types": ["IR plan with supplier roles", "Joint tabletop exercises", "Supplier contact lists", "Coordination procedures"]
+    },
+    {
+      "control_id": "GV.SC-09",
+      "domain": "Govern - Supply Chain Risk Mgmt",
+      "title": "Lifecycle supply chain monitoring",
+      "description": "Supply chain security practices are integrated into cybersecurity and enterprise risk management programs, and their performance is monitored throughout the technology product and service life cycle.",
+      "keywords": ["lifecycle", "performance monitoring", "supply chain", "integration"],
+      "evidence_types": ["Lifecycle policy", "Performance metrics", "Monitoring records", "Integration documentation"]
+    },
+    {
+      "control_id": "GV.SC-10",
+      "domain": "Govern - Supply Chain Risk Mgmt",
+      "title": "Post-relationship provisions",
+      "description": "Cybersecurity supply chain risk management plans include provisions for activities that occur after the conclusion of a partnership or supply chain relationship.",
+      "keywords": ["offboarding", "termination", "data return", "exit strategy"],
+      "evidence_types": ["Exit procedures", "Data return/destruction records", "Termination clauses", "Offboarding checklist"]
+    },
+    {
+      "control_id": "ID.AM-01",
+      "domain": "Identify - Asset Management",
+      "title": "Hardware inventory maintained",
+      "description": "Inventories of hardware managed by the organization are maintained.",
+      "keywords": ["hardware inventory", "asset inventory", "CMDB", "device inventory"],
+      "evidence_types": ["Hardware asset inventory", "CMDB exports", "Asset management tool reports", "Reconciliation records"]
+    },
+    {
+      "control_id": "ID.AM-02",
+      "domain": "Identify - Asset Management",
+      "title": "Software and services inventory maintained",
+      "description": "Inventories of software, services, and systems managed by the organization are maintained.",
+      "keywords": ["software inventory", "service inventory", "SaaS inventory", "application catalog"],
+      "evidence_types": ["Software inventory", "SaaS inventory", "Application catalog", "License management records"]
+    },
+    {
+      "control_id": "ID.AM-03",
+      "domain": "Identify - Asset Management",
+      "title": "Network communication flows maintained",
+      "description": "Representations of the organization's authorized network communication and internal and external network data flows are maintained.",
+      "keywords": ["data flow", "network diagram", "communication flows", "architecture"],
+      "evidence_types": ["Network diagrams", "Data flow diagrams", "Architecture documentation", "Authorized flows list"]
+    },
+    {
+      "control_id": "ID.AM-04",
+      "domain": "Identify - Asset Management",
+      "title": "Supplier services inventory maintained",
+      "description": "Inventories of services provided by suppliers are maintained.",
+      "keywords": ["supplier services", "third-party services", "vendor inventory", "outsourced services"],
+      "evidence_types": ["Supplier service inventory", "Third-party services register", "Outsourcing register"]
+    },
+    {
+      "control_id": "ID.AM-05",
+      "domain": "Identify - Asset Management",
+      "title": "Assets prioritized by criticality",
+      "description": "Assets are prioritized based on classification, criticality, resources, and impact on the mission.",
+      "keywords": ["asset classification", "criticality", "prioritization", "asset value"],
+      "evidence_types": ["Asset classification scheme", "Criticality matrix", "Business impact analysis", "Prioritized asset list"]
+    },
+    {
+      "control_id": "ID.AM-07",
+      "domain": "Identify - Asset Management",
+      "title": "Data inventories maintained",
+      "description": "Inventories of data and corresponding metadata for designated data types are maintained.",
+      "keywords": ["data inventory", "data catalog", "metadata", "data classification"],
+      "evidence_types": ["Data inventory/catalog", "Data classification records", "Records of processing activities", "Metadata register"]
+    },
+    {
+      "control_id": "ID.AM-08",
+      "domain": "Identify - Asset Management",
+      "title": "Lifecycle management of assets",
+      "description": "Systems, hardware, software, services, and data are managed throughout their life cycles.",
+      "keywords": ["lifecycle management", "asset lifecycle", "EOL", "decommissioning"],
+      "evidence_types": ["Lifecycle management policy", "Decommissioning procedure", "EOL/EOS tracking", "Disposal records"]
+    },
+    {
+      "control_id": "ID.RA-01",
+      "domain": "Identify - Risk Assessment",
+      "title": "Vulnerabilities identified and recorded",
+      "description": "Vulnerabilities in assets are identified, validated, and recorded.",
+      "keywords": ["vulnerability management", "vulnerability scanning", "CVE", "vulnerability assessment"],
+      "evidence_types": ["Vulnerability scan reports", "Vulnerability register", "Validation records", "Remediation tracking"]
+    },
+    {
+      "control_id": "ID.RA-02",
+      "domain": "Identify - Risk Assessment",
+      "title": "Cyber threat intelligence received",
+      "description": "Cyber threat intelligence is received from information sharing forums and sources.",
+      "keywords": ["threat intelligence", "CTI", "ISAC", "threat feeds"],
+      "evidence_types": ["Threat intelligence subscription records", "ISAC memberships", "Threat reports", "Intelligence feed integration"]
+    },
+    {
+      "control_id": "ID.RA-03",
+      "domain": "Identify - Risk Assessment",
+      "title": "Threats identified and recorded",
+      "description": "Internal and external threats to the organization are identified and recorded.",
+      "keywords": ["threat identification", "threat landscape", "threat modeling", "threat register"],
+      "evidence_types": ["Threat register", "Threat modeling outputs", "Risk assessment reports", "Threat landscape briefings"]
+    },
+    {
+      "control_id": "ID.RA-04",
+      "domain": "Identify - Risk Assessment",
+      "title": "Impacts and likelihoods recorded",
+      "description": "Potential impacts and likelihoods of threats exploiting vulnerabilities are identified and recorded.",
+      "keywords": ["impact", "likelihood", "probability", "risk scoring"],
+      "evidence_types": ["Risk register with impact/likelihood", "Risk scoring methodology", "Risk assessment reports"]
+    },
+    {
+      "control_id": "ID.RA-05",
+      "domain": "Identify - Risk Assessment",
+      "title": "Inherent risk and response priorities",
+      "description": "Threats, vulnerabilities, likelihoods, and impacts are used to understand inherent risk and inform risk response priorities.",
+      "keywords": ["inherent risk", "risk prioritization", "risk response", "risk evaluation"],
+      "evidence_types": ["Risk register", "Risk prioritization matrix", "Risk treatment plans"]
+    },
+    {
+      "control_id": "ID.RA-06",
+      "domain": "Identify - Risk Assessment",
+      "title": "Risk responses chosen and tracked",
+      "description": "Risk responses are chosen, prioritized, planned, tracked, and communicated.",
+      "keywords": ["risk treatment", "risk response", "mitigation", "tracking"],
+      "evidence_types": ["Risk treatment plans", "Risk response tracker", "Risk owner assignments", "Status reports"]
+    },
+    {
+      "control_id": "ID.RA-07",
+      "domain": "Identify - Risk Assessment",
+      "title": "Changes and exceptions managed",
+      "description": "Changes and exceptions are managed, assessed for risk impact, recorded, and tracked.",
+      "keywords": ["change management", "exception management", "deviation", "risk assessment"],
+      "evidence_types": ["Change management records", "Exception register", "Risk impact assessments", "Approval records"]
+    },
+    {
+      "control_id": "ID.RA-08",
+      "domain": "Identify - Risk Assessment",
+      "title": "Vulnerability disclosure processes",
+      "description": "Processes for receiving, analyzing, and responding to vulnerability disclosures are established.",
+      "keywords": ["vulnerability disclosure", "responsible disclosure", "bug bounty", "coordinated disclosure"],
+      "evidence_types": ["Vulnerability disclosure policy", "Bug bounty program", "Triage procedures", "Disclosure records"]
+    },
+    {
+      "control_id": "ID.RA-09",
+      "domain": "Identify - Risk Assessment",
+      "title": "Hardware/software authenticity assessed",
+      "description": "The authenticity and integrity of hardware and software are assessed prior to acquisition and use.",
+      "keywords": ["authenticity", "integrity", "tamper detection", "code signing", "SBOM"],
+      "evidence_types": ["Procurement security requirements", "SBOM repository", "Code signing verification logs", "Tamper-evident inspection records"]
+    },
+    {
+      "control_id": "ID.RA-10",
+      "domain": "Identify - Risk Assessment",
+      "title": "Critical suppliers assessed pre-acquisition",
+      "description": "Critical suppliers are assessed prior to acquisition.",
+      "keywords": ["supplier assessment", "due diligence", "pre-acquisition", "critical supplier"],
+      "evidence_types": ["Supplier due diligence records", "Pre-acquisition risk assessment", "Supplier security questionnaires"]
+    },
+    {
+      "control_id": "ID.IM-01",
+      "domain": "Identify - Improvement",
+      "title": "Improvements identified from evaluations",
+      "description": "Improvements are identified from evaluations.",
+      "keywords": ["improvement", "evaluation", "lessons learned", "continuous improvement"],
+      "evidence_types": ["Evaluation reports", "Improvement register", "Action plans"]
+    },
+    {
+      "control_id": "ID.IM-02",
+      "domain": "Identify - Improvement",
+      "title": "Improvements from tests and exercises",
+      "description": "Improvements are identified from security tests and exercises, including those done in coordination with suppliers and relevant third parties.",
+      "keywords": ["security testing", "exercises", "tabletop", "pen testing", "improvements"],
+      "evidence_types": ["Test/exercise after-action reports", "Lessons learned documentation", "Improvement actions tracker"]
+    },
+    {
+      "control_id": "ID.IM-03",
+      "domain": "Identify - Improvement",
+      "title": "Improvements from operational processes",
+      "description": "Improvements are identified from execution of operational processes, procedures, and activities.",
+      "keywords": ["operational improvement", "process improvement", "operations", "continuous improvement"],
+      "evidence_types": ["Process review records", "Operational metrics", "Improvement backlog"]
+    },
+    {
+      "control_id": "ID.IM-04",
+      "domain": "Identify - Improvement",
+      "title": "Findings communicated to stakeholders",
+      "description": "Incident, vulnerability, and other findings are communicated to designated internal and external stakeholders.",
+      "keywords": ["communication", "findings", "reporting", "stakeholder communication"],
+      "evidence_types": ["Communication procedures", "Stakeholder reports", "Findings register", "Distribution records"]
+    },
+    {
+      "control_id": "PR.AA-01",
+      "domain": "Protect - Identity & Access",
+      "title": "Identities and credentials managed",
+      "description": "Identities and credentials for authorized users, services, and hardware are managed by the organization.",
+      "keywords": ["identity management", "credentials", "IAM", "account management"],
+      "evidence_types": ["IAM policy", "Identity lifecycle procedures", "Credential management tool", "Provisioning/deprovisioning records"]
+    },
+    {
+      "control_id": "PR.AA-02",
+      "domain": "Protect - Identity & Access",
+      "title": "Identity proofing and credential binding",
+      "description": "Identities are proofed and bound to credentials based on the context of interactions.",
+      "keywords": ["identity proofing", "credential binding", "NIST 800-63", "IAL"],
+      "evidence_types": ["Identity proofing procedure", "Credential issuance records", "IAL/AAL determination documentation"]
+    },
+    {
+      "control_id": "PR.AA-03",
+      "domain": "Protect - Identity & Access",
+      "title": "Users, services and hardware authenticated",
+      "description": "Users, services, and hardware are authenticated.",
+      "keywords": ["authentication", "MFA", "service authentication", "device authentication"],
+      "evidence_types": ["Authentication policy", "MFA configuration", "Service account inventory", "Device authentication records"]
+    },
+    {
+      "control_id": "PR.AA-04",
+      "domain": "Protect - Identity & Access",
+      "title": "Identity assertions protected and verified",
+      "description": "Identity assertions are protected, conveyed, and verified.",
+      "keywords": ["identity assertions", "SAML", "OIDC", "tokens", "federation"],
+      "evidence_types": ["SSO/IdP configuration", "Token signing keys", "Federation agreements", "Assertion validation records"]
+    },
+    {
+      "control_id": "PR.AA-05",
+      "domain": "Protect - Identity & Access",
+      "title": "Access permissions managed with least privilege",
+      "description": "Access permissions, entitlements, and authorizations are defined in a policy, managed, enforced, and reviewed, and incorporate the principles of least privilege and separation of duties.",
+      "keywords": ["least privilege", "separation of duties", "RBAC", "access review", "entitlements"],
+      "evidence_types": ["Access control policy", "Role/entitlement matrix", "Access review records", "SoD analysis"]
+    },
+    {
+      "control_id": "PR.AA-06",
+      "domain": "Protect - Identity & Access",
+      "title": "Physical access managed and monitored",
+      "description": "Physical access to assets is managed, monitored, and enforced commensurate with risk.",
+      "keywords": ["physical access", "badge", "CCTV", "facility security"],
+      "evidence_types": ["Physical access policy", "Badge access logs", "Visitor logs", "CCTV records"]
+    },
+    {
+      "control_id": "PR.AT-01",
+      "domain": "Protect - Awareness & Training",
+      "title": "General security awareness training",
+      "description": "Personnel are provided with awareness and training so that they possess the knowledge and skills to perform general tasks with cybersecurity risks in mind.",
+      "keywords": ["awareness training", "security training", "general training", "user awareness"],
+      "evidence_types": ["Training program", "Completion records", "Training materials", "Awareness campaigns"]
+    },
+    {
+      "control_id": "PR.AT-02",
+      "domain": "Protect - Awareness & Training",
+      "title": "Specialized role-based training",
+      "description": "Individuals in specialized roles are provided with awareness and training so that they possess the knowledge and skills to perform relevant tasks with cybersecurity risks in mind.",
+      "keywords": ["role-based training", "specialized training", "developer training", "admin training"],
+      "evidence_types": ["Role-based curricula", "Specialized training records", "Certifications", "Competency assessments"]
+    },
+    {
+      "control_id": "PR.DS-01",
+      "domain": "Protect - Data Security",
+      "title": "Data-at-rest protected",
+      "description": "The confidentiality, integrity, and availability of data-at-rest are protected.",
+      "keywords": ["data at rest", "encryption", "disk encryption", "database encryption"],
+      "evidence_types": ["Encryption policy", "Encryption configuration", "Key management records", "Coverage reports"]
+    },
+    {
+      "control_id": "PR.DS-02",
+      "domain": "Protect - Data Security",
+      "title": "Data-in-transit protected",
+      "description": "The confidentiality, integrity, and availability of data-in-transit are protected.",
+      "keywords": ["data in transit", "TLS", "VPN", "encryption", "secure transmission"],
+      "evidence_types": ["TLS configuration", "VPN configuration", "Cryptography policy", "Certificate inventory"]
+    },
+    {
+      "control_id": "PR.DS-10",
+      "domain": "Protect - Data Security",
+      "title": "Data-in-use protected",
+      "description": "The confidentiality, integrity, and availability of data-in-use are protected.",
+      "keywords": ["data in use", "memory encryption", "confidential computing", "enclaves"],
+      "evidence_types": ["Confidential computing configuration", "Memory protection records", "Runtime protection evidence"]
+    },
+    {
+      "control_id": "PR.DS-11",
+      "domain": "Protect - Data Security",
+      "title": "Backups created, protected and tested",
+      "description": "Backups of data are created, protected, maintained, and tested.",
+      "keywords": ["backup", "restore", "recovery", "backup testing"],
+      "evidence_types": ["Backup policy", "Backup logs", "Restore test results", "Immutable backup configuration"]
+    },
+    {
+      "control_id": "PR.PS-01",
+      "domain": "Protect - Platform Security",
+      "title": "Configuration management practices",
+      "description": "Configuration management practices are established and applied.",
+      "keywords": ["configuration management", "hardening", "baselines", "CIS benchmarks"],
+      "evidence_types": ["Configuration baselines", "Hardening standards", "Compliance scan results", "Change records"]
+    },
+    {
+      "control_id": "PR.PS-02",
+      "domain": "Protect - Platform Security",
+      "title": "Software maintained commensurate with risk",
+      "description": "Software is maintained, replaced, and removed commensurate with risk.",
+      "keywords": ["patch management", "software updates", "EOL", "patching"],
+      "evidence_types": ["Patch management policy", "Patching SLA records", "Compliance reports", "EOL replacement plans"]
+    },
+    {
+      "control_id": "PR.PS-03",
+      "domain": "Protect - Platform Security",
+      "title": "Hardware maintained commensurate with risk",
+      "description": "Hardware is maintained, replaced, and removed commensurate with risk.",
+      "keywords": ["hardware maintenance", "refresh", "decommissioning", "EOL"],
+      "evidence_types": ["Hardware lifecycle policy", "Refresh schedule", "Decommissioning records", "Disposal certificates"]
+    },
+    {
+      "control_id": "PR.PS-04",
+      "domain": "Protect - Platform Security",
+      "title": "Log records generated for monitoring",
+      "description": "Log records are generated and made available for continuous monitoring.",
+      "keywords": ["logging", "audit logs", "log generation", "monitoring"],
+      "evidence_types": ["Logging policy", "Log source inventory", "SIEM ingestion records", "Logging configuration"]
+    },
+    {
+      "control_id": "PR.PS-05",
+      "domain": "Protect - Platform Security",
+      "title": "Unauthorized software prevented",
+      "description": "Installation and execution of unauthorized software are prevented.",
+      "keywords": ["application allowlisting", "application control", "execution control", "EDR"],
+      "evidence_types": ["Allowlisting configuration", "EDR coverage report", "Block events log", "Software approval workflow"]
+    },
+    {
+      "control_id": "PR.PS-06",
+      "domain": "Protect - Platform Security",
+      "title": "Secure software development practices",
+      "description": "Secure software development practices are integrated, and their security is evaluated.",
+      "keywords": ["secure development", "SSDLC", "SAST", "DAST", "code review"],
+      "evidence_types": ["Secure SDLC policy", "SAST/DAST results", "Code review records", "Security gate evidence"]
+    },
+    {
+      "control_id": "PR.IR-01",
+      "domain": "Protect - Tech Infrastructure Resilience",
+      "title": "Networks protected from unauthorized access",
+      "description": "Networks and environments are protected from unauthorized logical access and usage.",
+      "keywords": ["network security", "segmentation", "firewall", "zero trust"],
+      "evidence_types": ["Network architecture diagrams", "Firewall rulesets", "Segmentation documentation", "Network access control configuration"]
+    },
+    {
+      "control_id": "PR.IR-02",
+      "domain": "Protect - Tech Infrastructure Resilience",
+      "title": "Assets protected from environmental threats",
+      "description": "The organization's technology assets are protected from environmental threats.",
+      "keywords": ["environmental", "data center", "fire suppression", "HVAC", "physical environment"],
+      "evidence_types": ["Environmental controls documentation", "Data center inspection records", "DC audit reports"]
+    },
+    {
+      "control_id": "PR.IR-03",
+      "domain": "Protect - Tech Infrastructure Resilience",
+      "title": "Resilience mechanisms implemented",
+      "description": "Mechanisms are implemented to achieve resilience requirements in normal and adverse situations.",
+      "keywords": ["resilience", "redundancy", "high availability", "failover"],
+      "evidence_types": ["Resilience architecture", "HA/DR design documents", "Failover test results", "Redundancy configuration"]
+    },
+    {
+      "control_id": "PR.IR-04",
+      "domain": "Protect - Tech Infrastructure Resilience",
+      "title": "Adequate resource capacity maintained",
+      "description": "Adequate resource capacity to ensure availability is maintained.",
+      "keywords": ["capacity management", "scaling", "performance", "availability"],
+      "evidence_types": ["Capacity management plan", "Performance monitoring records", "Scaling policies", "Capacity reviews"]
+    },
+    {
+      "control_id": "DE.CM-01",
+      "domain": "Detect - Continuous Monitoring",
+      "title": "Networks monitored for adverse events",
+      "description": "Networks and network services are monitored to find potentially adverse events.",
+      "keywords": ["network monitoring", "NDR", "IDS", "IPS", "traffic analysis"],
+      "evidence_types": ["NDR/IDS configuration", "Alert reports", "Traffic analysis records", "Monitoring coverage map"]
+    },
+    {
+      "control_id": "DE.CM-02",
+      "domain": "Detect - Continuous Monitoring",
+      "title": "Physical environment monitored",
+      "description": "The physical environment is monitored to find potentially adverse events.",
+      "keywords": ["physical monitoring", "CCTV", "intrusion detection", "facility monitoring"],
+      "evidence_types": ["CCTV records", "Physical alarm logs", "Facility monitoring reports", "Guard logs"]
+    },
+    {
+      "control_id": "DE.CM-03",
+      "domain": "Detect - Continuous Monitoring",
+      "title": "Personnel activity monitored",
+      "description": "Personnel activity and technology usage are monitored to find potentially adverse events.",
+      "keywords": ["UEBA", "user monitoring", "insider threat", "DLP"],
+      "evidence_types": ["UEBA configuration", "DLP records", "Insider threat program documentation", "Monitoring records"]
+    },
+    {
+      "control_id": "DE.CM-06",
+      "domain": "Detect - Continuous Monitoring",
+      "title": "External service provider activity monitored",
+      "description": "External service provider activities and services are monitored to find potentially adverse events.",
+      "keywords": ["third-party monitoring", "supplier monitoring", "external services"],
+      "evidence_types": ["Third-party monitoring records", "Service provider logs", "Supplier security reports"]
+    },
+    {
+      "control_id": "DE.CM-09",
+      "domain": "Detect - Continuous Monitoring",
+      "title": "Endpoints and runtime monitored",
+      "description": "Computing hardware and software, runtime environments, and their data are monitored to find potentially adverse events.",
+      "keywords": ["EDR", "endpoint detection", "runtime monitoring", "host monitoring"],
+      "evidence_types": ["EDR deployment evidence", "Alert logs", "Endpoint coverage report", "Runtime monitoring records"]
+    },
+    {
+      "control_id": "DE.AE-02",
+      "domain": "Detect - Adverse Event Analysis",
+      "title": "Adverse events analyzed",
+      "description": "Potentially adverse events are analyzed to better understand associated activities.",
+      "keywords": ["event analysis", "triage", "alert analysis", "investigation"],
+      "evidence_types": ["SOC procedures", "Triage records", "Investigation notes", "Analysis playbooks"]
+    },
+    {
+      "control_id": "DE.AE-03",
+      "domain": "Detect - Adverse Event Analysis",
+      "title": "Information correlated from multiple sources",
+      "description": "Information is correlated from multiple sources.",
+      "keywords": ["correlation", "SIEM", "multi-source", "event correlation"],
+      "evidence_types": ["SIEM correlation rules", "Cross-source playbooks", "Correlation evidence", "Detection logic"]
+    },
+    {
+      "control_id": "DE.AE-04",
+      "domain": "Detect - Adverse Event Analysis",
+      "title": "Impact and scope of events understood",
+      "description": "The estimated impact and scope of adverse events are understood.",
+      "keywords": ["impact analysis", "scope", "blast radius", "incident scoping"],
+      "evidence_types": ["Impact assessment procedures", "Scoping records", "Investigation reports"]
+    },
+    {
+      "control_id": "DE.AE-06",
+      "domain": "Detect - Adverse Event Analysis",
+      "title": "Event information provided to staff/tools",
+      "description": "Information on adverse events is provided to authorized staff and tools.",
+      "keywords": ["alert distribution", "SOC notifications", "tooling integration"],
+      "evidence_types": ["Alerting configuration", "SOAR workflows", "Ticketing integration", "Notification records"]
+    },
+    {
+      "control_id": "DE.AE-07",
+      "domain": "Detect - Adverse Event Analysis",
+      "title": "Threat intelligence integrated into analysis",
+      "description": "Cyber threat intelligence and other contextual information are integrated into the analysis.",
+      "keywords": ["threat intelligence", "context", "enrichment", "TIP"],
+      "evidence_types": ["TIP integration", "Enrichment configuration", "Intelligence-driven investigations"]
+    },
+    {
+      "control_id": "DE.AE-08",
+      "domain": "Detect - Adverse Event Analysis",
+      "title": "Incidents declared by defined criteria",
+      "description": "Incidents are declared when adverse events meet the defined incident criteria.",
+      "keywords": ["incident declaration", "incident criteria", "severity classification", "triage"],
+      "evidence_types": ["Incident declaration criteria", "Severity matrix", "Incident logs", "Declaration records"]
+    },
+    {
+      "control_id": "RS.MA-01",
+      "domain": "Respond - Incident Management",
+      "title": "Incident response plan executed",
+      "description": "The incident response plan is executed in coordination with relevant third parties once an incident is declared.",
+      "keywords": ["incident response", "IR plan", "third-party coordination"],
+      "evidence_types": ["IR plan", "Execution records", "Third-party coordination logs"]
+    },
+    {
+      "control_id": "RS.MA-02",
+      "domain": "Respond - Incident Management",
+      "title": "Incident reports triaged and validated",
+      "description": "Incident reports are triaged and validated.",
+      "keywords": ["triage", "validation", "incident reports"],
+      "evidence_types": ["Triage procedures", "Triage records", "Validation evidence"]
+    },
+    {
+      "control_id": "RS.MA-03",
+      "domain": "Respond - Incident Management",
+      "title": "Incidents categorized and prioritized",
+      "description": "Incidents are categorized and prioritized.",
+      "keywords": ["categorization", "prioritization", "severity", "classification"],
+      "evidence_types": ["Classification scheme", "Priority matrix", "Incident tracker"]
+    },
+    {
+      "control_id": "RS.MA-04",
+      "domain": "Respond - Incident Management",
+      "title": "Incidents escalated as needed",
+      "description": "Incidents are escalated or elevated as needed.",
+      "keywords": ["escalation", "elevation", "management notification"],
+      "evidence_types": ["Escalation matrix", "Escalation records", "Notification logs"]
+    },
+    {
+      "control_id": "RS.MA-05",
+      "domain": "Respond - Incident Management",
+      "title": "Recovery criteria applied",
+      "description": "The criteria for initiating incident recovery are applied.",
+      "keywords": ["recovery criteria", "containment", "recovery initiation"],
+      "evidence_types": ["Recovery criteria documentation", "Decision logs", "Recovery handoff records"]
+    },
+    {
+      "control_id": "RS.AN-03",
+      "domain": "Respond - Incident Analysis",
+      "title": "Root cause analysis performed",
+      "description": "Analysis is performed to establish what has taken place during an incident and the root cause of the incident.",
+      "keywords": ["root cause", "RCA", "investigation", "forensics"],
+      "evidence_types": ["RCA reports", "Investigation documentation", "Forensic analysis records"]
+    },
+    {
+      "control_id": "RS.AN-06",
+      "domain": "Respond - Incident Analysis",
+      "title": "Investigation actions recorded",
+      "description": "Actions performed during an investigation are recorded, and the records' integrity and provenance are preserved.",
+      "keywords": ["chain of custody", "investigation records", "evidence preservation", "provenance"],
+      "evidence_types": ["Case management records", "Chain of custody documentation", "Audit logs of investigation"]
+    },
+    {
+      "control_id": "RS.AN-07",
+      "domain": "Respond - Incident Analysis",
+      "title": "Incident data and metadata collected",
+      "description": "Incident data and metadata are collected, and their integrity is preserved.",
+      "keywords": ["evidence collection", "integrity", "metadata", "forensic data"],
+      "evidence_types": ["Evidence collection procedures", "Hash records", "Integrity verification"]
+    },
+    {
+      "control_id": "RS.AN-08",
+      "domain": "Respond - Incident Analysis",
+      "title": "Incident magnitude estimated",
+      "description": "An incident's magnitude is estimated and validated.",
+      "keywords": ["magnitude", "scope", "impact estimation", "blast radius"],
+      "evidence_types": ["Magnitude assessment", "Scope documentation", "Impact validation records"]
+    },
+    {
+      "control_id": "RS.CO-02",
+      "domain": "Respond - Reporting & Communication",
+      "title": "Stakeholders notified of incidents",
+      "description": "Internal and external stakeholders are notified of incidents.",
+      "keywords": ["notification", "stakeholder communication", "regulatory notification", "breach notification"],
+      "evidence_types": ["Notification procedures", "Notification records", "Regulatory filings", "Customer communications"]
+    },
+    {
+      "control_id": "RS.CO-03",
+      "domain": "Respond - Reporting & Communication",
+      "title": "Information shared with stakeholders",
+      "description": "Information is shared with designated internal and external stakeholders.",
+      "keywords": ["information sharing", "communication", "transparency"],
+      "evidence_types": ["Communication plan", "Status updates", "Information sharing logs"]
+    },
+    {
+      "control_id": "RS.MI-01",
+      "domain": "Respond - Incident Mitigation",
+      "title": "Incidents contained",
+      "description": "Incidents are contained.",
+      "keywords": ["containment", "isolation", "quarantine", "mitigation"],
+      "evidence_types": ["Containment procedures", "Containment evidence", "Isolation records"]
+    },
+    {
+      "control_id": "RS.MI-02",
+      "domain": "Respond - Incident Mitigation",
+      "title": "Incidents eradicated",
+      "description": "Incidents are eradicated.",
+      "keywords": ["eradication", "removal", "remediation", "cleanup"],
+      "evidence_types": ["Eradication procedures", "Eradication records", "Verification of removal"]
+    },
+    {
+      "control_id": "RC.RP-01",
+      "domain": "Recover - Incident Recovery Plan",
+      "title": "Recovery plan executed",
+      "description": "The recovery portion of the incident response plan is executed once initiated from the RS.MA subcategory.",
+      "keywords": ["recovery", "plan execution", "restoration"],
+      "evidence_types": ["Recovery plan", "Execution records", "Recovery activities log"]
+    },
+    {
+      "control_id": "RC.RP-02",
+      "domain": "Recover - Incident Recovery Plan",
+      "title": "Recovery actions prioritized and performed",
+      "description": "Recovery actions are selected, scoped, prioritized, and performed.",
+      "keywords": ["recovery actions", "prioritization", "restoration"],
+      "evidence_types": ["Recovery prioritization matrix", "Action records", "Restoration evidence"]
+    },
+    {
+      "control_id": "RC.RP-03",
+      "domain": "Recover - Incident Recovery Plan",
+      "title": "Backup integrity verified before use",
+      "description": "The integrity of backups and other restoration assets is verified before using them for restoration.",
+      "keywords": ["backup integrity", "verification", "restoration assets"],
+      "evidence_types": ["Integrity verification procedure", "Hash verification records", "Test restore results"]
+    },
+    {
+      "control_id": "RC.RP-04",
+      "domain": "Recover - Incident Recovery Plan",
+      "title": "Post-incident operational norms established",
+      "description": "Critical mission functions and cybersecurity risk management are considered to establish post-incident operational norms.",
+      "keywords": ["post-incident", "operational norms", "new normal"],
+      "evidence_types": ["Post-incident operations plan", "Decisions log", "Function prioritization records"]
+    },
+    {
+      "control_id": "RC.RP-05",
+      "domain": "Recover - Incident Recovery Plan",
+      "title": "Restored assets verified",
+      "description": "The integrity of restored assets is verified, systems and services are restored, and normal operating status is confirmed.",
+      "keywords": ["verification", "restoration", "normal operations"],
+      "evidence_types": ["Integrity verification records", "Restoration confirmation", "Service validation"]
+    },
+    {
+      "control_id": "RC.RP-06",
+      "domain": "Recover - Incident Recovery Plan",
+      "title": "End of recovery declared",
+      "description": "The end of incident recovery is declared based on criteria, and incident-related documentation is completed.",
+      "keywords": ["recovery completion", "closure", "documentation"],
+      "evidence_types": ["Closure criteria", "Closure declarations", "Final incident report"]
+    },
+    {
+      "control_id": "RC.CO-03",
+      "domain": "Recover - Recovery Communication",
+      "title": "Recovery progress communicated to stakeholders",
+      "description": "Recovery activities and progress in restoring operational capabilities are communicated to designated internal and external stakeholders.",
+      "keywords": ["recovery communication", "progress reporting", "stakeholder updates"],
+      "evidence_types": ["Communication plan", "Status update records", "Stakeholder briefings"]
+    },
+    {
+      "control_id": "RC.CO-04",
+      "domain": "Recover - Recovery Communication",
+      "title": "Public updates on recovery shared",
+      "description": "Public updates on incident recovery are shared using approved methods and messaging.",
+      "keywords": ["public communication", "press releases", "customer updates", "messaging"],
+      "evidence_types": ["Public communication procedures", "Approved messaging", "Press releases", "Customer notification records"]
+    }
+  ]
+}
