@@ -1,0 +1,416 @@
+{
+  "framework_id": "PCI-DSS4.0.1",
+  "version": "PCI DSS v4.0.1 (June 2024)",
+  "name": "PCI DSS v4.0.1 — Payment Card Industry Data Security Standard",
+  "total_controls": 264,
+  "controls": [
+    {
+      "control_id": "Req.1.1",
+      "domain": "Network Security Controls",
+      "title": "NSC policies and procedures defined",
+      "description": "Network security controls (NSC) policies and procedures are defined, implemented, and maintained — including documented standards, change control, and review.",
+      "keywords": ["network security", "firewall policy", "NSC", "network controls"],
+      "evidence_types": ["Network security policy", "Firewall policy", "Network diagrams", "Change records"]
+    },
+    {
+      "control_id": "Req.1.2",
+      "domain": "Network Security Controls",
+      "title": "NSC configurations restrict traffic",
+      "description": "NSC configurations restrict traffic to/from the CDE to only what is necessary, with deny-all default and documented business justification for allowed ports/services.",
+      "keywords": ["firewall rules", "traffic restriction", "deny all", "ruleset"],
+      "evidence_types": ["Firewall ruleset review", "Ruleset documentation", "Business justification log", "6-monthly review records"]
+    },
+    {
+      "control_id": "Req.1.2.3",
+      "domain": "Network Security Controls",
+      "title": "Current network and data flow diagrams",
+      "description": "Network diagrams and data flow diagrams are current, accurate, and document CDE boundaries and all account data flows.",
+      "keywords": ["network diagram", "data flow", "DFD", "CDE boundary"],
+      "evidence_types": ["Network diagram", "Data flow diagram", "Architecture documentation"]
+    },
+    {
+      "control_id": "Req.1.3",
+      "domain": "Network Security Controls",
+      "title": "Inbound and outbound CDE traffic restricted",
+      "description": "Inbound and outbound network traffic to/from the CDE is restricted to only that necessary, with egress filtering and explicit rule documentation.",
+      "keywords": ["egress filtering", "ingress", "CDE traffic", "segmentation"],
+      "evidence_types": ["Egress rules", "Ingress rules", "Firewall configuration", "Traffic justification"]
+    },
+    {
+      "control_id": "Req.1.4",
+      "domain": "Network Security Controls",
+      "title": "Trusted/untrusted network connections controlled",
+      "description": "Network connections between trusted and untrusted networks are controlled with DMZ architecture, stateful inspection, anti-spoofing, and NAT.",
+      "keywords": ["DMZ", "trusted network", "untrusted", "anti-spoofing", "NAT"],
+      "evidence_types": ["DMZ architecture documentation", "Anti-spoofing ACLs", "NAT configuration", "IDS/IPS configuration"]
+    },
+    {
+      "control_id": "Req.2.1",
+      "domain": "Secure Configuration",
+      "title": "Vendor defaults and security parameters managed",
+      "description": "Processes for managing vendor defaults and other security parameters are documented and applied to all system components.",
+      "keywords": ["hardening", "vendor defaults", "secure configuration", "baselines"],
+      "evidence_types": ["Hardening policy", "Configuration standards", "Baseline documentation"]
+    },
+    {
+      "control_id": "Req.2.2",
+      "domain": "Secure Configuration",
+      "title": "System configuration standards developed",
+      "description": "System configuration standards are developed for all system components (CIS Benchmarks or equivalent) and applied before deployment.",
+      "keywords": ["CIS benchmark", "configuration standards", "hardening", "baseline"],
+      "evidence_types": ["CIS Benchmark configuration", "Per-platform standards", "Compliance scan results"]
+    },
+    {
+      "control_id": "Req.2.2.2",
+      "domain": "Secure Configuration",
+      "title": "Vendor default accounts managed",
+      "description": "Vendor default accounts are managed (disabled, renamed, or password changed) before deploying systems to production.",
+      "keywords": ["default accounts", "default passwords", "vendor accounts"],
+      "evidence_types": ["Default account audit", "Configuration evidence", "Deployment checklist"]
+    },
+    {
+      "control_id": "Req.2.2.7",
+      "domain": "Secure Configuration",
+      "title": "Non-console admin access encrypted",
+      "description": "All non-console administrative access is encrypted using strong cryptography (SSH, HTTPS, TLS).",
+      "keywords": ["admin access", "SSH", "HTTPS", "encryption", "non-console"],
+      "evidence_types": ["SSH/HTTPS configuration", "TLS configuration", "Admin access policy"]
+    },
+    {
+      "control_id": "Req.3.2",
+      "domain": "Protect Stored Account Data",
+      "title": "Account data storage minimized",
+      "description": "Account data storage is minimized; retention and disposal policies are defined and enforced; data is purged when no longer needed.",
+      "keywords": ["data retention", "data minimization", "data disposal", "storage"],
+      "evidence_types": ["Data retention policy", "Disposal procedures", "Retention schedules", "Disposal records"]
+    },
+    {
+      "control_id": "Req.3.3",
+      "domain": "Protect Stored Account Data",
+      "title": "SAD not retained after authorization",
+      "description": "Sensitive authentication data (SAD) — full magnetic stripe, CAV2/CVV2/CVC2/CID, PIN/PIN block — is not retained after authorization. If stored pre-authorization, it is encrypted.",
+      "keywords": ["SAD", "CVV", "CVC", "PIN", "magnetic stripe", "authentication data"],
+      "evidence_types": ["Database scans", "Code review records", "Storage audit", "Application review"]
+    },
+    {
+      "control_id": "Req.3.4",
+      "domain": "Protect Stored Account Data",
+      "title": "PAN protected wherever stored",
+      "description": "PAN is rendered unreadable wherever it is stored — using strong cryptography, truncation, tokenization, or hashing.",
+      "keywords": ["PAN", "cardholder data", "encryption", "tokenization", "truncation"],
+      "evidence_types": ["Encryption evidence", "Tokenization architecture", "Masking implementation", "Algorithm review"]
+    },
+    {
+      "control_id": "Req.3.5",
+      "domain": "Protect Stored Account Data",
+      "title": "PAN secured with strong cryptography",
+      "description": "PAN is secured with strong cryptography (AES-256 or equivalent), with no use of deprecated algorithms (DES, RC4, MD5 for integrity).",
+      "keywords": ["strong cryptography", "AES", "encryption algorithm", "deprecated"],
+      "evidence_types": ["Cryptography standards", "Algorithm inventory", "Configuration review"]
+    },
+    {
+      "control_id": "Req.3.6",
+      "domain": "Protect Stored Account Data",
+      "title": "Cryptographic keys secured",
+      "description": "Cryptographic keys used for PAN encryption are secured with key management procedures covering generation, distribution, storage, rotation, and retirement.",
+      "keywords": ["key management", "cryptographic keys", "key rotation", "HSM"],
+      "evidence_types": ["Key management policy", "HSM evidence", "Key rotation records", "Custodian agreements"]
+    },
+    {
+      "control_id": "Req.3.7",
+      "domain": "Protect Stored Account Data",
+      "title": "Key management procedures implemented",
+      "description": "Key management procedures and processes are implemented — split knowledge, dual control, key-encrypting keys, compromise procedures, custodian responsibilities.",
+      "keywords": ["split knowledge", "dual control", "key custodian", "key compromise"],
+      "evidence_types": ["Key management procedures", "Custodian agreements", "Compromise procedures", "Split knowledge evidence"]
+    },
+    {
+      "control_id": "Req.4.1",
+      "domain": "Protect Data in Transit",
+      "title": "PAN-in-transit protection processes defined",
+      "description": "Processes for protecting PAN with strong cryptography during transmission over open, public networks are defined and implemented.",
+      "keywords": ["data in transit", "PAN transmission", "cryptography policy"],
+      "evidence_types": ["Cryptography policy", "Network architecture", "Transmission inventory"]
+    },
+    {
+      "control_id": "Req.4.2",
+      "domain": "Protect Data in Transit",
+      "title": "PAN encrypted in transit on open networks",
+      "description": "PAN is protected during transmission over open, public networks using TLS 1.2+ (no SSL, TLS 1.0/1.1). Certificate inventory is maintained.",
+      "keywords": ["TLS", "encryption in transit", "certificates", "open networks"],
+      "evidence_types": ["TLS configuration", "Certificate inventory", "SSL Labs scans", "Cipher suite review"]
+    },
+    {
+      "control_id": "Req.5.2",
+      "domain": "Malware Protection",
+      "title": "Anti-malware deployed on applicable systems",
+      "description": "Anti-malware solution(s) are deployed on all system components subject to malware risk, with detection of all known malware types.",
+      "keywords": ["anti-malware", "antivirus", "AV", "EDR", "malware"],
+      "evidence_types": ["AV deployment inventory", "Coverage report", "Vendor capability matrix"]
+    },
+    {
+      "control_id": "Req.5.3",
+      "domain": "Malware Protection",
+      "title": "Anti-malware maintained and monitored",
+      "description": "Anti-malware solution is kept current (auto-update), performs periodic and real-time scans, logs results, and cannot be disabled by end users.",
+      "keywords": ["anti-malware updates", "real-time scanning", "AV logs", "tamper protection"],
+      "evidence_types": ["Update logs", "Scan schedule", "SIEM integration", "Tamper protection config"]
+    },
+    {
+      "control_id": "Req.5.4",
+      "domain": "Malware Protection",
+      "title": "Anti-phishing technical controls",
+      "description": "Automated technical solutions detect and protect against phishing attacks (new in v4.0). Includes email gateway filtering, URL filtering, DMARC/DKIM/SPF.",
+      "keywords": ["anti-phishing", "phishing protection", "DMARC", "DKIM", "SPF", "email security"],
+      "evidence_types": ["Email gateway config", "DMARC/DKIM/SPF records", "URL filter configuration"]
+    },
+    {
+      "control_id": "Req.6.2",
+      "domain": "Secure Development",
+      "title": "Secure software development practices",
+      "description": "Bespoke and custom software is developed securely using secure coding guidelines, developer training, code review, and protection against OWASP Top 10.",
+      "keywords": ["secure development", "SDLC", "secure coding", "code review", "OWASP"],
+      "evidence_types": ["SDLC policy", "Coding standards", "Training records", "SAST/DAST reports", "Code review records"]
+    },
+    {
+      "control_id": "Req.6.3",
+      "domain": "Vulnerability Management",
+      "title": "Vulnerabilities identified and addressed",
+      "description": "Security vulnerabilities are identified, ranked by risk (CVSS or similar), and addressed via patching with defined SLAs.",
+      "keywords": ["vulnerability management", "CVSS", "patch management", "ranking"],
+      "evidence_types": ["Vulnerability management policy", "Patch SLAs", "Patching evidence", "Inventory/SBOM"]
+    },
+    {
+      "control_id": "Req.6.4",
+      "domain": "Secure Development",
+      "title": "Public-facing web apps protected",
+      "description": "Public-facing web applications are protected against attacks via WAF (in blocking mode) or annual application testing. Payment page scripts are inventoried and integrity-monitored (v4.0 new).",
+      "keywords": ["WAF", "web application firewall", "payment scripts", "script integrity"],
+      "evidence_types": ["WAF configuration", "Script inventory", "Integrity monitoring", "App test reports"]
+    },
+    {
+      "control_id": "Req.6.5",
+      "domain": "Change Management",
+      "title": "Changes managed securely",
+      "description": "Changes to system components are managed via formal change control, environment separation, no live PANs in pre-prod, and post-change security verification.",
+      "keywords": ["change management", "change control", "environment separation", "test data"],
+      "evidence_types": ["Change management policy", "Change tickets", "Environment separation", "Test data sanitization"]
+    },
+    {
+      "control_id": "Req.7.2",
+      "domain": "Access Control",
+      "title": "Access restricted by least privilege",
+      "description": "Access to system components and cardholder data is restricted based on least privilege, need-to-know, role-based assignment, and 6-monthly access reviews.",
+      "keywords": ["least privilege", "need to know", "RBAC", "access review"],
+      "evidence_types": ["RBAC matrix", "Access review records", "Privilege approval workflow", "IAM configuration"]
+    },
+    {
+      "control_id": "Req.7.3",
+      "domain": "Access Control",
+      "title": "Access control system enforcement",
+      "description": "An access control system is in place to restrict access to the CDE, configured to enforce least privilege with deny-by-default, and kept current.",
+      "keywords": ["access control system", "IAM", "PAM", "deny by default"],
+      "evidence_types": ["IAM/PAM deployment", "ACL review", "Deny-by-default config", "Update records"]
+    },
+    {
+      "control_id": "Req.8.2",
+      "domain": "Authentication",
+      "title": "User IDs and credentials managed",
+      "description": "All users have unique IDs; shared/group/generic accounts only with documented exception; accounts managed through formal lifecycle; inactive accounts disabled within 90 days; sessions timeout after 15 minutes.",
+      "keywords": ["unique ID", "shared accounts", "account lifecycle", "session timeout"],
+      "evidence_types": ["Account audit", "IAM lifecycle records", "Inactive account procedures", "Session timeout config"]
+    },
+    {
+      "control_id": "Req.8.3",
+      "domain": "Authentication",
+      "title": "Strong authentication established",
+      "description": "Strong authentication is established and managed — password length min 12 characters, complexity, 90-day expiry (where MFA not used), password history of 4, account lockout after invalid attempts.",
+      "keywords": ["password policy", "12 characters", "complexity", "password history", "lockout"],
+      "evidence_types": ["Password policy config", "Authentication policy", "Lockout configuration"]
+    },
+    {
+      "control_id": "Req.8.4",
+      "domain": "Authentication",
+      "title": "MFA for all CDE access (v4.0)",
+      "description": "MFA is implemented for ALL access into the CDE (key v4.0 change — extended from admin/remote only to all users). MFA configured to prevent bypass.",
+      "keywords": ["MFA", "multi-factor authentication", "CDE access", "two-factor", "2FA"],
+      "evidence_types": ["MFA configuration", "MFA coverage report", "Bypass prevention config", "Audit logs"]
+    },
+    {
+      "control_id": "Req.8.5",
+      "domain": "Authentication",
+      "title": "MFA misuse prevented",
+      "description": "MFA systems are configured to prevent misuse — anti-replay, anti-fatigue, anti-phishing-resistant where possible.",
+      "keywords": ["MFA misuse", "MFA fatigue", "anti-replay", "phishing resistant"],
+      "evidence_types": ["MFA system configuration", "Anti-fatigue controls", "Authenticator policy"]
+    },
+    {
+      "control_id": "Req.9.2",
+      "domain": "Physical Security",
+      "title": "Physical access to facilities controlled",
+      "description": "Physical access controls protect facility entry and sensitive areas — badge access, visitor management, CCTV, control of network jacks and wireless devices.",
+      "keywords": ["physical access", "badge", "visitor management", "CCTV"],
+      "evidence_types": ["Physical security policy", "Badge access logs", "Visitor log", "CCTV records"]
+    },
+    {
+      "control_id": "Req.9.4",
+      "domain": "Physical Security",
+      "title": "Media containing CHD secured",
+      "description": "Media containing cardholder data is securely stored, classified, transported (tracked courier), distributed, and destroyed (cross-cut shred for paper, secure wipe/destroy for electronic).",
+      "keywords": ["media handling", "media destruction", "shredding", "secure wipe"],
+      "evidence_types": ["Media inventory", "Destruction certificates", "Chain of custody", "Disposal records"]
+    },
+    {
+      "control_id": "Req.9.5",
+      "domain": "Physical Security",
+      "title": "POI device protection from tampering",
+      "description": "Point-of-interaction (POI) devices are protected from tampering and skimming through inspection programs, with documented checklists and inventory.",
+      "keywords": ["POI", "skimming", "tampering", "point of interaction", "device inspection"],
+      "evidence_types": ["POI inspection schedule", "Inspection checklist", "POI inventory", "Tamper-evident records"]
+    },
+    {
+      "control_id": "Req.10.2",
+      "domain": "Logging & Monitoring",
+      "title": "Audit logs implemented",
+      "description": "Audit logs capture all user access to CHD, admin/root actions, access to audit logs, invalid auth attempts, authentication events, log service events, and creation/deletion of system objects.",
+      "keywords": ["audit logs", "logging", "SIEM", "log capture"],
+      "evidence_types": ["SIEM/log management platform", "Log samples", "Logging configuration", "Coverage matrix"]
+    },
+    {
+      "control_id": "Req.10.3",
+      "domain": "Logging & Monitoring",
+      "title": "Audit logs protected",
+      "description": "Audit logs are protected from destruction and modification — immutable storage, restricted access, prompt central backup, file integrity monitoring.",
+      "keywords": ["log integrity", "immutable", "log protection", "FIM"],
+      "evidence_types": ["Log integrity controls", "Central log backup config", "FIM on logs", "Access controls"]
+    },
+    {
+      "control_id": "Req.10.4",
+      "domain": "Logging & Monitoring",
+      "title": "Audit logs reviewed (automated v4.0)",
+      "description": "Audit logs are reviewed daily to identify anomalies. Automated log review mechanisms (SIEM correlation/alerting) are used (new in v4.0). Exceptions addressed promptly.",
+      "keywords": ["log review", "automated review", "SIEM alerts", "anomaly detection"],
+      "evidence_types": ["SIEM alert rules", "Review records", "Ticket records tied to alerts"]
+    },
+    {
+      "control_id": "Req.10.5",
+      "domain": "Logging & Monitoring",
+      "title": "Log history retained 12+ months",
+      "description": "Audit log history is retained for at least 12 months, with the last 3 months immediately available for analysis.",
+      "keywords": ["log retention", "12 months", "log history"],
+      "evidence_types": ["Retention policy", "Storage configuration", "Log availability evidence"]
+    },
+    {
+      "control_id": "Req.10.6",
+      "domain": "Logging & Monitoring",
+      "title": "Time synchronization",
+      "description": "Time-synchronization technology (NTP) is used; all CDE system clocks are synchronized to a consistent time source.",
+      "keywords": ["NTP", "time sync", "time synchronization", "clock sync"],
+      "evidence_types": ["NTP configuration", "Time source documentation", "Sync verification"]
+    },
+    {
+      "control_id": "Req.10.7",
+      "domain": "Logging & Monitoring",
+      "title": "Critical security control failures detected (v4.0)",
+      "description": "Failures of critical security controls (AV, FW, IDS/IPS, audit logging, etc.) are detected, alerted on, and addressed promptly (new in v4.0).",
+      "keywords": ["control failure", "monitoring failure", "alerting", "critical controls"],
+      "evidence_types": ["Health monitoring configuration", "Alerting evidence", "Failure response records"]
+    },
+    {
+      "control_id": "Req.11.2",
+      "domain": "Security Testing",
+      "title": "Wireless access points managed",
+      "description": "Authorized and unauthorized wireless access points are managed through quarterly scans and rogue AP detection, reconciled against the AP inventory.",
+      "keywords": ["wireless", "rogue AP", "wireless scan", "WIPS"],
+      "evidence_types": ["Wireless scan results", "AP inventory", "Rogue detection alerts"]
+    },
+    {
+      "control_id": "Req.11.3",
+      "domain": "Security Testing",
+      "title": "Vulnerability scans performed",
+      "description": "Internal and external vulnerability scans are performed at least quarterly; external scans by an ASV; all exploitable vulnerabilities remediated and re-scanned until passing.",
+      "keywords": ["vulnerability scan", "ASV", "quarterly", "internal scan", "external scan"],
+      "evidence_types": ["Internal scan reports", "ASV scan reports", "Remediation evidence", "Re-scan results"]
+    },
+    {
+      "control_id": "Req.11.4",
+      "domain": "Security Testing",
+      "title": "Penetration testing performed",
+      "description": "External and internal penetration testing is performed at least annually and after significant changes. Network segmentation is verified by pen testing every 6 months.",
+      "keywords": ["penetration testing", "pen test", "segmentation testing"],
+      "evidence_types": ["Pen test reports", "Segmentation test reports", "Remediation tracking", "Re-test confirmation"]
+    },
+    {
+      "control_id": "Req.11.5",
+      "domain": "Security Testing",
+      "title": "IDS/IPS and change detection deployed",
+      "description": "Intrusion detection and/or prevention is deployed at CDE perimeter and critical points. Change detection (FIM) monitors critical files in CDE.",
+      "keywords": ["IDS", "IPS", "intrusion detection", "FIM", "file integrity"],
+      "evidence_types": ["IDS/IPS configuration", "Alert logs", "FIM configuration", "Tuning records"]
+    },
+    {
+      "control_id": "Req.11.6",
+      "domain": "Security Testing",
+      "title": "Payment page change/tamper detection (v4.0)",
+      "description": "Change and tamper detection mechanism for payment pages monitors and alerts on unauthorized modifications to payment page contents/scripts (new in v4.0).",
+      "keywords": ["payment page", "tamper detection", "script integrity", "e-skimming", "Magecart"],
+      "evidence_types": ["Script integrity monitoring", "HTTP header monitoring", "Alert configuration", "Inventory"]
+    },
+    {
+      "control_id": "Req.12.1",
+      "domain": "Information Security Policy",
+      "title": "Information security policy maintained",
+      "description": "A comprehensive information security policy is defined, published, communicated, and reviewed at least annually with management approval.",
+      "keywords": ["security policy", "information security policy", "annual review"],
+      "evidence_types": ["Security policy", "Annual review records", "Distribution evidence", "Management approval"]
+    },
+    {
+      "control_id": "Req.12.3",
+      "domain": "Risk Management",
+      "title": "Risks to CHD managed via TRA",
+      "description": "Targeted Risk Analysis (TRA) is performed for flexible-frequency requirements and customised approach controls; cryptographic algorithms and technologies reviewed annually.",
+      "keywords": ["targeted risk analysis", "TRA", "risk assessment", "customised approach"],
+      "evidence_types": ["TRA documentation", "Crypto inventory", "Annual review records", "TRA templates"]
+    },
+    {
+      "control_id": "Req.12.5",
+      "domain": "Scope Management",
+      "title": "PCI DSS scope documented and validated",
+      "description": "PCI DSS scope is documented; in-scope inventory maintained; scope verified at least annually and after major changes.",
+      "keywords": ["scope", "CDE inventory", "scope validation", "scoping"],
+      "evidence_types": ["Scope document", "CDE inventory", "Annual scope review", "Post-change reviews"]
+    },
+    {
+      "control_id": "Req.12.6",
+      "domain": "Awareness & Training",
+      "title": "Security awareness program",
+      "description": "A security awareness program is implemented; reviewed annually; personnel acknowledge security policy at least annually.",
+      "keywords": ["security awareness", "training", "annual training", "acknowledgement"],
+      "evidence_types": ["Awareness program", "Training records", "Acknowledgement forms", "Annual review"]
+    },
+    {
+      "control_id": "Req.12.7",
+      "domain": "Personnel Security",
+      "title": "Personnel screening",
+      "description": "Personnel are screened (background checks where permitted by law) before being granted access to the CDE.",
+      "keywords": ["background check", "personnel screening", "pre-employment"],
+      "evidence_types": ["Background check policy", "Screening records", "HR procedures"]
+    },
+    {
+      "control_id": "Req.12.8",
+      "domain": "Third-Party Service Providers",
+      "title": "TPSP management",
+      "description": "Third-party service providers with CHD access are inventoried; bound by written agreements acknowledging PCI DSS responsibility; due diligence performed; annual compliance status monitored; responsibility matrix maintained.",
+      "keywords": ["TPSP", "third-party service provider", "vendor management", "AOC"],
+      "evidence_types": ["TPSP register", "Signed agreements", "AOC records", "Responsibility matrix", "Annual confirmations"]
+    },
+    {
+      "control_id": "Req.12.10",
+      "domain": "Incident Response",
+      "title": "Incident response plan and testing",
+      "description": "Incident response plan is documented, tested annually, with designated 24/7 personnel, trained team, alert integration, and procedures for unexpected PAN discovery.",
+      "keywords": ["incident response", "IR plan", "annual test", "24/7", "PAN discovery"],
+      "evidence_types": ["IR plan", "Test/tabletop records", "On-call roster", "Training records", "PAN discovery procedure"]
+    }
+  ]
+}
