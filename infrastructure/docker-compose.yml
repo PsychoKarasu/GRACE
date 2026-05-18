@@ -14,7 +14,7 @@ services:
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     volumes:
-      - grace-data:/app/data
+      - grace-data:/app/data/db
       - ../prompt-library:/prompt-library:ro
     restart: unless-stopped
     healthcheck:

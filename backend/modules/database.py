@@ -10,7 +10,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-DB_PATH = Path(__file__).parent.parent / "data" / "grace.db"
+DB_PATH = Path(__file__).parent.parent / "data" / "db" / "grace.db"
+DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 
 def get_db() -> sqlite3.Connection:

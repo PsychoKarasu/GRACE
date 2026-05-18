@@ -12,8 +12,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Create data directory
-RUN mkdir -p /app/data
+# Create db subdir; frameworks/ comes from COPY above and is masked
+# by no volume (only /app/data/db is mounted by docker-compose).
+RUN mkdir -p /app/data/db
 
 EXPOSE 8000
 
