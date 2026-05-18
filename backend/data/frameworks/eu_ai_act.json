@@ -1,0 +1,40 @@
+{
+  "framework_id": "EUAIACT",
+  "version": "Regulation (EU) 2024/1689",
+  "name": "EU AI Act — Risk-Tiered Obligations",
+  "total_controls": 4,
+  "controls": [
+    {
+      "control_id": "Tier-1-Prohibited",
+      "domain": "Prohibited AI Practices (Art. 5)",
+      "title": "Prohibited AI practices — complete ban",
+      "description": "AI systems falling under Art. 5 are PROHIBITED in the EU (applies from 2 February 2025). The 8 prohibited categories: (a) subliminal/manipulative techniques causing significant harm; (b) exploitation of vulnerabilities (age, disability, socioeconomic); (c) social scoring leading to detrimental treatment; (d) predictive criminal risk assessment based solely on profiling; (e) untargeted facial recognition database scraping; (f) emotion inference in workplace/education (except medical/safety); (g) biometric categorization for sensitive attributes (race, political opinion, sexual orientation); (h) real-time remote biometric identification in public spaces by law enforcement (narrow exceptions). Penalty: up to EUR 35M or 7% global annual turnover.",
+      "keywords": ["prohibited", "art 5", "manipulation", "social scoring", "biometric categorization", "emotion inference", "predictive policing", "facial recognition scraping", "real-time RBI"],
+      "evidence_types": ["AI inventory with Art.5 screening", "Prohibited practice attestation", "Use case prohibition analysis", "Decision not to deploy", "Legal opinion on prohibition"]
+    },
+    {
+      "control_id": "Tier-2-HighRisk",
+      "domain": "High-Risk AI Systems (Arts. 6-49, Annex I/III)",
+      "title": "High-risk AI systems — full conformity regime",
+      "description": "AI systems classified as high-risk under Art. 6 must meet the full obligations of Arts. 8-17 and 26 (apply from 2 August 2026 for Annex III; 2 August 2027 for Annex I product safety components). Path A: safety components of Annex I products requiring third-party conformity assessment. Path B: systems listed in Annex III (biometrics, critical infrastructure, education, employment, essential public/private services, law enforcement, migration/asylum, justice/democracy) unless narrow non-high-risk exceptions apply — note: any system PROFILING natural persons is always high-risk (Art. 6(3) override). Mandatory: risk management (Art. 9), data governance (Art. 10), technical documentation (Art. 11), record-keeping/logging (Art. 12), transparency to deployers (Art. 13), human oversight (Art. 14), accuracy/robustness/cybersecurity (Art. 15), QMS (Art. 17), conformity assessment + CE marking (Arts. 43-48), EU AI database registration (Art. 49). Deployer obligations (Art. 26): instructions compliance, staff competence, monitoring, incident notification, 6-month log retention, worker notification, public authority registration. Penalty: up to EUR 15M or 3% global annual turnover.",
+      "keywords": ["high risk", "art 6", "annex iii", "annex i", "conformity assessment", "CE marking", "human oversight", "QMS", "technical documentation", "risk management system", "high-risk AI"],
+      "evidence_types": ["AI risk classification record", "Risk management system documentation (Art.9)", "Data governance documentation (Art.10)", "Technical documentation per Annex IV (Art.11)", "Logging configuration (Art.12)", "Instructions for use (Art.13)", "Human oversight design (Art.14)", "Accuracy/robustness/cybersecurity test reports (Art.15)", "Quality management system (Art.17)", "EU Declaration of Conformity (Art.47)", "EU AI database registration (Art.49)", "Fundamental rights impact assessment", "Post-market monitoring plan (Art.72)", "Serious incident reports (Art.73)"]
+    },
+    {
+      "control_id": "Tier-3-LimitedRisk",
+      "domain": "Limited Risk — Transparency Obligations (Art. 50)",
+      "title": "Limited-risk AI — transparency disclosure required",
+      "description": "AI systems with limited risk (applies from 2 August 2026) must comply with transparency obligations under Art. 50: (1) Users must be informed they are interacting with an AI system (chatbots/conversational AI), unless obvious from context; (2) Providers of generative AI must mark synthetic content as machine-generated in machine-readable format; (3) Deployers using emotion recognition or biometric categorization (where not prohibited) must inform exposed natural persons; (4) Deployers generating or manipulating deepfakes must disclose that content is artificially generated/manipulated, except where lawfully used for criminal investigation or where authorized by law for artistic/satirical/fictional works. Includes additional GPAI transparency obligations under Arts. 53-55 (technical documentation per Annex XI, downstream provider info per Annex XII, copyright policy under Directive 2019/790, public training summary).",
+      "keywords": ["limited risk", "art 50", "transparency", "chatbot disclosure", "deepfake", "synthetic content", "AI disclosure", "watermarking", "emotion recognition", "biometric categorization"],
+      "evidence_types": ["Chatbot/AI disclosure notice", "Synthetic content marking/watermarking", "Deepfake disclosure procedures", "User interaction notification", "GPAI Annex XI documentation", "Downstream provider information (Annex XII)", "Copyright policy", "Public training data summary"]
+    },
+    {
+      "control_id": "Tier-4-MinimalRisk",
+      "domain": "Minimal/No Risk — Voluntary Codes",
+      "title": "Minimal-risk AI — no mandatory requirements",
+      "description": "AI systems posing minimal or no risk (the vast majority of AI in the EU — e.g., AI in video games, spam filters, basic recommendation systems not falling under Annex III) are NOT subject to mandatory obligations under the AI Act. However, providers are encouraged to adopt voluntary Codes of Conduct (Art. 95) addressing the requirements in Arts. 9-15 on a voluntary basis. Codes may also address environmental sustainability, accessibility, stakeholder participation, and diversity. Organisations should still document the risk-tier classification decision and maintain it for evidence purposes (especially Art. 6(3) non-high-risk documentation when Annex III applicability was considered and rejected).",
+      "keywords": ["minimal risk", "no risk", "voluntary codes", "code of conduct", "art 95", "non-high-risk", "documentation"],
+      "evidence_types": ["AI risk classification documentation", "Non-high-risk justification per Art.6(3)", "Voluntary Code of Conduct adoption (if applicable)", "AI inventory", "Tier classification rationale"]
+    }
+  ]
+}
