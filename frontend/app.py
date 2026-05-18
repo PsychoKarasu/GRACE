@@ -214,6 +214,8 @@ TRANSLATIONS = {
         "reg.update_button":          "Update",
         "reg.status_updated":         "Status updated.",
         "reg.xframework_title":       "🔗 Cross-Framework Impact",
+        "reg.xframework_show":        "🔗 Show cross-framework impact",
+        "reg.xframework_hide":        "🔗 Hide cross-framework impact",
         "reg.xframework_empty":       "No equivalent controls found in other active frameworks.",
         "reg.xframework_loading":     "Mapping controls across frameworks…",
         "reg.xframework_failed":      "Could not load cross-framework mappings.",
@@ -381,6 +383,8 @@ TRANSLATIONS = {
         "reg.update_button":          "Aggiorna",
         "reg.status_updated":         "Stato aggiornato.",
         "reg.xframework_title":       "🔗 Impatto Multi-Framework",
+        "reg.xframework_show":        "🔗 Mostra impatto multi-framework",
+        "reg.xframework_hide":        "🔗 Nascondi impatto multi-framework",
         "reg.xframework_empty":       "Nessun controllo equivalente trovato negli altri framework attivi.",
         "reg.xframework_loading":     "Mappatura controlli tra framework…",
         "reg.xframework_failed":      "Impossibile caricare le mappature multi-framework.",
@@ -2493,13 +2497,23 @@ with _main_col:
                         )
 
                         # ── Cross-framework impact (lazy, cached) ──
-                        # Collapsed by default — the heavy Claude call
-                        # only fires the first time a user expands this
-                        # panel for a given finding. Response is cached
-                        # in session_state so subsequent reruns
-                        # (theme toggle, status update) don't refetch.
-                        _xfw_cache_key = f"xfw_{f['finding_id']}"
-                        with st.expander(t("reg.xframework_title"), expanded=False):
+                        # Streamlit doesn't allow nested expanders, so we
+                        # mimic the collapse/expand behaviour with a
+                        # session_state toggle button. The heavy Claude
+                        # call only fires once: subsequent reruns (theme
+                        # toggle, status update) read from the cache.
+                        _xfw_cache_key   = f"xfw_{f['finding_id']}"
+                        _xfw_toggle_key  = f"xfw_open_{f['finding_id']}"
+                        _xfw_btn_key     = f"xfw_btn_{f['finding_id']}"
+                        is_open = st.session_state.get(_xfw_toggle_key, False)
+                        if st.button(
+                            t("reg.xframework_hide" if is_open else "reg.xframework_show"),
+                            key=_xfw_btn_key,
+                            use_container_width=False,
+                        ):
+                            st.session_state[_xfw_toggle_key] = not is_open
+                            st.rerun()
+                        if st.session_state.get(_xfw_toggle_key, False):
                             if _xfw_cache_key not in st.session_state:
                                 with st.spinner(t("reg.xframework_loading")):
                                     st.session_state[_xfw_cache_key] = api_get(
