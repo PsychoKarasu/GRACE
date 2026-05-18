@@ -1,0 +1,440 @@
+{
+  "framework_id": "HIPAA",
+  "version": "45 CFR Part 164 Subpart C (Security Rule)",
+  "name": "HIPAA Security Rule — Administrative, Physical, and Technical Safeguards",
+  "total_controls": 54,
+  "controls": [
+    {
+      "control_id": "164.308(a)(1)(i)",
+      "domain": "Administrative Safeguards",
+      "title": "Security Management Process",
+      "description": "Implement policies and procedures to prevent, detect, contain, and correct security violations affecting ePHI — the overarching framework for managing ePHI security.",
+      "keywords": ["security management", "policies", "ePHI", "security framework"],
+      "evidence_types": ["Security management policy", "ISMS documentation", "Program charter", "Management approval"]
+    },
+    {
+      "control_id": "164.308(a)(1)(ii)(A)",
+      "domain": "Administrative Safeguards",
+      "title": "Risk Analysis (Required)",
+      "description": "Conduct an accurate and thorough assessment of the potential risks and vulnerabilities to the confidentiality, integrity, and availability of ePHI. The foundation of HIPAA Security compliance and most-cited deficiency by HHS.",
+      "keywords": ["risk analysis", "risk assessment", "vulnerability assessment", "ePHI"],
+      "evidence_types": ["Risk analysis report", "Threat/vulnerability inventory", "Risk register", "NIST SP 800-30 methodology evidence"]
+    },
+    {
+      "control_id": "164.308(a)(1)(ii)(B)",
+      "domain": "Administrative Safeguards",
+      "title": "Risk Management (Required)",
+      "description": "Implement security measures sufficient to reduce risks and vulnerabilities to a reasonable and appropriate level.",
+      "keywords": ["risk management", "risk treatment", "mitigation", "remediation"],
+      "evidence_types": ["Risk management plan", "Remediation tracker", "Risk treatment decisions", "Status reports"]
+    },
+    {
+      "control_id": "164.308(a)(1)(ii)(C)",
+      "domain": "Administrative Safeguards",
+      "title": "Sanction Policy (Required)",
+      "description": "Apply appropriate sanctions against workforce members who fail to comply with the security policies and procedures of the covered entity or business associate.",
+      "keywords": ["sanction", "disciplinary", "workforce", "policy violation"],
+      "evidence_types": ["Sanction policy", "HR disciplinary procedures", "Sanction records (redacted)"]
+    },
+    {
+      "control_id": "164.308(a)(1)(ii)(D)",
+      "domain": "Administrative Safeguards",
+      "title": "Information System Activity Review (Required)",
+      "description": "Implement procedures to regularly review records of information system activity — audit logs, access reports, and security incident tracking reports.",
+      "keywords": ["audit review", "log review", "system activity", "monitoring"],
+      "evidence_types": ["Log review procedures", "Audit log samples", "Review records", "SIEM reports"]
+    },
+    {
+      "control_id": "164.308(a)(2)",
+      "domain": "Administrative Safeguards",
+      "title": "Assigned Security Responsibility (Required)",
+      "description": "Identify the Security Official who is responsible for the development and implementation of the policies and procedures required by the Security Rule.",
+      "keywords": ["security official", "CISO", "responsibility", "accountability"],
+      "evidence_types": ["Security Official appointment letter", "Job description", "Org chart"]
+    },
+    {
+      "control_id": "164.308(a)(3)(i)",
+      "domain": "Administrative Safeguards",
+      "title": "Workforce Security",
+      "description": "Implement policies and procedures to ensure that all workforce members have appropriate access to ePHI, and prevent those without access rights from obtaining access.",
+      "keywords": ["workforce security", "access management", "workforce access"],
+      "evidence_types": ["Workforce security policy", "Access governance procedure"]
+    },
+    {
+      "control_id": "164.308(a)(3)(ii)(A)",
+      "domain": "Administrative Safeguards",
+      "title": "Authorization and/or Supervision (Addressable)",
+      "description": "Implement procedures for the authorization and/or supervision of workforce members who work with ePHI or in locations where it might be accessed.",
+      "keywords": ["authorization", "supervision", "workforce", "ePHI access"],
+      "evidence_types": ["Authorization procedure", "Supervisor sign-off records", "Access approval workflow"]
+    },
+    {
+      "control_id": "164.308(a)(3)(ii)(B)",
+      "domain": "Administrative Safeguards",
+      "title": "Workforce Clearance Procedure (Addressable)",
+      "description": "Implement procedures to determine that the access of a workforce member to ePHI is appropriate.",
+      "keywords": ["clearance", "background check", "workforce screening"],
+      "evidence_types": ["Background check policy", "Clearance procedure", "Screening records"]
+    },
+    {
+      "control_id": "164.308(a)(3)(ii)(C)",
+      "domain": "Administrative Safeguards",
+      "title": "Termination Procedures (Addressable)",
+      "description": "Implement procedures for terminating access to ePHI when employment ends or workforce member's access is no longer appropriate.",
+      "keywords": ["termination", "offboarding", "access revocation"],
+      "evidence_types": ["Termination procedure", "Offboarding checklist", "Access revocation records"]
+    },
+    {
+      "control_id": "164.308(a)(4)(i)",
+      "domain": "Administrative Safeguards",
+      "title": "Information Access Management",
+      "description": "Implement policies and procedures for authorizing access to ePHI consistent with applicable Privacy Rule requirements.",
+      "keywords": ["access management", "authorization", "access policy"],
+      "evidence_types": ["Information access management policy", "Authorization procedures"]
+    },
+    {
+      "control_id": "164.308(a)(4)(ii)(A)",
+      "domain": "Administrative Safeguards",
+      "title": "Isolating Healthcare Clearinghouse Function (Required if applicable)",
+      "description": "If a healthcare clearinghouse is part of a larger organization, implement policies to protect the ePHI from unauthorized access by the larger organization.",
+      "keywords": ["clearinghouse", "isolation", "segregation"],
+      "evidence_types": ["Clearinghouse isolation policy", "Network segregation evidence", "Access control records"]
+    },
+    {
+      "control_id": "164.308(a)(4)(ii)(B)",
+      "domain": "Administrative Safeguards",
+      "title": "Access Authorization (Addressable)",
+      "description": "Implement policies and procedures for granting access to ePHI through access to a workstation, transaction, program, or other mechanism.",
+      "keywords": ["access authorization", "access request", "approval"],
+      "evidence_types": ["Access authorization procedure", "Access request forms", "Approval workflow"]
+    },
+    {
+      "control_id": "164.308(a)(4)(ii)(C)",
+      "domain": "Administrative Safeguards",
+      "title": "Access Establishment and Modification (Addressable)",
+      "description": "Implement policies and procedures that establish, document, review, and modify a user's right of access to a workstation, transaction, program, or process.",
+      "keywords": ["access modification", "access review", "user rights"],
+      "evidence_types": ["Access modification procedure", "Access review records", "Audit trails"]
+    },
+    {
+      "control_id": "164.308(a)(5)(i)",
+      "domain": "Administrative Safeguards",
+      "title": "Security Awareness and Training",
+      "description": "Implement a security awareness and training program for all members of the workforce (including management).",
+      "keywords": ["security awareness", "training", "workforce training"],
+      "evidence_types": ["Training program documentation", "Training completion records", "Training materials"]
+    },
+    {
+      "control_id": "164.308(a)(5)(ii)(A)",
+      "domain": "Administrative Safeguards",
+      "title": "Security Reminders (Addressable)",
+      "description": "Periodic security updates communicated to workforce members.",
+      "keywords": ["security reminders", "awareness communications", "updates"],
+      "evidence_types": ["Security newsletter archives", "Awareness email records", "Bulletin records"]
+    },
+    {
+      "control_id": "164.308(a)(5)(ii)(B)",
+      "domain": "Administrative Safeguards",
+      "title": "Protection from Malicious Software (Addressable)",
+      "description": "Procedures for guarding against, detecting, and reporting malicious software.",
+      "keywords": ["malicious software", "anti-malware", "antivirus", "ransomware"],
+      "evidence_types": ["Anti-malware policy", "AV deployment evidence", "Update logs", "Incident records"]
+    },
+    {
+      "control_id": "164.308(a)(5)(ii)(C)",
+      "domain": "Administrative Safeguards",
+      "title": "Log-in Monitoring (Addressable)",
+      "description": "Procedures for monitoring log-in attempts and reporting discrepancies.",
+      "keywords": ["login monitoring", "failed logins", "authentication monitoring"],
+      "evidence_types": ["Log-in monitoring configuration", "Alert procedures", "Failed login reports"]
+    },
+    {
+      "control_id": "164.308(a)(5)(ii)(D)",
+      "domain": "Administrative Safeguards",
+      "title": "Password Management (Addressable)",
+      "description": "Procedures for creating, changing, and safeguarding passwords.",
+      "keywords": ["password management", "password policy", "credentials"],
+      "evidence_types": ["Password policy", "Password configuration evidence", "Guidance materials"]
+    },
+    {
+      "control_id": "164.308(a)(6)(i)",
+      "domain": "Administrative Safeguards",
+      "title": "Security Incident Procedures",
+      "description": "Implement policies and procedures to address security incidents affecting ePHI.",
+      "keywords": ["incident procedures", "security incident", "incident handling"],
+      "evidence_types": ["Incident response policy", "IR plan", "Procedures documentation"]
+    },
+    {
+      "control_id": "164.308(a)(6)(ii)",
+      "domain": "Administrative Safeguards",
+      "title": "Response and Reporting (Required)",
+      "description": "Identify and respond to suspected or known security incidents; mitigate harmful effects; document incidents and outcomes.",
+      "keywords": ["incident response", "incident reporting", "mitigation", "documentation"],
+      "evidence_types": ["Incident response procedure", "Incident tickets", "Mitigation records", "Post-incident reports"]
+    },
+    {
+      "control_id": "164.308(a)(7)(i)",
+      "domain": "Administrative Safeguards",
+      "title": "Contingency Plan",
+      "description": "Establish (and implement as needed) policies and procedures for responding to an emergency or other occurrence (e.g., fire, vandalism, system failure, natural disaster) affecting systems containing ePHI.",
+      "keywords": ["contingency", "emergency response", "business continuity"],
+      "evidence_types": ["Contingency plan", "BCP/DR documentation", "Emergency response procedures"]
+    },
+    {
+      "control_id": "164.308(a)(7)(ii)(A)",
+      "domain": "Administrative Safeguards",
+      "title": "Data Backup Plan (Required)",
+      "description": "Establish and implement procedures to create and maintain retrievable exact copies of ePHI.",
+      "keywords": ["backup", "data backup", "ePHI backup"],
+      "evidence_types": ["Data backup policy", "Backup logs", "Backup configuration", "Test restore records"]
+    },
+    {
+      "control_id": "164.308(a)(7)(ii)(B)",
+      "domain": "Administrative Safeguards",
+      "title": "Disaster Recovery Plan (Required)",
+      "description": "Establish (and implement as needed) procedures to restore any loss of ePHI data.",
+      "keywords": ["disaster recovery", "DR plan", "restoration"],
+      "evidence_types": ["Disaster recovery plan", "Recovery procedures", "RTO/RPO documentation"]
+    },
+    {
+      "control_id": "164.308(a)(7)(ii)(C)",
+      "domain": "Administrative Safeguards",
+      "title": "Emergency Mode Operation Plan (Required)",
+      "description": "Establish (and implement as needed) procedures to enable continuation of critical business processes for protection of ePHI security while operating in emergency mode.",
+      "keywords": ["emergency mode", "emergency operations", "continuity"],
+      "evidence_types": ["Emergency mode plan", "Critical process inventory", "Workaround procedures"]
+    },
+    {
+      "control_id": "164.308(a)(7)(ii)(D)",
+      "domain": "Administrative Safeguards",
+      "title": "Testing and Revision Procedures (Addressable)",
+      "description": "Implement procedures for periodic testing and revision of contingency plans.",
+      "keywords": ["contingency testing", "tabletop", "BCP testing"],
+      "evidence_types": ["Test schedule", "Test results", "Tabletop records", "Plan revision history"]
+    },
+    {
+      "control_id": "164.308(a)(7)(ii)(E)",
+      "domain": "Administrative Safeguards",
+      "title": "Applications and Data Criticality Analysis (Addressable)",
+      "description": "Assess the relative criticality of specific applications and data in support of other contingency plan components.",
+      "keywords": ["criticality analysis", "BIA", "application criticality"],
+      "evidence_types": ["Business impact analysis", "Application criticality matrix", "Tier classification"]
+    },
+    {
+      "control_id": "164.308(a)(8)",
+      "domain": "Administrative Safeguards",
+      "title": "Evaluation (Required)",
+      "description": "Perform a periodic technical and non-technical evaluation of compliance with the Security Rule, especially after environmental or operational changes affecting ePHI security.",
+      "keywords": ["evaluation", "periodic review", "security assessment"],
+      "evidence_types": ["Evaluation reports", "Audit records", "Change-driven assessments"]
+    },
+    {
+      "control_id": "164.308(b)(1)",
+      "domain": "Administrative Safeguards",
+      "title": "Business Associate Contracts (Required)",
+      "description": "A covered entity may permit a business associate to create, receive, maintain, or transmit ePHI on its behalf only with satisfactory assurances that the BA will appropriately safeguard the information — documented in a Business Associate Agreement (BAA).",
+      "keywords": ["business associate", "BAA", "business associate agreement", "vendor"],
+      "evidence_types": ["BAA inventory", "Signed BAAs", "BA register", "Subcontractor BAAs"]
+    },
+    {
+      "control_id": "164.310(a)(1)",
+      "domain": "Physical Safeguards",
+      "title": "Facility Access Controls",
+      "description": "Implement policies and procedures to limit physical access to electronic information systems and the facility in which they are housed, while ensuring authorized access is allowed.",
+      "keywords": ["facility access", "physical access", "facility security"],
+      "evidence_types": ["Facility access policy", "Badge access logs", "Access control configuration"]
+    },
+    {
+      "control_id": "164.310(a)(2)(i)",
+      "domain": "Physical Safeguards",
+      "title": "Contingency Operations (Addressable)",
+      "description": "Establish procedures that allow facility access in support of restoration of lost data under the disaster recovery plan and emergency mode operations plan.",
+      "keywords": ["contingency access", "DR access", "emergency facility access"],
+      "evidence_types": ["Emergency access procedure", "DR facility plan", "Access procedures"]
+    },
+    {
+      "control_id": "164.310(a)(2)(ii)",
+      "domain": "Physical Safeguards",
+      "title": "Facility Security Plan (Addressable)",
+      "description": "Implement policies and procedures to safeguard the facility and the equipment therein from unauthorized physical access, tampering, and theft.",
+      "keywords": ["facility security plan", "physical security", "tampering"],
+      "evidence_types": ["Facility security plan", "Physical security policy", "Inspection records"]
+    },
+    {
+      "control_id": "164.310(a)(2)(iii)",
+      "domain": "Physical Safeguards",
+      "title": "Access Control and Validation (Addressable)",
+      "description": "Implement procedures to control and validate a person's access to facilities based on their role or function, including visitor control.",
+      "keywords": ["access validation", "visitor management", "role-based facility access"],
+      "evidence_types": ["Visitor management procedure", "Visitor logs", "Badge issuance records"]
+    },
+    {
+      "control_id": "164.310(a)(2)(iv)",
+      "domain": "Physical Safeguards",
+      "title": "Maintenance Records (Addressable)",
+      "description": "Implement policies to document repairs and modifications to the physical components of a facility related to security (e.g., hardware, walls, doors, locks).",
+      "keywords": ["maintenance records", "facility maintenance", "physical components"],
+      "evidence_types": ["Maintenance log", "Facility change records", "Work orders"]
+    },
+    {
+      "control_id": "164.310(b)",
+      "domain": "Physical Safeguards",
+      "title": "Workstation Use (Required)",
+      "description": "Implement policies and procedures that specify the proper functions to be performed, the manner in which those functions are to be performed, and the physical attributes of the surroundings of a specific workstation or class of workstations that can access ePHI.",
+      "keywords": ["workstation use", "acceptable use", "workstation policy"],
+      "evidence_types": ["Workstation use policy", "Acceptable use policy", "Workstation standards"]
+    },
+    {
+      "control_id": "164.310(c)",
+      "domain": "Physical Safeguards",
+      "title": "Workstation Security (Required)",
+      "description": "Implement physical safeguards for all workstations that access ePHI, to restrict access to authorized users.",
+      "keywords": ["workstation security", "physical safeguards", "device security"],
+      "evidence_types": ["Workstation security standards", "Screen privacy controls", "Locked-down configurations"]
+    },
+    {
+      "control_id": "164.310(d)(1)",
+      "domain": "Physical Safeguards",
+      "title": "Device and Media Controls",
+      "description": "Implement policies and procedures that govern the receipt and removal of hardware and electronic media that contain ePHI into and out of a facility, and the movement of these items within the facility.",
+      "keywords": ["device controls", "media controls", "hardware movement"],
+      "evidence_types": ["Device/media policy", "Movement records", "Asset tracking"]
+    },
+    {
+      "control_id": "164.310(d)(2)(i)",
+      "domain": "Physical Safeguards",
+      "title": "Disposal (Required)",
+      "description": "Implement policies and procedures to address the final disposition of ePHI, and/or the hardware or electronic media on which it is stored — wiping, degaussing, or physical destruction.",
+      "keywords": ["disposal", "destruction", "media disposal", "secure wipe"],
+      "evidence_types": ["Disposal policy", "Destruction certificates", "Wipe verification logs"]
+    },
+    {
+      "control_id": "164.310(d)(2)(ii)",
+      "domain": "Physical Safeguards",
+      "title": "Media Re-use (Required)",
+      "description": "Implement procedures for removal of ePHI from electronic media before the media are made available for re-use.",
+      "keywords": ["media reuse", "secure wipe", "sanitization"],
+      "evidence_types": ["Media reuse procedure", "Sanitization records", "Verification logs"]
+    },
+    {
+      "control_id": "164.310(d)(2)(iii)",
+      "domain": "Physical Safeguards",
+      "title": "Accountability (Addressable)",
+      "description": "Maintain a record of the movements of hardware and electronic media and any person responsible therefor.",
+      "keywords": ["accountability", "asset tracking", "media tracking", "chain of custody"],
+      "evidence_types": ["Asset tracking system", "Chain of custody records", "Movement logs"]
+    },
+    {
+      "control_id": "164.310(d)(2)(iv)",
+      "domain": "Physical Safeguards",
+      "title": "Data Backup and Storage (Addressable)",
+      "description": "Create a retrievable, exact copy of ePHI, when needed, before movement of equipment.",
+      "keywords": ["backup before move", "data backup", "equipment movement"],
+      "evidence_types": ["Pre-move backup procedure", "Backup verification records"]
+    },
+    {
+      "control_id": "164.312(a)(1)",
+      "domain": "Technical Safeguards",
+      "title": "Access Control",
+      "description": "Implement technical policies and procedures for electronic information systems that maintain ePHI to allow access only to those persons or software programs that have been granted access rights.",
+      "keywords": ["access control", "technical access", "RBAC"],
+      "evidence_types": ["Access control policy", "IAM configuration", "RBAC matrix"]
+    },
+    {
+      "control_id": "164.312(a)(2)(i)",
+      "domain": "Technical Safeguards",
+      "title": "Unique User Identification (Required)",
+      "description": "Assign a unique name and/or number for identifying and tracking user identity.",
+      "keywords": ["unique user ID", "user identification", "no shared accounts"],
+      "evidence_types": ["Account audit", "IAM configuration", "No-shared-account policy"]
+    },
+    {
+      "control_id": "164.312(a)(2)(ii)",
+      "domain": "Technical Safeguards",
+      "title": "Emergency Access Procedure (Required)",
+      "description": "Establish (and implement as needed) procedures for obtaining necessary ePHI during an emergency.",
+      "keywords": ["emergency access", "break-glass", "emergency procedures"],
+      "evidence_types": ["Emergency access procedure", "Break-glass account documentation", "Usage logs"]
+    },
+    {
+      "control_id": "164.312(a)(2)(iii)",
+      "domain": "Technical Safeguards",
+      "title": "Automatic Logoff (Addressable)",
+      "description": "Implement electronic procedures that terminate an electronic session after a predetermined time of inactivity.",
+      "keywords": ["automatic logoff", "session timeout", "idle timeout"],
+      "evidence_types": ["Session timeout configuration", "Workstation policy", "GPO/MDM settings"]
+    },
+    {
+      "control_id": "164.312(a)(2)(iv)",
+      "domain": "Technical Safeguards",
+      "title": "Encryption and Decryption (Addressable)",
+      "description": "Implement a mechanism to encrypt and decrypt ePHI. Encryption is addressable but is industry standard — AES-256 minimum for ePHI at rest.",
+      "keywords": ["encryption at rest", "AES", "decryption", "ePHI encryption"],
+      "evidence_types": ["Encryption policy", "Encryption configuration", "Algorithm inventory", "Key management"]
+    },
+    {
+      "control_id": "164.312(b)",
+      "domain": "Technical Safeguards",
+      "title": "Audit Controls (Required)",
+      "description": "Implement hardware, software, and/or procedural mechanisms that record and examine activity in information systems that contain or use ePHI.",
+      "keywords": ["audit controls", "logging", "audit logs", "SIEM"],
+      "evidence_types": ["Logging configuration", "SIEM evidence", "Log retention policy", "Audit log samples"]
+    },
+    {
+      "control_id": "164.312(c)(1)",
+      "domain": "Technical Safeguards",
+      "title": "Integrity",
+      "description": "Implement policies and procedures to protect ePHI from improper alteration or destruction.",
+      "keywords": ["integrity", "data integrity", "alteration protection"],
+      "evidence_types": ["Integrity policy", "Hash verification", "Database integrity controls"]
+    },
+    {
+      "control_id": "164.312(c)(2)",
+      "domain": "Technical Safeguards",
+      "title": "Mechanism to Authenticate ePHI (Addressable)",
+      "description": "Implement electronic mechanisms to corroborate that ePHI has not been altered or destroyed in an unauthorized manner.",
+      "keywords": ["ePHI authentication", "checksums", "digital signatures", "hash"],
+      "evidence_types": ["Hash verification logs", "Digital signature evidence", "FIM configuration"]
+    },
+    {
+      "control_id": "164.312(d)",
+      "domain": "Technical Safeguards",
+      "title": "Person or Entity Authentication (Required)",
+      "description": "Implement procedures to verify that a person or entity seeking access to ePHI is the one claimed.",
+      "keywords": ["authentication", "MFA", "identity verification"],
+      "evidence_types": ["Authentication policy", "MFA configuration", "IdP configuration"]
+    },
+    {
+      "control_id": "164.312(e)(1)",
+      "domain": "Technical Safeguards",
+      "title": "Transmission Security",
+      "description": "Implement technical security measures to guard against unauthorized access to ePHI that is being transmitted over an electronic communications network.",
+      "keywords": ["transmission security", "data in transit", "network protection"],
+      "evidence_types": ["Transmission security policy", "TLS configuration", "VPN configuration"]
+    },
+    {
+      "control_id": "164.312(e)(2)(i)",
+      "domain": "Technical Safeguards",
+      "title": "Integrity Controls (Addressable)",
+      "description": "Implement security measures to ensure that electronically transmitted ePHI is not improperly modified without detection until disposed of.",
+      "keywords": ["transmission integrity", "in-transit integrity", "tamper detection"],
+      "evidence_types": ["TLS configuration", "Signed messaging", "Integrity verification logs"]
+    },
+    {
+      "control_id": "164.312(e)(2)(ii)",
+      "domain": "Technical Safeguards",
+      "title": "Encryption in Transit (Addressable)",
+      "description": "Implement a mechanism to encrypt ePHI whenever deemed appropriate. Industry standard: TLS 1.2+ for all ePHI transmissions.",
+      "keywords": ["encryption in transit", "TLS", "encryption", "transmission"],
+      "evidence_types": ["TLS configuration", "Cryptography policy", "Certificate inventory"]
+    },
+    {
+      "control_id": "164.316(b)(1)",
+      "domain": "Policies, Procedures & Documentation",
+      "title": "Documentation Requirements",
+      "description": "Maintain written (electronic or paper) policies, procedures, and records required by the Security Rule. Retention: 6 years from creation date OR date last in effect (whichever is later). Reviewed periodically and updated as needed.",
+      "keywords": ["documentation", "records", "6 year retention", "policy maintenance"],
+      "evidence_types": ["Policy repository", "Version history", "Retention records", "Review schedule"]
+    }
+  ]
+}
