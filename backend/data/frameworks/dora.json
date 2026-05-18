@@ -1,0 +1,520 @@
+{
+  "framework_id": "DORA",
+  "version": "Regulation (EU) 2022/2554",
+  "name": "DORA — Digital Operational Resilience Act",
+  "total_controls": 64,
+  "controls": [
+    {
+      "control_id": "Art.1",
+      "domain": "General Provisions",
+      "title": "Subject matter",
+      "description": "Establishes uniform requirements for the security of NIS supporting business processes of financial entities: ICT risk management, incident management/reporting, resilience testing, third-party risk, and information sharing. DORA is maximum harmonisation.",
+      "keywords": ["subject matter", "scope", "harmonisation", "financial entities"],
+      "evidence_types": ["DORA applicability assessment", "Regulatory scope analysis", "Compliance program charter"]
+    },
+    {
+      "control_id": "Art.2",
+      "domain": "General Provisions",
+      "title": "Scope",
+      "description": "Applies to a broad range of financial entities: credit institutions, payment/e-money institutions, investment firms, CASPs, CCPs, CSDs, trading venues, insurers, IORPs, CRAs, crowdfunding providers. Certain SMEs excluded.",
+      "keywords": ["scope", "applicability", "financial entities", "credit institutions"],
+      "evidence_types": ["Entity type classification", "Scope determination memo", "Exclusion analysis"]
+    },
+    {
+      "control_id": "Art.3",
+      "domain": "General Provisions",
+      "title": "Definitions",
+      "description": "Defines key terms: ICT risk, ICT-related incident, major ICT-related incident, cyber threat, critical or important function, ICT third-party service provider, critical ICT TPSP.",
+      "keywords": ["definitions", "ICT risk", "critical function", "major incident"],
+      "evidence_types": ["Glossary aligned to Art.3", "Definition mapping", "Internal terminology document"]
+    },
+    {
+      "control_id": "Art.4",
+      "domain": "General Provisions",
+      "title": "Proportionality",
+      "description": "Rules applied proportionately to size, risk profile, nature, scale and complexity. Micro-enterprises and certain entities may apply the simplified framework under Art.16.",
+      "keywords": ["proportionality", "size", "complexity", "simplified framework"],
+      "evidence_types": ["Proportionality assessment", "Tier classification", "Justification documentation"]
+    },
+    {
+      "control_id": "Art.5",
+      "domain": "ICT Risk Management",
+      "title": "Governance and organisation",
+      "description": "Management body bears ultimate responsibility for ICT risk: define risk appetite, approve policies, approve RMF, approve ICT budget, ensure ICT staffing/training, approve major ICT projects, ensure crisis communication, ensure internal audit. At least one board member reports on ICT risk.",
+      "keywords": ["governance", "management body", "board", "ICT risk appetite", "accountability"],
+      "evidence_types": ["Board minutes approving ICT RMF", "Risk appetite statement", "ICT budget approval", "Board ICT training records"]
+    },
+    {
+      "control_id": "Art.6",
+      "domain": "ICT Risk Management",
+      "title": "ICT risk management framework",
+      "description": "Maintain a robust, well-documented ICT RMF with strategies, policies, procedures, IT protocols, and tools. Review after major incidents and at least annually.",
+      "keywords": ["ICT RMF", "risk management framework", "policies", "annual review"],
+      "evidence_types": ["ICT risk management framework", "Policy suite", "Annual review records", "Post-incident reviews"]
+    },
+    {
+      "control_id": "Art.7",
+      "domain": "ICT Risk Management",
+      "title": "ICT systems, protocols and tools",
+      "description": "ICT systems, protocols, and tools must be appropriate, reliable, technologically resilient, and kept current with security standards (patched, maintained).",
+      "keywords": ["ICT systems", "resilience", "patch management", "reliability"],
+      "evidence_types": ["System inventory with criticality", "Patch management policy", "Capacity planning", "Security baseline standards"]
+    },
+    {
+      "control_id": "Art.8",
+      "domain": "ICT Risk Management",
+      "title": "Identification",
+      "description": "Identify and classify ICT-supported functions, their ICT and information assets, sources of ICT risk; maintain an updated ICT asset inventory; map interdependencies; identify single points of failure.",
+      "keywords": ["asset inventory", "classification", "interdependencies", "SPOF"],
+      "evidence_types": ["ICT asset inventory", "Asset classification scheme", "Dependency map", "SPOF analysis"]
+    },
+    {
+      "control_id": "Art.9",
+      "domain": "ICT Risk Management",
+      "title": "Protection and prevention",
+      "description": "Implement controls including information security policies, network segmentation, encryption, third-party access policies, change management, document management, patch and software update policies, and ICT project management policies.",
+      "keywords": ["protection", "segmentation", "encryption", "change management", "access controls"],
+      "evidence_types": ["Information security policy", "Network segmentation diagrams", "Cryptography policy", "Change management procedure", "Patch policy"]
+    },
+    {
+      "control_id": "Art.10",
+      "domain": "ICT Risk Management",
+      "title": "Detection",
+      "description": "Implement appropriate mechanisms to detect anomalous activities including ICT network problems and ICT-related incidents, with multiple layers of control and defined thresholds for alerts.",
+      "keywords": ["detection", "SIEM", "anomaly detection", "monitoring", "alerts"],
+      "evidence_types": ["SIEM configuration", "Detection capability inventory", "Alert thresholds", "Monitoring coverage map"]
+    },
+    {
+      "control_id": "Art.11",
+      "domain": "ICT Risk Management",
+      "title": "Response and recovery",
+      "description": "Implement ICT business continuity policy with activation triggers, recovery priorities, interim procedures, BIA for critical functions, RTO/RPO, response and recovery plans. Test continuity plans at least annually.",
+      "keywords": ["business continuity", "BCP", "BIA", "RTO", "RPO", "recovery plan"],
+      "evidence_types": ["ICT business continuity policy", "BIA documentation", "RTO/RPO documentation", "Annual test results"]
+    },
+    {
+      "control_id": "Art.12",
+      "domain": "ICT Risk Management",
+      "title": "Backup policies and procedures",
+      "description": "Maintain backup policies specifying frequency, type, location, and scope. Restoration systems separate from primary; tested for restorability aligned to RTO. ICT backup systems may use third-party cloud.",
+      "keywords": ["backup", "restoration", "RTO", "cloud backup"],
+      "evidence_types": ["Backup policy", "Backup configuration", "Restore test records", "Backup separation evidence"]
+    },
+    {
+      "control_id": "Art.13",
+      "domain": "ICT Risk Management",
+      "title": "Learning and evolving",
+      "description": "Gather, analyse, and document findings from major incidents and post-incident reviews. Monitor cyber threat intelligence. Integrate threat intelligence into risk assessment. Provide ICT security awareness training; specialist training; board training on ICT risk.",
+      "keywords": ["lessons learned", "threat intelligence", "training", "awareness", "continuous improvement"],
+      "evidence_types": ["Post-incident review records", "Threat intelligence integration evidence", "Training program", "Training completion records"]
+    },
+    {
+      "control_id": "Art.14",
+      "domain": "ICT Risk Management",
+      "title": "Communication",
+      "description": "Implement crisis communication plans for major ICT incidents or cyber threats. Define internal escalation procedures and external communication to clients, sector counterparts, and public authorities.",
+      "keywords": ["crisis communication", "escalation", "communication plan", "stakeholder communication"],
+      "evidence_types": ["Crisis communication plan", "Escalation procedures", "Communication templates", "Stakeholder lists"]
+    },
+    {
+      "control_id": "Art.15",
+      "domain": "ICT Risk Management",
+      "title": "Further harmonisation",
+      "description": "ESAs develop RTS on detailed elements of ICT RMF (CDR (EU) 2024/1774). Financial entities must align with the RTS-defined detailed requirements.",
+      "keywords": ["RTS", "harmonisation", "CDR 2024/1774", "technical standards"],
+      "evidence_types": ["RTS alignment assessment", "Gap analysis vs CDR 2024/1774", "Implementation plans"]
+    },
+    {
+      "control_id": "Art.16",
+      "domain": "ICT Risk Management",
+      "title": "Simplified ICT risk management framework",
+      "description": "Small and less complex entities may apply a simplified framework per CDR (EU) 2024/1774 Chapter II covering key RMF elements, simplified testing, and simplified reporting.",
+      "keywords": ["simplified framework", "SME", "small entity", "proportionality"],
+      "evidence_types": ["Eligibility determination", "Simplified RMF documentation", "Justification memo"]
+    },
+    {
+      "control_id": "Art.17",
+      "domain": "Incident Management",
+      "title": "ICT-related incident management process",
+      "description": "Establish documented incident management process with roles, criteria, escalation paths. Report major incidents to senior management and board. Communicate with affected clients without undue delay.",
+      "keywords": ["incident management", "incident process", "escalation", "client communication"],
+      "evidence_types": ["Incident management process", "Roles & responsibilities matrix", "Escalation procedures", "Client notification templates"]
+    },
+    {
+      "control_id": "Art.18",
+      "domain": "Incident Management",
+      "title": "Classification of incidents and cyber threats",
+      "description": "Classify incidents based on clients affected, reputational impact, duration, geographic spread, data losses, service criticality, economic impact. ESAs to develop RTS (CDR (EU) 2024/1772).",
+      "keywords": ["incident classification", "major incident", "severity", "criteria"],
+      "evidence_types": ["Incident classification methodology", "Classification criteria aligned to CDR 2024/1772", "Classification records"]
+    },
+    {
+      "control_id": "Art.19",
+      "domain": "Incident Management",
+      "title": "Reporting of major ICT-related incidents",
+      "description": "Report major incidents to competent authority in three stages: initial within 4 hours of classification as major; intermediate within 72 hours; final within 1 month. Entities may voluntarily notify significant cyber threats.",
+      "keywords": ["incident reporting", "4 hours", "72 hours", "1 month", "competent authority"],
+      "evidence_types": ["Incident reporting procedure", "Reporting timelines", "Sample incident reports", "Authority contact list"]
+    },
+    {
+      "control_id": "Art.20",
+      "domain": "Incident Management",
+      "title": "Harmonisation of reporting content, timelines and templates",
+      "description": "Use ESA-developed templates and content standards (CDR (EU) 2025/301 for content; CIR (EU) 2025/302 for templates).",
+      "keywords": ["reporting templates", "harmonisation", "CDR 2025/301", "CIR 2025/302"],
+      "evidence_types": ["Template alignment evidence", "Reporting tool configuration", "Standardised report samples"]
+    },
+    {
+      "control_id": "Art.21",
+      "domain": "Incident Management",
+      "title": "Centralisation of reporting",
+      "description": "ESAs to assess feasibility of single EU reporting hub. Authorities share incident information with relevant bodies (CSIRTs, ENISA, other regulators).",
+      "keywords": ["centralised reporting", "EU hub", "information sharing"],
+      "evidence_types": ["Single-point reporting procedure", "Authority distribution awareness"]
+    },
+    {
+      "control_id": "Art.22",
+      "domain": "Incident Management",
+      "title": "Supervisory feedback",
+      "description": "Competent authorities may provide feedback after incident reports: impact assessment, threat intelligence, preventive measures.",
+      "keywords": ["supervisory feedback", "regulatory feedback", "follow-up"],
+      "evidence_types": ["Feedback handling procedure", "Records of received feedback", "Action plans from feedback"]
+    },
+    {
+      "control_id": "Art.23",
+      "domain": "Incident Management",
+      "title": "Reporting of payment-related major incidents",
+      "description": "Applies to credit institutions, payment institutions, e-money institutions. Payment-specific reporting integrated with DORA templates. Supersedes pre-DORA PSD2 Art.96 reporting where DORA major thresholds met.",
+      "keywords": ["payment incident", "PSD2", "Art.96", "payment institutions"],
+      "evidence_types": ["Payment incident procedure", "PSD2-DORA mapping", "Reporting records"]
+    },
+    {
+      "control_id": "Art.24",
+      "domain": "Resilience Testing",
+      "title": "General requirements for resilience testing",
+      "description": "All financial entities must conduct a testing programme for critical ICT systems at least annually. Tests conducted by independent internal or external parties.",
+      "keywords": ["resilience testing", "annual testing", "independent testing"],
+      "evidence_types": ["Testing programme", "Annual test plan", "Independence evidence", "Test results"]
+    },
+    {
+      "control_id": "Art.25",
+      "domain": "Resilience Testing",
+      "title": "Testing of ICT tools and systems",
+      "description": "Basic testing types: vulnerability assessments and scans, network security assessments, source code reviews, performance tests, end-to-end tests, scenario-based compatibility tests.",
+      "keywords": ["vulnerability assessment", "network testing", "code review", "performance testing"],
+      "evidence_types": ["Vulnerability scan reports", "Network assessment reports", "Code review records", "Performance test results"]
+    },
+    {
+      "control_id": "Art.26",
+      "domain": "Resilience Testing",
+      "title": "Advanced testing — Threat-Led Penetration Testing (TLPT)",
+      "description": "TLPT at least once every 3 years. Live production systems in scope. Covers critical/important functions. Threat intelligence-driven scenarios. Mutual recognition across EU jurisdictions. External testers, no conflict of interest. Applicability criteria in CDR (EU) 2025/1190.",
+      "keywords": ["TLPT", "threat-led", "penetration test", "red team", "3 years"],
+      "evidence_types": ["TLPT scope document", "TLPT applicability assessment", "Threat intelligence inputs", "TLPT reports", "External tester engagement"]
+    },
+    {
+      "control_id": "Art.27",
+      "domain": "Resilience Testing",
+      "title": "Requirements for testers carrying out TLPT",
+      "description": "Testers must demonstrate methodology capability, technical expertise, hold relevant professional certifications, and have no conflicts of interest. Competent authority maintains list of qualified testers.",
+      "keywords": ["TLPT testers", "qualifications", "certifications", "independence"],
+      "evidence_types": ["Tester qualifications evidence", "Certifications records", "Conflict-of-interest declarations", "Engagement contracts"]
+    },
+    {
+      "control_id": "Art.28",
+      "domain": "Third-Party Risk",
+      "title": "General principles for ICT third-party risk management",
+      "description": "Adopt, review, and update ICT third-party risk policy. Maintain Register of Information (RoI) for all ICT service arrangements. Submit RoI annually to competent authority. Pre-contractual due diligence for critical/important arrangements. Ongoing monitoring. Concentration risk assessment. Exit strategies.",
+      "keywords": ["third-party risk", "TPSP", "Register of Information", "RoI", "due diligence", "exit strategy"],
+      "evidence_types": ["Third-party risk policy", "Register of Information", "Due diligence records", "Exit strategies", "RoI submission evidence"]
+    },
+    {
+      "control_id": "Art.29",
+      "domain": "Third-Party Risk",
+      "title": "Preliminary assessment of ICT concentration risk",
+      "description": "Assess entity-level concentration when entering new arrangements. Assess risk that entire ICT services become unavailable. Required prior to arrangements for critical functions.",
+      "keywords": ["concentration risk", "TPSP concentration", "vendor concentration"],
+      "evidence_types": ["Concentration risk assessment", "Pre-contract analysis", "Concentration register"]
+    },
+    {
+      "control_id": "Art.30",
+      "domain": "Third-Party Risk",
+      "title": "Key contractual provisions",
+      "description": "Mandatory provisions for critical/important function contracts: service description, data locations, data protection, availability/security, audit and access rights, termination rights, reporting, data portability, sub-contracting. Lighter provisions for non-critical. RTS in CDR (EU) 2024/1773, CDR (EU) 2025/532.",
+      "keywords": ["contractual provisions", "contracts", "audit rights", "termination", "subcontracting"],
+      "evidence_types": ["Standard contract clauses", "Master service agreements", "Contractual gap analyses", "Audit right clauses"]
+    },
+    {
+      "control_id": "Art.31",
+      "domain": "Critical TPSP Oversight",
+      "title": "Designation of critical ICT third-party service providers",
+      "description": "ESAs designate critical ICT TPSPs based on CDR (EU) 2024/1502 criteria. Non-EU CTPSPs must designate EU legal representative.",
+      "keywords": ["CTPSP", "critical TPSP", "designation", "EU representative"],
+      "evidence_types": ["CTPSP designation list", "Designation status awareness", "Usage assessment"]
+    },
+    {
+      "control_id": "Art.32",
+      "domain": "Critical TPSP Oversight",
+      "title": "Structure of the oversight framework",
+      "description": "Lead Overseer (EBA/ESMA/EIOPA) designated per CTPSP. Joint Oversight Network (JON). Joint Examination Teams (JETs) per CDR (EU) 2025/420.",
+      "keywords": ["Lead Overseer", "EBA", "ESMA", "EIOPA", "JON", "JET"],
+      "evidence_types": ["Awareness of Lead Overseer for used CTPSPs", "Oversight structure understanding"]
+    },
+    {
+      "control_id": "Art.33",
+      "domain": "Critical TPSP Oversight",
+      "title": "Information requests",
+      "description": "Lead Overseer may require CTPSPs to provide all relevant information and documentation.",
+      "keywords": ["information requests", "Lead Overseer", "documentation"],
+      "evidence_types": ["TPSP information request handling procedure", "Cooperation evidence"]
+    },
+    {
+      "control_id": "Art.34",
+      "domain": "Critical TPSP Oversight",
+      "title": "General investigations",
+      "description": "Lead Overseer may conduct general investigations including interviews and document reviews.",
+      "keywords": ["investigations", "Lead Overseer", "interviews"],
+      "evidence_types": ["Investigation cooperation procedure", "Documentation accessibility"]
+    },
+    {
+      "control_id": "Art.35",
+      "domain": "Critical TPSP Oversight",
+      "title": "Inspections",
+      "description": "Lead Overseer may conduct on-site inspections; CTPSPs must cooperate.",
+      "keywords": ["inspections", "on-site", "cooperation"],
+      "evidence_types": ["Inspection support procedure", "Site access protocols"]
+    },
+    {
+      "control_id": "Art.36",
+      "domain": "Critical TPSP Oversight",
+      "title": "Oversight recommendations",
+      "description": "Lead Overseer issues recommendations on significant findings; CTPSP has 6 weeks to respond.",
+      "keywords": ["oversight recommendations", "findings", "remediation"],
+      "evidence_types": ["Awareness of CTPSP recommendations", "Internal impact assessment procedure"]
+    },
+    {
+      "control_id": "Art.37",
+      "domain": "Critical TPSP Oversight",
+      "title": "Follow-up of oversight recommendations",
+      "description": "If CTPSP fails to implement recommendations: escalated follow-up; public disclosure of non-compliance possible.",
+      "keywords": ["follow-up", "non-compliance", "public disclosure"],
+      "evidence_types": ["Monitoring of CTPSP follow-up status", "Risk assessment of disclosed findings"]
+    },
+    {
+      "control_id": "Art.38",
+      "domain": "Critical TPSP Oversight",
+      "title": "Oversight fees",
+      "description": "Annual oversight fees for CTPSPs per CDR (EU) 2024/1505.",
+      "keywords": ["oversight fees", "annual fees", "CTPSP fees"],
+      "evidence_types": ["Awareness/budgeting (CTPSP-side); for FE awareness only"]
+    },
+    {
+      "control_id": "Art.39",
+      "domain": "Critical TPSP Oversight",
+      "title": "Rights of defence",
+      "description": "CTPSPs have right to be heard before formal findings are issued; access to documents.",
+      "keywords": ["rights of defence", "due process", "right to be heard"],
+      "evidence_types": ["Procedural awareness (CTPSP-side)"]
+    },
+    {
+      "control_id": "Art.40",
+      "domain": "Critical TPSP Oversight",
+      "title": "Cooperation between competent authorities",
+      "description": "Competent authorities of financial entities that use a CTPSP exchange relevant information with the Lead Overseer — supervisory findings, complaints, material changes. Financial entities cooperate with their own competent authority on CTPSP arrangements.",
+      "keywords": ["cooperation", "competent authority", "information sharing"],
+      "evidence_types": ["Cooperation procedures with competent authority", "Information disclosure procedures"]
+    },
+    {
+      "control_id": "Art.41",
+      "domain": "Critical TPSP Oversight",
+      "title": "Cooperation between competent authorities and Lead Overseers",
+      "description": "Exchange of information; coordination mechanisms; JON information sharing. RTS on harmonisation (CDR (EU) 2025/295).",
+      "keywords": ["cooperation", "JON", "Lead Overseer", "coordination"],
+      "evidence_types": ["Awareness of cooperation framework"]
+    },
+    {
+      "control_id": "Art.42",
+      "domain": "Critical TPSP Oversight",
+      "title": "Liability of financial entities",
+      "description": "Designation of a CTPSP does not affect the financial entity's own responsibility for DORA compliance. Entities cannot outsource regulatory obligations to a CTPSP.",
+      "keywords": ["liability", "responsibility", "outsourcing", "accountability"],
+      "evidence_types": ["Accountability framework", "Outsourcing risk acknowledgement", "Internal controls retained"]
+    },
+    {
+      "control_id": "Art.43",
+      "domain": "Critical TPSP Oversight",
+      "title": "Oversight fees collection",
+      "description": "Lead Overseer collects fees; methodology per CDR (EU) 2024/1505.",
+      "keywords": ["fees collection", "Lead Overseer", "methodology"],
+      "evidence_types": ["CTPSP-side procedure"]
+    },
+    {
+      "control_id": "Art.44",
+      "domain": "Critical TPSP Oversight",
+      "title": "International cooperation",
+      "description": "ESAs may conclude administrative arrangements with third-country regulatory authorities on information exchange for oversight of CTPSPs with global footprint.",
+      "keywords": ["international cooperation", "third country", "global TPSP"],
+      "evidence_types": ["Awareness of international arrangements affecting used CTPSPs"]
+    },
+    {
+      "control_id": "Art.45",
+      "domain": "Information Sharing",
+      "title": "Cyber threat intelligence sharing arrangements",
+      "description": "Financial entities may voluntarily participate in cyber threat intelligence sharing arrangements with other financial entities. Must protect confidential information and comply with competition rules.",
+      "keywords": ["threat intelligence", "information sharing", "ISAC", "FS-ISAC"],
+      "evidence_types": ["ISAC/sharing arrangement memberships", "Information sharing policy", "Confidentiality controls"]
+    },
+    {
+      "control_id": "Art.46",
+      "domain": "Competent Authorities",
+      "title": "Competent authorities",
+      "description": "Each Member State designates competent authorities for each financial entity type. Multiple authorities may be designated (e.g., ECB for SSM banks + national NCA).",
+      "keywords": ["competent authority", "NCA", "ECB", "supervision"],
+      "evidence_types": ["Authority register", "Supervisory contact list"]
+    },
+    {
+      "control_id": "Art.47",
+      "domain": "Competent Authorities",
+      "title": "Cooperation with NIS2 structures",
+      "description": "Competent authorities under DORA cooperate with bodies established under NIS2, including information sharing with national CSIRTs and ENISA.",
+      "keywords": ["NIS2", "CSIRT", "ENISA", "cross-regulatory"],
+      "evidence_types": ["NIS2 awareness", "CSIRT contacts", "ENISA engagement"]
+    },
+    {
+      "control_id": "Art.48",
+      "domain": "Competent Authorities",
+      "title": "Cooperation between competent authorities",
+      "description": "Mutual assistance; supervisory convergence across Member States.",
+      "keywords": ["mutual assistance", "supervisory convergence", "cross-border"],
+      "evidence_types": ["Multi-jurisdiction supervisor list", "Cross-border coordination procedures"]
+    },
+    {
+      "control_id": "Art.49",
+      "domain": "Competent Authorities",
+      "title": "Cross-sectoral exercises",
+      "description": "Competent authorities may participate in cross-sectoral crisis simulations with other regulatory bodies and public authorities.",
+      "keywords": ["cross-sectoral exercises", "crisis simulation", "TIBER-EU"],
+      "evidence_types": ["Exercise participation records", "After-action reports"]
+    },
+    {
+      "control_id": "Art.50",
+      "domain": "Competent Authorities",
+      "title": "Administrative penalties and remedial measures",
+      "description": "Competent authorities have supervisory powers: orders to cease non-compliant conduct, administrative penalties, suspension of ICT service arrangements posing systemic risk.",
+      "keywords": ["penalties", "remedial measures", "supervisory action"],
+      "evidence_types": ["Penalty awareness", "Remediation tracking", "Authority engagement procedure"]
+    },
+    {
+      "control_id": "Art.51",
+      "domain": "Competent Authorities",
+      "title": "Exercise of penalty power",
+      "description": "Member States determine effective, proportionate, and dissuasive penalties. Penalties can apply to both legal entities and natural persons in management.",
+      "keywords": ["penalties", "individual liability", "management liability"],
+      "evidence_types": ["Personal liability disclosures to management", "Penalties register awareness"]
+    },
+    {
+      "control_id": "Art.52",
+      "domain": "Competent Authorities",
+      "title": "Criminal penalties",
+      "description": "Member States may provide for criminal penalties for DORA violations.",
+      "keywords": ["criminal penalties", "criminal liability", "violations"],
+      "evidence_types": ["Awareness of national criminal provisions", "Internal controls to prevent violations"]
+    },
+    {
+      "control_id": "Art.53",
+      "domain": "Competent Authorities",
+      "title": "Notification and publication of penalties",
+      "description": "Competent authorities publish information on penalties and measures imposed (naming and shaming regime).",
+      "keywords": ["publication", "naming and shaming", "reputational risk"],
+      "evidence_types": ["Reputational risk procedure", "Public disclosure monitoring"]
+    },
+    {
+      "control_id": "Art.54",
+      "domain": "Competent Authorities",
+      "title": "EBA Lead for banking",
+      "description": "EBA acts as Lead Overseer for banking-sector CTPSPs; coordinates with ESMA and EIOPA.",
+      "keywords": ["EBA", "banking lead", "Lead Overseer"],
+      "evidence_types": ["Awareness of EBA role for banking CTPSPs"]
+    },
+    {
+      "control_id": "Art.55",
+      "domain": "Competent Authorities",
+      "title": "ESMA Lead for capital markets",
+      "description": "ESMA acts as Lead Overseer for capital markets CTPSPs.",
+      "keywords": ["ESMA", "capital markets", "Lead Overseer"],
+      "evidence_types": ["Awareness of ESMA role for capital markets CTPSPs"]
+    },
+    {
+      "control_id": "Art.56",
+      "domain": "Competent Authorities",
+      "title": "EIOPA Lead for insurance and pensions",
+      "description": "EIOPA acts as Lead Overseer for insurance, reinsurance, and pension fund CTPSPs.",
+      "keywords": ["EIOPA", "insurance", "pensions", "Lead Overseer"],
+      "evidence_types": ["Awareness of EIOPA role for insurance/pensions CTPSPs"]
+    },
+    {
+      "control_id": "Art.57",
+      "domain": "Delegated Acts",
+      "title": "Exercise of the delegation",
+      "description": "Empowers Commission to adopt delegated regulations (the RTS/ITS). Delegation runs for 5 years from 17 January 2025, renewable.",
+      "keywords": ["delegated acts", "RTS", "ITS", "Commission"],
+      "evidence_types": ["RTS/ITS tracking register", "Update procedure"]
+    },
+    {
+      "control_id": "Art.58",
+      "domain": "Transitional & Final",
+      "title": "Transitional provisions",
+      "description": "Procedures for handling pending supervisory cases at the time of DORA application.",
+      "keywords": ["transitional", "pending cases"],
+      "evidence_types": ["Transition handling memo"]
+    },
+    {
+      "control_id": "Art.59",
+      "domain": "Transitional & Final",
+      "title": "Amendments to MiCA",
+      "description": "DORA imposes ICT risk obligations on CASPs as defined in MiCA; Art.59 makes consequential amendments to align MiCA with DORA.",
+      "keywords": ["MiCA", "CASP", "crypto", "amendments"],
+      "evidence_types": ["MiCA-DORA alignment evidence (CASP only)"]
+    },
+    {
+      "control_id": "Art.60",
+      "domain": "Transitional & Final",
+      "title": "Amendments to EMIR",
+      "description": "Consequential amendments for CCPs and trade repositories.",
+      "keywords": ["EMIR", "CCP", "trade repository", "amendments"],
+      "evidence_types": ["EMIR-DORA alignment evidence (CCP/TR only)"]
+    },
+    {
+      "control_id": "Art.61",
+      "domain": "Transitional & Final",
+      "title": "Amendments to MiFIR",
+      "description": "Consequential amendments for trading venues and data reporting service providers.",
+      "keywords": ["MiFIR", "trading venue", "DRSP", "amendments"],
+      "evidence_types": ["MiFIR-DORA alignment evidence (venue/DRSP only)"]
+    },
+    {
+      "control_id": "Art.62",
+      "domain": "Transitional & Final",
+      "title": "Amendments to AIFMD",
+      "description": "Consequential amendments for AIFMs.",
+      "keywords": ["AIFMD", "AIFM", "fund manager", "amendments"],
+      "evidence_types": ["AIFMD-DORA alignment evidence (AIFM only)"]
+    },
+    {
+      "control_id": "Art.63",
+      "domain": "Transitional & Final",
+      "title": "Entry into force",
+      "description": "DORA entered into force on 16 January 2023 (20 days after OJ publication on 27 December 2022).",
+      "keywords": ["entry into force", "16 January 2023"],
+      "evidence_types": ["Timeline awareness", "Implementation plan"]
+    },
+    {
+      "control_id": "Art.64",
+      "domain": "Transitional & Final",
+      "title": "Application",
+      "description": "DORA applies from 17 January 2025 — 24 months after entry into force.",
+      "keywords": ["application date", "17 January 2025"],
+      "evidence_types": ["Implementation deadline tracking", "Readiness assessment", "Go-live attestation"]
+    }
+  ]
+}
