@@ -361,25 +361,59 @@ def classify_intent(query: str, has_docs: bool, has_framework: bool) -> str:
     return "free_qa"
 
 
-def _free_qa_response(query: str, framework_id: Optional[str], language: str) -> str:
+def _free_qa_response(query: str, framework_id: Optional[str], language: str,
+                      document_ids: Optional[list] = None) -> str:
     """Generic Claude Q&A about GRC. Lightweight system prompt that
-    keeps GRACE on-topic without long-context overhead."""
+    keeps GRACE on-topic without long-context overhead. When
+    `document_ids` are supplied, their text is injected into the user
+    message so Claude can reason over uploaded/pasted context even
+    without a framework selection (e.g. cross-document mapping)."""
     from modules.grc_engine import get_client, _language_instruction
     system = (
         "You are GRACE, an AI GRC (Governance, Risk, Assurance & Compliance) "
         "analyst. Reply to the user's question concisely, with practical "
         "framing. Cite framework articles or control IDs when relevant. If "
         "the question is outside GRC scope, say so briefly and redirect to "
-        "what GRACE can help with."
+        "what GRACE can help with. When documents are provided in the "
+        "context, ground every claim in them and quote the relevant "
+        "passages verbatim."
         + _language_instruction(language, mode="prose")
     )
-    user_msg = query
+
+    # Build the user message, prepending any attached document content.
+    # Cap each document at ~40k chars to stay well under the model's
+    # context window when several large files are attached.
+    doc_blocks = []
+    for did in (document_ids or []):
+        d = get_document(did)
+        if d and d.get("content_text"):
+            body_text = d["content_text"][:40000]
+            doc_blocks.append(
+                f"<document title=\"{d.get('title', 'Untitled')}\">\n"
+                f"{body_text}\n"
+                f"</document>"
+            )
+
+    parts = []
+    if doc_blocks:
+        parts.append(
+            "The user has attached the following document(s) as context. "
+            "Use them as your primary source of truth:"
+        )
+        parts.extend(doc_blocks)
+        parts.append("---")
     if framework_id:
-        user_msg = f"(Context: user's working framework is {framework_id})\n\n{query}"
+        parts.append(f"(Context: user's working framework is {framework_id})")
+    parts.append(f"User question: {query}")
+    user_msg = "\n\n".join(parts)
+
+    # Sonnet handles the larger context windows that document Q&A needs;
+    # Haiku stays the default only for the no-document path.
+    model = "claude-sonnet-4-6" if doc_blocks else "claude-haiku-4-5-20251001"
     try:
         msg = get_client().messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=900,
+            model=model,
+            max_tokens=1500 if doc_blocks else 900,
             system=system,
             messages=[{"role": "user", "content": user_msg}],
         )
@@ -519,13 +553,22 @@ def ask_grace(body: AskRequest):
             "citations":     citations,
         }
 
-    # free_qa fallback
-    text = _free_qa_response(body.query, body.framework_id, language)
+    # free_qa fallback — attached documents (without a framework) flow
+    # through here as "document-grounded Q&A", which still uses Claude
+    # but with the docs as authoritative context.
+    text = _free_qa_response(body.query, body.framework_id, language,
+                             document_ids=document_ids)
+    titles = []
+    for did in document_ids:
+        d = get_document(did)
+        if d:
+            titles.append(d["title"])
     return {
         "intent":        "free_qa",
         "response_type": "qa",
         "response_text": text,
-        "citations":     [],
+        "citations":     [{"type": "document", "id": did, "label": ttl}
+                          for did, ttl in zip(document_ids, titles)],
     }
 
 
