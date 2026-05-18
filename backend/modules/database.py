@@ -120,6 +120,21 @@ def init_db():
             created_at           TEXT NOT NULL,
             PRIMARY KEY (finding_id, language)
         );
+
+        CREATE TABLE IF NOT EXISTS control_mappings (
+            mapping_id           TEXT PRIMARY KEY,
+            source_framework     TEXT NOT NULL,
+            source_control_id    TEXT NOT NULL,
+            target_framework     TEXT NOT NULL,
+            target_control_id    TEXT NOT NULL,
+            target_control_title TEXT,
+            confidence           TEXT NOT NULL CHECK(confidence IN ('high','medium','low')),
+            rationale            TEXT,
+            generated_at         TEXT NOT NULL,
+            UNIQUE(source_framework, source_control_id, target_framework, target_control_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_mapping_src
+            ON control_mappings(source_framework, source_control_id);
     """)
     # Idempotent migrations for older DBs
     cols = {r["name"] for r in conn.execute("PRAGMA table_info(findings)").fetchall()}
@@ -325,6 +340,26 @@ def list_findings(framework: str = None, status: str = None, limit: int = 100,
     return [dict(r) for r in rows]
 
 
+def get_finding(finding_id: str) -> Optional[dict]:
+    """Return a single finding row (joined with gaps + documents) or None."""
+    conn = get_db()
+    row = conn.execute("""
+        SELECT f.finding_id, f.framework, f.control_id, f.control_title,
+               f.compliance_status, f.severity, f.coverage_score,
+               f.operational_status, f.created_at, f.language,
+               g.description, g.recommended_action, g.regulatory_reference,
+               g.evidence_required,
+               d.title as document_title, d.document_id, r.run_id
+        FROM findings f
+        LEFT JOIN gaps g ON g.finding_id = f.finding_id
+        LEFT JOIN documents d ON d.document_id = f.document_id
+        LEFT JOIN assessment_runs r ON r.run_id = f.run_id
+        WHERE f.finding_id = ?
+    """, (finding_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
 def update_operational_status(finding_id: str, new_status: str, actor: str = "demo_user"):
     conn = get_db()
     conn.execute(
@@ -442,6 +477,97 @@ def list_output_documents(limit: int = 20) -> list:
     """, (limit,)).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+# ─── Cross-framework control mappings ────────────────────────────
+
+_CONFIDENCE_RANK = {"high": 0, "medium": 1, "low": 2}
+
+
+def has_mappings(source_framework: str, source_control_id: str) -> bool:
+    """Fast existence check: does the cache already contain at least one
+    mapping row for this source control? Used to decide whether to invoke
+    Claude or just hit the cache."""
+    conn = get_db()
+    row = conn.execute(
+        "SELECT 1 FROM control_mappings "
+        "WHERE source_framework = ? AND source_control_id = ? LIMIT 1",
+        (source_framework, source_control_id),
+    ).fetchone()
+    conn.close()
+    return row is not None
+
+
+def get_mappings_for_control(source_framework: str, source_control_id: str) -> list:
+    """Return cached cross-framework mappings for one source control,
+    ordered by confidence (high → low) then framework asc."""
+    conn = get_db()
+    rows = conn.execute("""
+        SELECT target_framework, target_control_id, target_control_title,
+               confidence, rationale, generated_at
+        FROM control_mappings
+        WHERE source_framework = ? AND source_control_id = ?
+    """, (source_framework, source_control_id)).fetchall()
+    conn.close()
+    items = [dict(r) for r in rows]
+    items.sort(key=lambda m: (_CONFIDENCE_RANK.get(m["confidence"], 99),
+                              m["target_framework"]))
+    return items
+
+
+def save_mappings(source_framework: str, source_control_id: str,
+                  mappings: list) -> int:
+    """Bulk-insert mappings via INSERT OR IGNORE — duplicates (same
+    source × target pair) are silently skipped. Returns the number of
+    rows actually written. An empty list is still a valid 'we computed
+    this and found nothing' answer, so the caller is expected to write
+    a sentinel row separately if needed."""
+    if not mappings:
+        return 0
+    conn = get_db()
+    inserted = 0
+    ts = now_utc()
+    for m in mappings:
+        conf = (m.get("confidence") or "").lower()
+        if conf not in ("high", "medium", "low"):
+            conf = "low"
+        try:
+            cur = conn.execute("""
+                INSERT OR IGNORE INTO control_mappings
+                (mapping_id, source_framework, source_control_id,
+                 target_framework, target_control_id, target_control_title,
+                 confidence, rationale, generated_at)
+                VALUES (?,?,?,?,?,?,?,?,?)
+            """, (
+                new_id(),
+                source_framework, source_control_id,
+                m.get("target_framework", ""),
+                m.get("target_control_id", ""),
+                m.get("target_control_title", ""),
+                conf,
+                m.get("rationale", ""),
+                ts,
+            ))
+            inserted += cur.rowcount or 0
+        except Exception:
+            # never let one bad row sabotage the whole batch
+            continue
+    conn.commit()
+    conn.close()
+    return inserted
+
+
+def count_mappings(source_framework: str, source_control_id: str) -> int:
+    """Cheap count of cached mappings — used to populate the
+    cross_framework_count badge on each finding without touching Claude."""
+    conn = get_db()
+    row = conn.execute(
+        "SELECT COUNT(*) as n FROM control_mappings "
+        "WHERE source_framework = ? AND source_control_id = ?",
+        (source_framework, source_control_id),
+    ).fetchone()
+    conn.close()
+    return int(row["n"]) if row else 0
 
 
 # ─── Audit log ────────────────────────────────────────────────────
