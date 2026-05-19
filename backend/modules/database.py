@@ -229,6 +229,32 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_incidents_status   ON incidents(status);
         CREATE INDEX IF NOT EXISTS idx_incidents_severity ON incidents(severity);
         CREATE INDEX IF NOT EXISTS idx_incidents_category ON incidents(category);
+
+        -- ── Ask GRACE: persistent chat history ───────────────────────
+        CREATE TABLE IF NOT EXISTS chat_sessions (
+            session_id  TEXT PRIMARY KEY,
+            user_id     TEXT NOT NULL DEFAULT 'demo',
+            title       TEXT,
+            created_at  TEXT NOT NULL,
+            updated_at  TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_chat_sessions_user
+            ON chat_sessions(user_id, updated_at DESC);
+
+        CREATE TABLE IF NOT EXISTS chat_messages (
+            message_id     TEXT PRIMARY KEY,
+            session_id     TEXT REFERENCES chat_sessions(session_id) ON DELETE CASCADE,
+            role           TEXT NOT NULL CHECK(role IN ('user','assistant','system')),
+            content        TEXT NOT NULL,
+            document_ids   TEXT,
+            framework_id   TEXT,
+            citations      TEXT,
+            intent         TEXT,
+            response_type  TEXT,
+            created_at     TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_chat_messages_session
+            ON chat_messages(session_id, created_at);
     """)
     # Idempotent migrations for older DBs
     cols = {r["name"] for r in conn.execute("PRAGMA table_info(findings)").fetchall()}
@@ -1341,6 +1367,143 @@ def delete_incident(incident_id: str) -> bool:
     deleted = cur.rowcount or 0
     conn.close()
     return deleted > 0
+
+
+# ─── Chat sessions / messages (Ask GRACE persistence) ────────────
+
+def create_chat_session(user_id: str = "demo", title: Optional[str] = None) -> dict:
+    """Create a fresh chat session and return it as a dict."""
+    sid = new_id()
+    ts = now_utc()
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO chat_sessions (session_id, user_id, title, created_at, updated_at) "
+        "VALUES (?,?,?,?,?)",
+        (sid, user_id, title, ts, ts),
+    )
+    conn.commit()
+    conn.close()
+    return {"session_id": sid, "user_id": user_id, "title": title,
+            "created_at": ts, "updated_at": ts}
+
+
+def get_chat_session(session_id: str) -> Optional[dict]:
+    conn = get_db()
+    row = conn.execute(
+        "SELECT session_id, user_id, title, created_at, updated_at "
+        "FROM chat_sessions WHERE session_id = ?",
+        (session_id,),
+    ).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def list_chat_sessions(user_id: str = "demo", limit: int = 50) -> list:
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT session_id, user_id, title, created_at, updated_at "
+        "FROM chat_sessions WHERE user_id = ? "
+        "ORDER BY updated_at DESC LIMIT ?",
+        (user_id, limit),
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def update_chat_session_title(session_id: str, title: Optional[str]) -> None:
+    conn = get_db()
+    conn.execute(
+        "UPDATE chat_sessions SET title = ?, updated_at = ? WHERE session_id = ?",
+        (title, now_utc(), session_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+# Spec exposes both names; keep them as aliases for clarity at call sites.
+def rename_chat_session(session_id: str, new_title: str) -> None:
+    update_chat_session_title(session_id, new_title)
+
+
+def delete_chat_session(session_id: str) -> None:
+    """Hard-delete a session AND its messages (cascade)."""
+    conn = get_db()
+    # ON DELETE CASCADE is declared, but SQLite's PRAGMA foreign_keys must
+    # be ON for it to apply — get_db() sets it, but we also clean up
+    # explicitly to stay correct on connections that were opened with FKs
+    # disabled (and to keep the contract obvious).
+    conn.execute("DELETE FROM chat_messages WHERE session_id = ?", (session_id,))
+    conn.execute("DELETE FROM chat_sessions WHERE session_id = ?", (session_id,))
+    conn.commit()
+    conn.close()
+
+
+def append_chat_message(session_id: str, role: str, content: str, *,
+                        document_ids: Optional[list] = None,
+                        framework_id: Optional[str] = None,
+                        citations: Optional[list] = None,
+                        intent: Optional[str] = None,
+                        response_type: Optional[str] = None) -> dict:
+    """Persist a message AND bump the parent session's updated_at."""
+    if role not in ("user", "assistant", "system"):
+        raise ValueError(f"invalid chat role: {role!r}")
+    mid = new_id()
+    ts = now_utc()
+    conn = get_db()
+    try:
+        conn.execute(
+            "INSERT INTO chat_messages "
+            "(message_id, session_id, role, content, document_ids, framework_id, "
+            " citations, intent, response_type, created_at) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?)",
+            (mid, session_id, role, content,
+             json.dumps(document_ids) if document_ids else None,
+             framework_id,
+             json.dumps(citations) if citations else None,
+             intent, response_type, ts),
+        )
+        conn.execute(
+            "UPDATE chat_sessions SET updated_at = ? WHERE session_id = ?",
+            (ts, session_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    return {
+        "message_id":    mid,
+        "session_id":    session_id,
+        "role":          role,
+        "content":       content,
+        "document_ids":  document_ids or [],
+        "framework_id":  framework_id,
+        "citations":     citations or [],
+        "intent":        intent,
+        "response_type": response_type,
+        "created_at":    ts,
+    }
+
+
+def list_chat_messages(session_id: str, limit: int = 200) -> list:
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT message_id, session_id, role, content, document_ids, framework_id, "
+        "       citations, intent, response_type, created_at "
+        "FROM chat_messages WHERE session_id = ? "
+        "ORDER BY created_at ASC LIMIT ?",
+        (session_id, limit),
+    ).fetchall()
+    conn.close()
+    out = []
+    for r in rows:
+        d = dict(r)
+        for k in ("document_ids", "citations"):
+            raw = d.get(k)
+            try:
+                d[k] = json.loads(raw) if raw else []
+            except Exception:
+                d[k] = []
+        out.append(d)
+    return out
 
 
 # ─── Audit log ────────────────────────────────────────────────────
