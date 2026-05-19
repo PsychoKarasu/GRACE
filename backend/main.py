@@ -239,7 +239,12 @@ def get_doc(document_id: str):
 # ─── Assessment ──────────────────────────────────────────────────────
 
 class AssessmentRequest(BaseModel):
-    document_id: str
+    # Either `document_id` (single doc, legacy) OR `document_ids` (list,
+    # for the Gap Analysis wizard). At least one must be supplied. When
+    # `document_ids` is used the run is registered against the FIRST id
+    # but findings reference the merged title (see run_assessment_sync).
+    document_id: Optional[str] = None
+    document_ids: Optional[list] = None
     framework: str
     controls_scope: Optional[list] = None
     channel: Optional[str] = "web"
@@ -313,23 +318,49 @@ def get_runs():
 
 @app.post("/api/v1/assessments/run-sync")
 def run_assessment_sync(body: AssessmentRequest):
-    """Run assessment synchronously and return result immediately."""
-    doc = get_document(body.document_id)
-    if not doc:
-        raise HTTPException(404, detail="Document not found")
+    """Run assessment synchronously and return result immediately.
 
-    run_id = create_run(body.document_id, body.framework, body.controls_scope, body.channel)
+    Accepts either:
+      - `document_id` (single document, legacy)
+      - `document_ids` (list — wizard-style multi-doc); the run is
+        registered against the first doc but the merged title is used so
+        the resulting findings reference every contributing document.
+    """
+    # Normalise to a list, preferring the multi-doc field when present.
+    ids: list = []
+    if body.document_ids:
+        ids = [d for d in body.document_ids if d]
+    elif body.document_id:
+        ids = [body.document_id]
+    if not ids:
+        raise HTTPException(400, detail="document_id or document_ids required")
+
+    # Materialise documents and assemble the merged text + title (same
+    # shape as the old `analyze_new` branch in /ask used to produce).
+    docs: list = []
+    for did in ids:
+        d = get_document(did)
+        if not d:
+            raise HTTPException(404, detail=f"Document not found: {did}")
+        docs.append(d)
+    primary_id   = ids[0]
+    merged_text  = "\n\n---\n\n".join(d["content_text"] for d in docs)
+    merged_title = " + ".join(d["title"] for d in docs)
+
+    run_id = create_run(primary_id, body.framework, body.controls_scope, body.channel)
     try:
         result = run_gap_analysis(
-            document_text=doc["content_text"],
-            document_title=doc["title"],
+            document_text=merged_text,
+            document_title=merged_title,
             framework_id=body.framework,
             controls_scope=body.controls_scope,
             language=body.language,
         )
-        finding_ids = save_findings(run_id, body.document_id, result, language=body.language or "en")
+        finding_ids = save_findings(run_id, primary_id, result, language=body.language or "en")
         complete_run(run_id, "completed")
-        return {"run_id": run_id, "status": "completed", "result": result, "finding_ids": finding_ids}
+        return {"run_id": run_id, "status": "completed", "result": result,
+                "finding_ids": finding_ids, "document_ids": ids,
+                "document_title": merged_title}
     except Exception as e:
         complete_run(run_id, "error", str(e))
         raise HTTPException(500, detail=str(e))
