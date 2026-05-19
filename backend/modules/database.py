@@ -135,6 +135,100 @@ def init_db():
         );
         CREATE INDEX IF NOT EXISTS idx_mapping_src
             ON control_mappings(source_framework, source_control_id);
+
+        -- ── Phase 1: business-ready GRC modules ──────────────────────
+        CREATE TABLE IF NOT EXISTS risks (
+            risk_id          TEXT PRIMARY KEY,
+            title            TEXT NOT NULL,
+            description      TEXT,
+            category         TEXT,
+            likelihood       INTEGER CHECK(likelihood BETWEEN 1 AND 5),
+            impact           INTEGER CHECK(impact BETWEEN 1 AND 5),
+            inherent_score   INTEGER,
+            residual_score   INTEGER,
+            treatment_plan   TEXT,
+            treatment_notes  TEXT,
+            owner            TEXT,
+            status           TEXT DEFAULT 'open',
+            linked_controls  TEXT,
+            created_at       TEXT NOT NULL,
+            updated_at       TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_risks_status   ON risks(status);
+        CREATE INDEX IF NOT EXISTS idx_risks_category ON risks(category);
+        CREATE INDEX IF NOT EXISTS idx_risks_owner    ON risks(owner);
+
+        CREATE TABLE IF NOT EXISTS vendors (
+            vendor_id        TEXT PRIMARY KEY,
+            name             TEXT NOT NULL,
+            category         TEXT,
+            contact_email    TEXT,
+            contract_url     TEXT,
+            risk_score       INTEGER,
+            risk_tier        TEXT,
+            last_assessed_at TEXT,
+            questionnaire    TEXT,
+            ai_summary       TEXT,
+            status           TEXT DEFAULT 'active',
+            created_at       TEXT NOT NULL,
+            updated_at       TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_vendors_tier     ON vendors(risk_tier);
+        CREATE INDEX IF NOT EXISTS idx_vendors_category ON vendors(category);
+
+        CREATE TABLE IF NOT EXISTS policies (
+            policy_id        TEXT PRIMARY KEY,
+            title            TEXT NOT NULL,
+            version          TEXT NOT NULL,
+            summary          TEXT,
+            content          TEXT,
+            effective_date   TEXT,
+            review_date      TEXT,
+            owner            TEXT,
+            status           TEXT DEFAULT 'active',
+            linked_controls  TEXT,
+            created_at       TEXT NOT NULL,
+            updated_at       TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_policies_status ON policies(status);
+
+        CREATE TABLE IF NOT EXISTS policy_assignments (
+            assignment_id    TEXT PRIMARY KEY,
+            policy_id        TEXT REFERENCES policies(policy_id),
+            user_id          TEXT NOT NULL,
+            assigned_at      TEXT NOT NULL,
+            acknowledged_at  TEXT,
+            status           TEXT DEFAULT 'pending',
+            signature_note   TEXT,
+            UNIQUE(policy_id, user_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_pa_user   ON policy_assignments(user_id);
+        CREATE INDEX IF NOT EXISTS idx_pa_policy ON policy_assignments(policy_id);
+
+        CREATE TABLE IF NOT EXISTS incidents (
+            incident_id                    TEXT PRIMARY KEY,
+            title                          TEXT NOT NULL,
+            description                    TEXT,
+            severity                       TEXT NOT NULL,
+            status                         TEXT DEFAULT 'open',
+            category                       TEXT,
+            reported_at                    TEXT NOT NULL,
+            reported_by                    TEXT,
+            resolved_at                    TEXT,
+            breach_notification_required   INTEGER DEFAULT 0,
+            breach_notified_at             TEXT,
+            regulatory_deadline            TEXT,
+            impact_assessment              TEXT,
+            root_cause                     TEXT,
+            remediation                    TEXT,
+            linked_controls                TEXT,
+            linked_findings                TEXT,
+            created_at                     TEXT NOT NULL,
+            updated_at                     TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_incidents_status   ON incidents(status);
+        CREATE INDEX IF NOT EXISTS idx_incidents_severity ON incidents(severity);
+        CREATE INDEX IF NOT EXISTS idx_incidents_category ON incidents(category);
     """)
     # Idempotent migrations for older DBs
     cols = {r["name"] for r in conn.execute("PRAGMA table_info(findings)").fetchall()}
@@ -591,6 +685,662 @@ def count_mappings(source_framework: str, source_control_id: str) -> int:
     ).fetchone()
     conn.close()
     return int(row["n"]) if row else 0
+
+
+# ─── Risks (Risk Register) ────────────────────────────────────────
+
+def _risk_score(likelihood: int, impact: int) -> int:
+    try:
+        return int(likelihood) * int(impact)
+    except Exception:
+        return 0
+
+
+def create_risk(data: dict) -> dict:
+    """Insert a new risk. `data` must include title, likelihood, impact."""
+    risk_id = new_id()
+    likelihood = int(data.get("likelihood", 1) or 1)
+    impact = int(data.get("impact", 1) or 1)
+    inherent = _risk_score(likelihood, impact)
+    residual = data.get("residual_score")
+    residual = int(residual) if residual is not None else inherent
+    linked = data.get("linked_controls") or []
+    if not isinstance(linked, str):
+        linked = json.dumps(linked)
+    ts = now_utc()
+    conn = get_db()
+    conn.execute("""
+        INSERT INTO risks
+        (risk_id, title, description, category, likelihood, impact,
+         inherent_score, residual_score, treatment_plan, treatment_notes,
+         owner, status, linked_controls, created_at, updated_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    """, (risk_id, data.get("title", "").strip(), data.get("description", ""),
+          data.get("category", "operational"), likelihood, impact,
+          inherent, residual,
+          data.get("treatment_plan", "mitigate"),
+          data.get("treatment_notes", ""),
+          data.get("owner", ""),
+          data.get("status", "open"),
+          linked, ts, ts))
+    conn.commit()
+    conn.close()
+    return get_risk(risk_id)
+
+
+def get_risk(risk_id: str) -> Optional[dict]:
+    conn = get_db()
+    row = conn.execute("SELECT * FROM risks WHERE risk_id = ?", (risk_id,)).fetchone()
+    conn.close()
+    if not row:
+        return None
+    d = dict(row)
+    try:
+        d["linked_controls"] = json.loads(d.get("linked_controls") or "[]")
+    except Exception:
+        d["linked_controls"] = []
+    return d
+
+
+def list_risks(status: str = None, category: str = None, owner: str = None,
+               min_score: int = None, limit: int = 500) -> list:
+    conn = get_db()
+    q = "SELECT * FROM risks WHERE 1=1"
+    params = []
+    if status:
+        q += " AND status = ?"
+        params.append(status)
+    if category:
+        q += " AND category = ?"
+        params.append(category)
+    if owner:
+        q += " AND owner = ?"
+        params.append(owner)
+    if min_score is not None:
+        q += " AND residual_score >= ?"
+        params.append(int(min_score))
+    q += " ORDER BY residual_score DESC, updated_at DESC LIMIT ?"
+    params.append(limit)
+    rows = conn.execute(q, params).fetchall()
+    conn.close()
+    out = []
+    for r in rows:
+        d = dict(r)
+        try:
+            d["linked_controls"] = json.loads(d.get("linked_controls") or "[]")
+        except Exception:
+            d["linked_controls"] = []
+        out.append(d)
+    return out
+
+
+def update_risk(risk_id: str, data: dict) -> Optional[dict]:
+    existing = get_risk(risk_id)
+    if not existing:
+        return None
+    merged = dict(existing)
+    for k in ("title", "description", "category", "likelihood", "impact",
+              "residual_score", "treatment_plan", "treatment_notes",
+              "owner", "status", "linked_controls"):
+        if k in data and data[k] is not None:
+            merged[k] = data[k]
+    likelihood = int(merged.get("likelihood", 1) or 1)
+    impact = int(merged.get("impact", 1) or 1)
+    inherent = _risk_score(likelihood, impact)
+    residual = merged.get("residual_score")
+    residual = int(residual) if residual is not None else inherent
+    linked = merged.get("linked_controls") or []
+    if not isinstance(linked, str):
+        linked = json.dumps(linked)
+    conn = get_db()
+    conn.execute("""
+        UPDATE risks
+           SET title=?, description=?, category=?, likelihood=?, impact=?,
+               inherent_score=?, residual_score=?, treatment_plan=?,
+               treatment_notes=?, owner=?, status=?, linked_controls=?,
+               updated_at=?
+         WHERE risk_id=?
+    """, (merged.get("title", ""), merged.get("description", ""),
+          merged.get("category", "operational"), likelihood, impact,
+          inherent, residual,
+          merged.get("treatment_plan", "mitigate"),
+          merged.get("treatment_notes", ""),
+          merged.get("owner", ""),
+          merged.get("status", "open"),
+          linked, now_utc(), risk_id))
+    conn.commit()
+    conn.close()
+    return get_risk(risk_id)
+
+
+def delete_risk(risk_id: str) -> bool:
+    conn = get_db()
+    cur = conn.execute("DELETE FROM risks WHERE risk_id = ?", (risk_id,))
+    conn.commit()
+    deleted = cur.rowcount or 0
+    conn.close()
+    return deleted > 0
+
+
+# ─── Vendors (Third-Party Risk) ───────────────────────────────────
+
+DEFAULT_VENDOR_QUESTIONS = [
+    {"question_id": "Q1",  "question": "Is customer data processed only within the EU/EEA?",                                  "weight": 10},
+    {"question_id": "Q2",  "question": "Is data encrypted at rest AND in transit (TLS 1.2+, AES-256)?",                       "weight": 15},
+    {"question_id": "Q3",  "question": "Does the vendor hold ISO 27001 or SOC 2 Type II certification?",                      "weight": 12},
+    {"question_id": "Q4",  "question": "Is there a written breach notification SLA of 72h or less?",                          "weight": 10},
+    {"question_id": "Q5",  "question": "Are all subprocessors disclosed and contractually bound?",                            "weight": 8},
+    {"question_id": "Q6",  "question": "Does the contract grant audit/inspection rights?",                                    "weight": 8},
+    {"question_id": "Q7",  "question": "Is there a tested BCDR plan with documented RTO/RPO?",                                "weight": 10},
+    {"question_id": "Q8",  "question": "Is MFA enforced on all admin and customer-facing accounts?",                          "weight": 10},
+    {"question_id": "Q9",  "question": "Is a signed GDPR DPA / Article 28 agreement in place?",                               "weight": 9},
+    {"question_id": "Q10", "question": "Has the vendor had any reportable breaches in the last 24 months?",                   "weight": 8},
+]
+
+_ANSWER_VALUE = {"yes": 1.0, "partial": 0.5, "no": 0.0, "unknown": 0.3}
+
+
+def _score_questionnaire(answers: list) -> int:
+    """Sum(weight × answer_value) / sum(weight) × 100 → 0–100 integer."""
+    if not answers:
+        return 0
+    total_w = sum(int(a.get("weight", 0) or 0) for a in answers) or 1
+    earned = 0.0
+    for a in answers:
+        v = _ANSWER_VALUE.get((a.get("answer") or "unknown").lower(), 0.3)
+        earned += int(a.get("weight", 0) or 0) * v
+    return int(round((earned / total_w) * 100))
+
+
+def _tier_for_score(score: int) -> str:
+    if score <= 40:
+        return "critical"
+    if score <= 60:
+        return "high"
+    if score <= 80:
+        return "medium"
+    return "low"
+
+
+def _default_questionnaire() -> list:
+    return [
+        {**q, "answer": "unknown", "notes": ""} for q in DEFAULT_VENDOR_QUESTIONS
+    ]
+
+
+def create_vendor(data: dict) -> dict:
+    vendor_id = new_id()
+    q = data.get("questionnaire") or _default_questionnaire()
+    if not isinstance(q, str):
+        q_text = json.dumps(q)
+    else:
+        q_text = q
+    # Initial score from defaults (mostly 'unknown' → ~30)
+    try:
+        answers = json.loads(q_text) if isinstance(q_text, str) else q
+    except Exception:
+        answers = _default_questionnaire()
+    score = _score_questionnaire(answers)
+    tier = _tier_for_score(score)
+    ts = now_utc()
+    conn = get_db()
+    conn.execute("""
+        INSERT INTO vendors
+        (vendor_id, name, category, contact_email, contract_url,
+         risk_score, risk_tier, last_assessed_at, questionnaire, ai_summary,
+         status, created_at, updated_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+    """, (vendor_id, data.get("name", "").strip(),
+          data.get("category", "saas"),
+          data.get("contact_email", ""),
+          data.get("contract_url", ""),
+          score, tier, None, q_text, None,
+          data.get("status", "active"), ts, ts))
+    conn.commit()
+    conn.close()
+    return get_vendor(vendor_id)
+
+
+def get_vendor(vendor_id: str) -> Optional[dict]:
+    conn = get_db()
+    row = conn.execute("SELECT * FROM vendors WHERE vendor_id = ?", (vendor_id,)).fetchone()
+    conn.close()
+    if not row:
+        return None
+    d = dict(row)
+    try:
+        d["questionnaire"] = json.loads(d.get("questionnaire") or "[]")
+    except Exception:
+        d["questionnaire"] = []
+    return d
+
+
+def list_vendors(risk_tier: str = None, category: str = None,
+                 status: str = None, limit: int = 500) -> list:
+    conn = get_db()
+    q = "SELECT * FROM vendors WHERE 1=1"
+    params = []
+    if risk_tier:
+        q += " AND risk_tier = ?"
+        params.append(risk_tier)
+    if category:
+        q += " AND category = ?"
+        params.append(category)
+    if status:
+        q += " AND status = ?"
+        params.append(status)
+    q += " ORDER BY (risk_score IS NULL) ASC, risk_score ASC, updated_at DESC LIMIT ?"
+    params.append(limit)
+    rows = conn.execute(q, params).fetchall()
+    conn.close()
+    out = []
+    for r in rows:
+        d = dict(r)
+        try:
+            d["questionnaire"] = json.loads(d.get("questionnaire") or "[]")
+        except Exception:
+            d["questionnaire"] = []
+        out.append(d)
+    return out
+
+
+def update_vendor(vendor_id: str, data: dict) -> Optional[dict]:
+    existing = get_vendor(vendor_id)
+    if not existing:
+        return None
+    merged = dict(existing)
+    for k in ("name", "category", "contact_email", "contract_url", "status"):
+        if k in data and data[k] is not None:
+            merged[k] = data[k]
+    conn = get_db()
+    conn.execute("""
+        UPDATE vendors
+           SET name=?, category=?, contact_email=?, contract_url=?,
+               status=?, updated_at=?
+         WHERE vendor_id=?
+    """, (merged.get("name", ""), merged.get("category", "saas"),
+          merged.get("contact_email", ""), merged.get("contract_url", ""),
+          merged.get("status", "active"), now_utc(), vendor_id))
+    conn.commit()
+    conn.close()
+    return get_vendor(vendor_id)
+
+
+def save_vendor_assessment(vendor_id: str, answers: list,
+                            ai_summary: str = "") -> Optional[dict]:
+    """Persist a completed questionnaire: recompute score, tier and stamp
+    last_assessed_at. `answers` is the full questionnaire list (questions
+    plus user-provided answer/notes)."""
+    existing = get_vendor(vendor_id)
+    if not existing:
+        return None
+    if not isinstance(answers, list):
+        return None
+    score = _score_questionnaire(answers)
+    tier = _tier_for_score(score)
+    ts = now_utc()
+    conn = get_db()
+    conn.execute("""
+        UPDATE vendors
+           SET questionnaire=?, risk_score=?, risk_tier=?,
+               last_assessed_at=?, ai_summary=?, updated_at=?
+         WHERE vendor_id=?
+    """, (json.dumps(answers), score, tier, ts,
+          ai_summary or existing.get("ai_summary") or "", ts, vendor_id))
+    conn.commit()
+    conn.close()
+    return get_vendor(vendor_id)
+
+
+def delete_vendor(vendor_id: str) -> bool:
+    conn = get_db()
+    cur = conn.execute("DELETE FROM vendors WHERE vendor_id = ?", (vendor_id,))
+    conn.commit()
+    deleted = cur.rowcount or 0
+    conn.close()
+    return deleted > 0
+
+
+# ─── Policies & Acknowledgments ───────────────────────────────────
+
+def create_policy(data: dict) -> dict:
+    policy_id = new_id()
+    linked = data.get("linked_controls") or []
+    if not isinstance(linked, str):
+        linked = json.dumps(linked)
+    ts = now_utc()
+    conn = get_db()
+    conn.execute("""
+        INSERT INTO policies
+        (policy_id, title, version, summary, content, effective_date,
+         review_date, owner, status, linked_controls, created_at, updated_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+    """, (policy_id, data.get("title", "").strip(),
+          data.get("version", "1.0"),
+          data.get("summary", ""),
+          data.get("content", ""),
+          data.get("effective_date", ""),
+          data.get("review_date", ""),
+          data.get("owner", ""),
+          data.get("status", "active"),
+          linked, ts, ts))
+    conn.commit()
+    conn.close()
+    return get_policy(policy_id)
+
+
+def get_policy(policy_id: str) -> Optional[dict]:
+    conn = get_db()
+    row = conn.execute("SELECT * FROM policies WHERE policy_id = ?", (policy_id,)).fetchone()
+    conn.close()
+    if not row:
+        return None
+    d = dict(row)
+    try:
+        d["linked_controls"] = json.loads(d.get("linked_controls") or "[]")
+    except Exception:
+        d["linked_controls"] = []
+    return d
+
+
+def list_policies(status: str = None, limit: int = 500) -> list:
+    conn = get_db()
+    q = "SELECT * FROM policies WHERE 1=1"
+    params = []
+    if status:
+        q += " AND status = ?"
+        params.append(status)
+    q += " ORDER BY updated_at DESC LIMIT ?"
+    params.append(limit)
+    rows = conn.execute(q, params).fetchall()
+    conn.close()
+    out = []
+    for r in rows:
+        d = dict(r)
+        try:
+            d["linked_controls"] = json.loads(d.get("linked_controls") or "[]")
+        except Exception:
+            d["linked_controls"] = []
+        out.append(d)
+    return out
+
+
+def update_policy(policy_id: str, data: dict) -> Optional[dict]:
+    existing = get_policy(policy_id)
+    if not existing:
+        return None
+    merged = dict(existing)
+    for k in ("title", "version", "summary", "content", "effective_date",
+              "review_date", "owner", "status", "linked_controls"):
+        if k in data and data[k] is not None:
+            merged[k] = data[k]
+    linked = merged.get("linked_controls") or []
+    if not isinstance(linked, str):
+        linked = json.dumps(linked)
+    conn = get_db()
+    conn.execute("""
+        UPDATE policies
+           SET title=?, version=?, summary=?, content=?, effective_date=?,
+               review_date=?, owner=?, status=?, linked_controls=?,
+               updated_at=?
+         WHERE policy_id=?
+    """, (merged.get("title", ""), merged.get("version", ""),
+          merged.get("summary", ""), merged.get("content", ""),
+          merged.get("effective_date", ""), merged.get("review_date", ""),
+          merged.get("owner", ""), merged.get("status", "active"),
+          linked, now_utc(), policy_id))
+    conn.commit()
+    conn.close()
+    return get_policy(policy_id)
+
+
+def assign_policy(policy_id: str, user_ids: list) -> dict:
+    """Bulk-assign a policy to N users (upsert — re-assigning is a no-op).
+    Returns {assigned: n, skipped: n}."""
+    if not get_policy(policy_id):
+        return {"error": "policy_not_found"}
+    ts = now_utc()
+    conn = get_db()
+    assigned = 0
+    skipped = 0
+    for uid in user_ids or []:
+        uid_s = (uid or "").strip()
+        if not uid_s:
+            continue
+        existing = conn.execute(
+            "SELECT assignment_id FROM policy_assignments "
+            "WHERE policy_id = ? AND user_id = ?", (policy_id, uid_s)
+        ).fetchone()
+        if existing:
+            skipped += 1
+            continue
+        conn.execute("""
+            INSERT INTO policy_assignments
+            (assignment_id, policy_id, user_id, assigned_at, status)
+            VALUES (?,?,?,?,?)
+        """, (new_id(), policy_id, uid_s, ts, "pending"))
+        assigned += 1
+    conn.commit()
+    conn.close()
+    return {"assigned": assigned, "skipped": skipped}
+
+
+def list_policy_assignments(user_id: str = None, status: str = None,
+                             policy_id: str = None, limit: int = 500) -> list:
+    conn = get_db()
+    q = """
+        SELECT pa.*, p.title AS policy_title, p.version AS policy_version,
+               p.summary AS policy_summary, p.content AS policy_content,
+               p.status AS policy_status
+        FROM policy_assignments pa
+        LEFT JOIN policies p ON p.policy_id = pa.policy_id
+        WHERE 1=1
+    """
+    params = []
+    if user_id:
+        q += " AND pa.user_id = ?"
+        params.append(user_id)
+    if status:
+        q += " AND pa.status = ?"
+        params.append(status)
+    if policy_id:
+        q += " AND pa.policy_id = ?"
+        params.append(policy_id)
+    q += " ORDER BY pa.assigned_at DESC LIMIT ?"
+    params.append(limit)
+    rows = conn.execute(q, params).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def acknowledge_assignment(assignment_id: str, signature_note: str = "") -> Optional[dict]:
+    conn = get_db()
+    row = conn.execute(
+        "SELECT * FROM policy_assignments WHERE assignment_id = ?",
+        (assignment_id,)
+    ).fetchone()
+    if not row:
+        conn.close()
+        return None
+    ts = now_utc()
+    conn.execute("""
+        UPDATE policy_assignments
+           SET acknowledged_at=?, status='acknowledged', signature_note=?
+         WHERE assignment_id=?
+    """, (ts, signature_note or "", assignment_id))
+    conn.commit()
+    out = conn.execute(
+        "SELECT * FROM policy_assignments WHERE assignment_id = ?",
+        (assignment_id,)
+    ).fetchone()
+    conn.close()
+    return dict(out) if out else None
+
+
+# ─── Incidents (Incident Management) ──────────────────────────────
+
+def _compute_regulatory_deadline(severity: str, category: str,
+                                  reported_at: str) -> Optional[str]:
+    """Hard-coded demo rule:
+      - security_breach OR data_loss + (high|critical) → 72h from reported_at (GDPR Art.33)
+      - everything else → None
+    """
+    if not reported_at:
+        return None
+    sev = (severity or "").lower()
+    cat = (category or "").lower()
+    if cat in ("security_breach", "data_loss") and sev in ("high", "critical"):
+        from datetime import timedelta
+        try:
+            dt = datetime.fromisoformat(reported_at.replace("Z", "+00:00"))
+            return (dt + timedelta(hours=72)).isoformat()
+        except Exception:
+            return None
+    return None
+
+
+def create_incident(data: dict) -> dict:
+    incident_id = new_id()
+    ts = now_utc()
+    reported_at = data.get("reported_at") or ts
+    severity = data.get("severity", "medium")
+    category = data.get("category", "other")
+    breach_required = 1 if data.get("breach_notification_required") else 0
+    # Auto-flag breach notification when the regulatory deadline applies.
+    deadline = _compute_regulatory_deadline(severity, category, reported_at)
+    if deadline and not breach_required:
+        breach_required = 1
+    linked_c = data.get("linked_controls") or []
+    if not isinstance(linked_c, str):
+        linked_c = json.dumps(linked_c)
+    linked_f = data.get("linked_findings") or []
+    if not isinstance(linked_f, str):
+        linked_f = json.dumps(linked_f)
+    conn = get_db()
+    conn.execute("""
+        INSERT INTO incidents
+        (incident_id, title, description, severity, status, category,
+         reported_at, reported_by, resolved_at,
+         breach_notification_required, breach_notified_at, regulatory_deadline,
+         impact_assessment, root_cause, remediation,
+         linked_controls, linked_findings, created_at, updated_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    """, (incident_id,
+          data.get("title", "").strip(), data.get("description", ""),
+          severity, data.get("status", "open"), category,
+          reported_at, data.get("reported_by", ""), None,
+          breach_required, None, deadline,
+          data.get("impact_assessment", ""),
+          data.get("root_cause", ""),
+          data.get("remediation", ""),
+          linked_c, linked_f, ts, ts))
+    conn.commit()
+    conn.close()
+    return get_incident(incident_id)
+
+
+def get_incident(incident_id: str) -> Optional[dict]:
+    conn = get_db()
+    row = conn.execute("SELECT * FROM incidents WHERE incident_id = ?",
+                       (incident_id,)).fetchone()
+    conn.close()
+    if not row:
+        return None
+    d = dict(row)
+    for k in ("linked_controls", "linked_findings"):
+        try:
+            d[k] = json.loads(d.get(k) or "[]")
+        except Exception:
+            d[k] = []
+    return d
+
+
+def list_incidents(status: str = None, severity: str = None,
+                    category: str = None, limit: int = 500) -> list:
+    conn = get_db()
+    q = "SELECT * FROM incidents WHERE 1=1"
+    params = []
+    if status:
+        q += " AND status = ?"
+        params.append(status)
+    if severity:
+        q += " AND severity = ?"
+        params.append(severity)
+    if category:
+        q += " AND category = ?"
+        params.append(category)
+    q += " ORDER BY reported_at DESC LIMIT ?"
+    params.append(limit)
+    rows = conn.execute(q, params).fetchall()
+    conn.close()
+    out = []
+    for r in rows:
+        d = dict(r)
+        for k in ("linked_controls", "linked_findings"):
+            try:
+                d[k] = json.loads(d.get(k) or "[]")
+            except Exception:
+                d[k] = []
+        out.append(d)
+    return out
+
+
+def update_incident(incident_id: str, data: dict) -> Optional[dict]:
+    existing = get_incident(incident_id)
+    if not existing:
+        return None
+    merged = dict(existing)
+    for k in ("title", "description", "severity", "status", "category",
+              "reported_by", "breach_notification_required",
+              "breach_notified_at", "impact_assessment", "root_cause",
+              "remediation", "linked_controls", "linked_findings",
+              "resolved_at"):
+        if k in data and data[k] is not None:
+            merged[k] = data[k]
+    # Auto-stamp resolved_at when status transitions to resolved/closed
+    if (merged.get("status") in ("resolved", "closed")
+            and not merged.get("resolved_at")):
+        merged["resolved_at"] = now_utc()
+    linked_c = merged.get("linked_controls") or []
+    if not isinstance(linked_c, str):
+        linked_c = json.dumps(linked_c)
+    linked_f = merged.get("linked_findings") or []
+    if not isinstance(linked_f, str):
+        linked_f = json.dumps(linked_f)
+    breach_required = 1 if merged.get("breach_notification_required") else 0
+    conn = get_db()
+    conn.execute("""
+        UPDATE incidents
+           SET title=?, description=?, severity=?, status=?, category=?,
+               reported_by=?, resolved_at=?,
+               breach_notification_required=?, breach_notified_at=?,
+               impact_assessment=?, root_cause=?, remediation=?,
+               linked_controls=?, linked_findings=?, updated_at=?
+         WHERE incident_id=?
+    """, (merged.get("title", ""), merged.get("description", ""),
+          merged.get("severity", "medium"),
+          merged.get("status", "open"),
+          merged.get("category", "other"),
+          merged.get("reported_by", ""),
+          merged.get("resolved_at"),
+          breach_required,
+          merged.get("breach_notified_at"),
+          merged.get("impact_assessment", ""),
+          merged.get("root_cause", ""),
+          merged.get("remediation", ""),
+          linked_c, linked_f, now_utc(), incident_id))
+    conn.commit()
+    conn.close()
+    return get_incident(incident_id)
+
+
+def delete_incident(incident_id: str) -> bool:
+    conn = get_db()
+    cur = conn.execute("DELETE FROM incidents WHERE incident_id = ?", (incident_id,))
+    conn.commit()
+    deleted = cur.rowcount or 0
+    conn.close()
+    return deleted > 0
 
 
 # ─── Audit log ────────────────────────────────────────────────────

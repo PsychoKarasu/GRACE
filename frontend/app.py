@@ -111,6 +111,10 @@ TRANSLATIONS = {
         "nav.dashboard":              "Governance Dashboard",
         "nav.registry":               "Finding Registry",
         "nav.library":                "Framework Library",
+        "nav.risks":                  "🎲 Risk Management",
+        "nav.vendors":                "🤝 Vendor Risk",
+        "nav.policies":               "📜 Policies",
+        "nav.incidents":              "🚨 Incidents",
         "ga.header":                  "Ask GRACE",
         "ga.intro":                   "Analyse, ask or add context — one natural-language workspace over your GRC content.",
         "ga.input":                   "Input",
@@ -259,6 +263,197 @@ TRANSLATIONS = {
         "opstatus.closed":            "Closed",
         "opstatus.dismissed":         "Dismissed",
         "all":                        "All",
+        # ── Risk Management ──────────────────────────────────────
+        "risks.header":               "Risk Management",
+        "risks.intro":                "Maintain the corporate risk register — likelihood × impact, treatment plans, owners.",
+        "risks.kpi.total":            "Total risks",
+        "risks.kpi.critical":         "Critical (score ≥ 15)",
+        "risks.kpi.avg_residual":     "Avg residual score",
+        "risks.kpi.open":             "Open",
+        "risks.filter.status":        "Status",
+        "risks.filter.category":      "Category",
+        "risks.filter.owner":         "Owner",
+        "risks.heatmap_title":        "5 × 5 Risk Heatmap (likelihood × impact)",
+        "risks.heatmap_xaxis":        "Impact →",
+        "risks.heatmap_yaxis":        "Likelihood →",
+        "risks.new_button":           "+ New Risk",
+        "risks.new_form_title":       "Create a new risk",
+        "risks.edit_button":          "Edit",
+        "risks.cancel_button":        "Cancel",
+        "risks.save_button":          "Save changes",
+        "risks.delete_button":        "Delete",
+        "risks.delete_confirm":       "Risk deleted.",
+        "risks.no_risks":             "No risks registered yet. Click '+ New Risk' to add one.",
+        "risks.field.title":          "Title",
+        "risks.field.description":    "Description",
+        "risks.field.category":       "Category",
+        "risks.field.likelihood":     "Likelihood (1–5)",
+        "risks.field.impact":         "Impact (1–5)",
+        "risks.field.residual":       "Residual score (0–25)",
+        "risks.field.treatment":      "Treatment plan",
+        "risks.field.treatment_notes":"Treatment notes",
+        "risks.field.owner":          "Owner",
+        "risks.field.status":         "Status",
+        "risks.field.linked_controls":"Linked controls (comma-separated, e.g. ISO27001:2022:A.5.1, GDPR:Art.32)",
+        "risks.create_button":        "Create risk",
+        "risks.created_ok":           "Risk created.",
+        "risks.updated_ok":           "Risk updated.",
+        "risks.score_inherent":       "Inherent",
+        "risks.score_residual":       "Residual",
+        "risks.cat.operational":      "Operational",
+        "risks.cat.cyber":            "Cyber",
+        "risks.cat.compliance":       "Compliance",
+        "risks.cat.financial":        "Financial",
+        "risks.cat.strategic":        "Strategic",
+        "risks.cat.reputational":     "Reputational",
+        "risks.treat.avoid":          "Avoid",
+        "risks.treat.transfer":       "Transfer",
+        "risks.treat.mitigate":       "Mitigate",
+        "risks.treat.accept":         "Accept",
+        "risks.status.open":          "Open",
+        "risks.status.under_treatment": "Under Treatment",
+        "risks.status.accepted":      "Accepted",
+        "risks.status.closed":        "Closed",
+        # ── Vendor Risk ──────────────────────────────────────────
+        "vendors.header":             "Vendor Risk",
+        "vendors.intro":              "Assess and monitor your third-party suppliers against a 10-question security baseline.",
+        "vendors.kpi.total":          "Total vendors",
+        "vendors.kpi.high_risk":      "Critical / High risk",
+        "vendors.kpi.due":            "Due for reassessment",
+        "vendors.kpi.active":         "Active",
+        "vendors.filter.tier":        "Risk tier",
+        "vendors.filter.category":    "Category",
+        "vendors.filter.status":      "Status",
+        "vendors.new_button":         "+ Add Vendor",
+        "vendors.new_form_title":     "Add a new vendor",
+        "vendors.field.name":         "Vendor name",
+        "vendors.field.category":     "Category",
+        "vendors.field.contact_email":"Contact email",
+        "vendors.field.contract_url": "Contract URL",
+        "vendors.field.status":       "Status",
+        "vendors.create_button":      "Create vendor",
+        "vendors.created_ok":         "Vendor added.",
+        "vendors.updated_ok":         "Vendor updated.",
+        "vendors.assess_button":      "Assess",
+        "vendors.assess_form_title":  "Vendor security questionnaire",
+        "vendors.assess_intro":       "Answer each question, optionally add notes, then submit to compute the risk score.",
+        "vendors.assess_submit":      "Submit assessment",
+        "vendors.assess_ok":          "Assessment saved. Risk score and tier updated.",
+        "vendors.ai_summary":         "AI summary",
+        "vendors.never_assessed":     "Not yet assessed",
+        "vendors.last_assessed":      "Last assessed {date}",
+        "vendors.score":              "Score",
+        "vendors.tier":               "Tier",
+        "vendors.no_vendors":         "No vendors registered. Click '+ Add Vendor' to start.",
+        "vendors.answer.yes":         "Yes",
+        "vendors.answer.no":          "No",
+        "vendors.answer.partial":     "Partial",
+        "vendors.answer.unknown":     "Unknown",
+        "vendors.notes_label":        "Notes",
+        "vendors.cat.cloud_infra":    "Cloud Infrastructure",
+        "vendors.cat.saas":           "SaaS",
+        "vendors.cat.payment":        "Payment",
+        "vendors.cat.data_processor": "Data Processor",
+        "vendors.cat.professional_services": "Professional Services",
+        "vendors.cat.other":          "Other",
+        "vendors.tier.low":           "Low",
+        "vendors.tier.medium":        "Medium",
+        "vendors.tier.high":          "High",
+        "vendors.tier.critical":      "Critical",
+        "vendors.status.active":      "Active",
+        "vendors.status.under_review":"Under Review",
+        "vendors.status.terminated":  "Terminated",
+        # ── Policies ─────────────────────────────────────────────
+        "policies.header":            "Policies",
+        "policies.intro":             "Publish internal policies, assign them to people and collect acknowledgments.",
+        "policies.tab_library":       "📚 Library",
+        "policies.tab_acks":          "✅ My Acknowledgments",
+        "policies.kpi.total":         "Total policies",
+        "policies.kpi.active":        "Active",
+        "policies.kpi.pending":       "Pending acknowledgments",
+        "policies.new_button":        "+ Create Policy",
+        "policies.new_form_title":    "Create a new policy",
+        "policies.field.title":       "Title",
+        "policies.field.version":     "Version",
+        "policies.field.summary":     "Summary",
+        "policies.field.content":     "Content (markdown)",
+        "policies.field.effective":   "Effective date (YYYY-MM-DD)",
+        "policies.field.review":      "Review date (YYYY-MM-DD)",
+        "policies.field.owner":       "Owner",
+        "policies.field.status":      "Status",
+        "policies.field.linked_controls": "Linked controls (comma-separated)",
+        "policies.create_button":     "Create policy",
+        "policies.created_ok":        "Policy created.",
+        "policies.assign_to":         "Assign to users (comma-separated user IDs, e.g. alice@demo, bob@demo)",
+        "policies.assign_button":     "Assign",
+        "policies.assign_ok":         "Assigned to {n} user(s); {s} already had this policy.",
+        "policies.no_policies":       "No policies created yet. Click '+ Create Policy' to start.",
+        "policies.demo_user_label":   "Demo user",
+        "policies.demo_user_help":    "Type a user ID to see their pending acknowledgments.",
+        "policies.no_pending":        "No pending acknowledgments for this user.",
+        "policies.accept_button":     "✅ Accept",
+        "policies.signature_note":    "Signature note (optional)",
+        "policies.acknowledged_ok":   "Policy acknowledged. Thanks.",
+        "policies.acknowledged_section": "Already acknowledged",
+        "policies.policy_version":    "Version {v}",
+        "policies.policy_owner":      "Owner: {o}",
+        "policies.policy_effective":  "Effective: {d}",
+        "policies.status.draft":      "Draft",
+        "policies.status.active":     "Active",
+        "policies.status.superseded": "Superseded",
+        "policies.status.retired":    "Retired",
+        # ── Incidents ────────────────────────────────────────────
+        "incidents.header":           "Incidents",
+        "incidents.intro":            "Track security incidents from report to resolution — with regulatory deadline awareness.",
+        "incidents.kpi.open":         "Open incidents",
+        "incidents.kpi.critical":     "Critical open",
+        "incidents.kpi.breach_pending":"Breach notifications pending",
+        "incidents.kpi.mttr":         "MTTR (days)",
+        "incidents.filter.severity":  "Severity",
+        "incidents.filter.status":    "Status",
+        "incidents.filter.category":  "Category",
+        "incidents.new_button":       "+ Report Incident",
+        "incidents.new_form_title":   "Report a new incident",
+        "incidents.field.title":      "Title",
+        "incidents.field.description":"Description",
+        "incidents.field.severity":   "Severity",
+        "incidents.field.status":     "Status",
+        "incidents.field.category":   "Category",
+        "incidents.field.reported_by":"Reported by",
+        "incidents.field.impact":     "Impact assessment",
+        "incidents.field.root_cause": "Root cause",
+        "incidents.field.remediation":"Remediation",
+        "incidents.field.linked_controls": "Linked controls (comma-separated)",
+        "incidents.field.linked_findings": "Linked finding IDs (comma-separated)",
+        "incidents.field.breach_required":"Regulatory breach notification required",
+        "incidents.field.breach_notified":"Breach notified at (ISO timestamp)",
+        "incidents.create_button":    "Report incident",
+        "incidents.created_ok":       "Incident reported.",
+        "incidents.update_button":    "Save changes",
+        "incidents.updated_ok":       "Incident updated.",
+        "incidents.no_incidents":     "No incidents reported. Click '+ Report Incident' to log one.",
+        "incidents.breach_banner":    "⚠ Regulatory breach notification required",
+        "incidents.deadline_in":      "Deadline: {when}",
+        "incidents.deadline_overdue": "OVERDUE — was due {when}",
+        "incidents.deadline_notified":"Notified at {when}",
+        "incidents.reported_on":      "Reported {date}",
+        "incidents.resolved_on":      "Resolved {date}",
+        "incidents.edit_section":     "Edit incident",
+        "incidents.severity.low":     "Low",
+        "incidents.severity.medium":  "Medium",
+        "incidents.severity.high":    "High",
+        "incidents.severity.critical":"Critical",
+        "incidents.status.open":      "Open",
+        "incidents.status.investigating":"Investigating",
+        "incidents.status.contained": "Contained",
+        "incidents.status.resolved":  "Resolved",
+        "incidents.status.closed":    "Closed",
+        "incidents.cat.security_breach": "Security Breach",
+        "incidents.cat.data_loss":    "Data Loss",
+        "incidents.cat.system_outage":"System Outage",
+        "incidents.cat.policy_violation":"Policy Violation",
+        "incidents.cat.third_party":  "Third Party",
+        "incidents.cat.other":        "Other",
     },
     "it": {
         "sidebar.navigation":         "Navigazione",
@@ -280,6 +475,10 @@ TRANSLATIONS = {
         "nav.dashboard":              "Dashboard Governance",
         "nav.registry":               "Registro Findings",
         "nav.library":                "Libreria Framework",
+        "nav.risks":                  "🎲 Gestione Rischi",
+        "nav.vendors":                "🤝 Rischio Fornitori",
+        "nav.policies":               "📜 Policy",
+        "nav.incidents":              "🚨 Incidenti",
         "ga.header":                  "Ask GRACE",
         "ga.intro":                   "Analizza, chiedi o aggiungi contesto — un unico workspace in linguaggio naturale sui tuoi contenuti GRC.",
         "ga.input":                   "Input",
@@ -428,6 +627,197 @@ TRANSLATIONS = {
         "opstatus.closed":            "Chiuso",
         "opstatus.dismissed":         "Scartato",
         "all":                        "Tutti",
+        # ── Risk Management ──────────────────────────────────────
+        "risks.header":               "Gestione Rischi",
+        "risks.intro":                "Mantieni il registro dei rischi aziendali — probabilità × impatto, piani di trattamento, owner.",
+        "risks.kpi.total":            "Rischi totali",
+        "risks.kpi.critical":         "Critici (score ≥ 15)",
+        "risks.kpi.avg_residual":     "Score residuo medio",
+        "risks.kpi.open":             "Aperti",
+        "risks.filter.status":        "Stato",
+        "risks.filter.category":      "Categoria",
+        "risks.filter.owner":         "Owner",
+        "risks.heatmap_title":        "Heatmap 5 × 5 dei rischi (probabilità × impatto)",
+        "risks.heatmap_xaxis":        "Impatto →",
+        "risks.heatmap_yaxis":        "Probabilità →",
+        "risks.new_button":           "+ Nuovo rischio",
+        "risks.new_form_title":       "Crea un nuovo rischio",
+        "risks.edit_button":          "Modifica",
+        "risks.cancel_button":        "Annulla",
+        "risks.save_button":          "Salva modifiche",
+        "risks.delete_button":        "Elimina",
+        "risks.delete_confirm":       "Rischio eliminato.",
+        "risks.no_risks":             "Nessun rischio registrato. Clicca '+ Nuovo rischio' per aggiungerne uno.",
+        "risks.field.title":          "Titolo",
+        "risks.field.description":    "Descrizione",
+        "risks.field.category":       "Categoria",
+        "risks.field.likelihood":     "Probabilità (1–5)",
+        "risks.field.impact":         "Impatto (1–5)",
+        "risks.field.residual":       "Score residuo (0–25)",
+        "risks.field.treatment":      "Piano di trattamento",
+        "risks.field.treatment_notes":"Note al trattamento",
+        "risks.field.owner":          "Owner",
+        "risks.field.status":         "Stato",
+        "risks.field.linked_controls":"Controlli collegati (separati da virgola, es. ISO27001:2022:A.5.1, GDPR:Art.32)",
+        "risks.create_button":        "Crea rischio",
+        "risks.created_ok":           "Rischio creato.",
+        "risks.updated_ok":           "Rischio aggiornato.",
+        "risks.score_inherent":       "Inerente",
+        "risks.score_residual":       "Residuo",
+        "risks.cat.operational":      "Operativo",
+        "risks.cat.cyber":            "Cyber",
+        "risks.cat.compliance":       "Compliance",
+        "risks.cat.financial":        "Finanziario",
+        "risks.cat.strategic":        "Strategico",
+        "risks.cat.reputational":     "Reputazionale",
+        "risks.treat.avoid":          "Evitare",
+        "risks.treat.transfer":       "Trasferire",
+        "risks.treat.mitigate":       "Mitigare",
+        "risks.treat.accept":         "Accettare",
+        "risks.status.open":          "Aperto",
+        "risks.status.under_treatment": "In Trattamento",
+        "risks.status.accepted":      "Accettato",
+        "risks.status.closed":        "Chiuso",
+        # ── Vendor Risk ──────────────────────────────────────────
+        "vendors.header":             "Rischio Fornitori",
+        "vendors.intro":              "Valuta e monitora i tuoi fornitori esterni rispetto a una baseline di sicurezza di 10 domande.",
+        "vendors.kpi.total":          "Fornitori totali",
+        "vendors.kpi.high_risk":      "Rischio critico / alto",
+        "vendors.kpi.due":            "Da rivalutare",
+        "vendors.kpi.active":         "Attivi",
+        "vendors.filter.tier":        "Livello rischio",
+        "vendors.filter.category":    "Categoria",
+        "vendors.filter.status":      "Stato",
+        "vendors.new_button":         "+ Aggiungi fornitore",
+        "vendors.new_form_title":     "Aggiungi un nuovo fornitore",
+        "vendors.field.name":         "Nome fornitore",
+        "vendors.field.category":     "Categoria",
+        "vendors.field.contact_email":"Email di contatto",
+        "vendors.field.contract_url": "URL contratto",
+        "vendors.field.status":       "Stato",
+        "vendors.create_button":      "Crea fornitore",
+        "vendors.created_ok":         "Fornitore aggiunto.",
+        "vendors.updated_ok":         "Fornitore aggiornato.",
+        "vendors.assess_button":      "Valuta",
+        "vendors.assess_form_title":  "Questionario di sicurezza fornitore",
+        "vendors.assess_intro":       "Rispondi a ciascuna domanda, eventualmente aggiungi delle note, poi invia per calcolare lo score di rischio.",
+        "vendors.assess_submit":      "Invia valutazione",
+        "vendors.assess_ok":          "Valutazione salvata. Score e tier aggiornati.",
+        "vendors.ai_summary":         "Sintesi AI",
+        "vendors.never_assessed":     "Non ancora valutato",
+        "vendors.last_assessed":      "Ultima valutazione: {date}",
+        "vendors.score":              "Score",
+        "vendors.tier":               "Tier",
+        "vendors.no_vendors":         "Nessun fornitore registrato. Clicca '+ Aggiungi fornitore' per iniziare.",
+        "vendors.answer.yes":         "Sì",
+        "vendors.answer.no":          "No",
+        "vendors.answer.partial":     "Parziale",
+        "vendors.answer.unknown":     "Sconosciuto",
+        "vendors.notes_label":        "Note",
+        "vendors.cat.cloud_infra":    "Infrastruttura Cloud",
+        "vendors.cat.saas":           "SaaS",
+        "vendors.cat.payment":        "Pagamenti",
+        "vendors.cat.data_processor": "Responsabile del Trattamento",
+        "vendors.cat.professional_services": "Servizi Professionali",
+        "vendors.cat.other":          "Altro",
+        "vendors.tier.low":           "Basso",
+        "vendors.tier.medium":        "Medio",
+        "vendors.tier.high":          "Alto",
+        "vendors.tier.critical":      "Critico",
+        "vendors.status.active":      "Attivo",
+        "vendors.status.under_review":"In Revisione",
+        "vendors.status.terminated":  "Terminato",
+        # ── Policies ─────────────────────────────────────────────
+        "policies.header":            "Policy",
+        "policies.intro":             "Pubblica policy interne, assegnale alle persone e raccogli le conferme di presa visione.",
+        "policies.tab_library":       "📚 Libreria",
+        "policies.tab_acks":          "✅ Le mie conferme",
+        "policies.kpi.total":         "Policy totali",
+        "policies.kpi.active":        "Attive",
+        "policies.kpi.pending":       "Conferme in attesa",
+        "policies.new_button":        "+ Crea policy",
+        "policies.new_form_title":    "Crea una nuova policy",
+        "policies.field.title":       "Titolo",
+        "policies.field.version":     "Versione",
+        "policies.field.summary":     "Sintesi",
+        "policies.field.content":     "Contenuto (markdown)",
+        "policies.field.effective":   "Data di entrata in vigore (YYYY-MM-DD)",
+        "policies.field.review":      "Data revisione (YYYY-MM-DD)",
+        "policies.field.owner":       "Owner",
+        "policies.field.status":      "Stato",
+        "policies.field.linked_controls": "Controlli collegati (separati da virgola)",
+        "policies.create_button":     "Crea policy",
+        "policies.created_ok":        "Policy creata.",
+        "policies.assign_to":         "Assegna agli utenti (ID separati da virgola, es. alice@demo, bob@demo)",
+        "policies.assign_button":     "Assegna",
+        "policies.assign_ok":         "Assegnata a {n} utente/i; {s} già la avevano.",
+        "policies.no_policies":       "Nessuna policy creata. Clicca '+ Crea policy' per iniziare.",
+        "policies.demo_user_label":   "Utente demo",
+        "policies.demo_user_help":    "Inserisci un ID utente per vedere le sue conferme in attesa.",
+        "policies.no_pending":        "Nessuna conferma in attesa per questo utente.",
+        "policies.accept_button":     "✅ Accetto",
+        "policies.signature_note":    "Nota di firma (opzionale)",
+        "policies.acknowledged_ok":   "Policy confermata. Grazie.",
+        "policies.acknowledged_section": "Già confermate",
+        "policies.policy_version":    "Versione {v}",
+        "policies.policy_owner":      "Owner: {o}",
+        "policies.policy_effective":  "In vigore dal: {d}",
+        "policies.status.draft":      "Bozza",
+        "policies.status.active":     "Attiva",
+        "policies.status.superseded": "Sostituita",
+        "policies.status.retired":    "Ritirata",
+        # ── Incidents ────────────────────────────────────────────
+        "incidents.header":           "Incidenti",
+        "incidents.intro":            "Traccia gli incidenti di sicurezza dalla segnalazione alla risoluzione — con consapevolezza dei termini regolatori.",
+        "incidents.kpi.open":         "Incidenti aperti",
+        "incidents.kpi.critical":     "Critici aperti",
+        "incidents.kpi.breach_pending":"Notifiche da inviare",
+        "incidents.kpi.mttr":         "MTTR (giorni)",
+        "incidents.filter.severity":  "Severità",
+        "incidents.filter.status":    "Stato",
+        "incidents.filter.category":  "Categoria",
+        "incidents.new_button":       "+ Segnala incidente",
+        "incidents.new_form_title":   "Segnala un nuovo incidente",
+        "incidents.field.title":      "Titolo",
+        "incidents.field.description":"Descrizione",
+        "incidents.field.severity":   "Severità",
+        "incidents.field.status":     "Stato",
+        "incidents.field.category":   "Categoria",
+        "incidents.field.reported_by":"Segnalato da",
+        "incidents.field.impact":     "Valutazione d'impatto",
+        "incidents.field.root_cause": "Causa principale",
+        "incidents.field.remediation":"Rimedio",
+        "incidents.field.linked_controls": "Controlli collegati (separati da virgola)",
+        "incidents.field.linked_findings": "ID finding collegati (separati da virgola)",
+        "incidents.field.breach_required":"Notifica di violazione richiesta",
+        "incidents.field.breach_notified":"Notificato il (timestamp ISO)",
+        "incidents.create_button":    "Segnala incidente",
+        "incidents.created_ok":       "Incidente segnalato.",
+        "incidents.update_button":    "Salva modifiche",
+        "incidents.updated_ok":       "Incidente aggiornato.",
+        "incidents.no_incidents":     "Nessun incidente segnalato. Clicca '+ Segnala incidente' per registrarne uno.",
+        "incidents.breach_banner":    "⚠ Notifica regolatoria richiesta",
+        "incidents.deadline_in":      "Scadenza: {when}",
+        "incidents.deadline_overdue": "IN RITARDO — scadeva il {when}",
+        "incidents.deadline_notified":"Notificato il {when}",
+        "incidents.reported_on":      "Segnalato il {date}",
+        "incidents.resolved_on":      "Risolto il {date}",
+        "incidents.edit_section":     "Modifica incidente",
+        "incidents.severity.low":     "Bassa",
+        "incidents.severity.medium":  "Media",
+        "incidents.severity.high":    "Alta",
+        "incidents.severity.critical":"Critica",
+        "incidents.status.open":      "Aperto",
+        "incidents.status.investigating":"In indagine",
+        "incidents.status.contained": "Contenuto",
+        "incidents.status.resolved":  "Risolto",
+        "incidents.status.closed":    "Chiuso",
+        "incidents.cat.security_breach": "Violazione di Sicurezza",
+        "incidents.cat.data_loss":    "Perdita di Dati",
+        "incidents.cat.system_outage":"Disservizio Sistema",
+        "incidents.cat.policy_violation":"Violazione di Policy",
+        "incidents.cat.third_party":  "Terze Parti",
+        "incidents.cat.other":        "Altro",
     },
 }
 
@@ -1454,6 +1844,128 @@ hr {{
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }}
+
+/* ── Phase 1 — Risk / Vendor / Policy / Incident module styles ── */
+
+/* Generic record card — drop-in for findings-style cards in non-findings
+   pages. Keeps the navy/teal/amber palette and the same left-border
+   severity colouring. */
+.record-card {{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--text-dim);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  transition: transform .15s ease, box-shadow .15s ease;
+}}
+.record-card:hover {{ transform: translateY(-1px); box-shadow: var(--shadow-lg); }}
+.record-card.critical {{ border-left-color: #DC2626; }}
+.record-card.high     {{ border-left-color: #EA580C; }}
+.record-card.medium   {{ border-left-color: #EAB308; }}
+.record-card.low      {{ border-left-color: #6B7280; }}
+.record-card.green    {{ border-left-color: #10B981; }}
+.record-card .rc-head {{
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 10px; flex-wrap: wrap;
+}}
+.record-card .rc-title {{
+  font-weight: 700;
+  color: var(--text);
+  font-size: 0.98rem;
+}}
+.record-card .rc-meta {{
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  margin-top: 4px;
+}}
+.record-card .rc-body {{
+  color: var(--text);
+  margin-top: 8px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}}
+.record-card .rc-foot {{
+  margin-top: 10px;
+  display: flex; flex-wrap: wrap; gap: 6px;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}}
+
+/* ── Risk heatmap (5×5) ── */
+.risk-heatmap {{
+  display: grid;
+  grid-template-columns: 36px repeat(5, 1fr);
+  gap: 4px;
+  margin: 8px 0 14px 0;
+}}
+.risk-heatmap .hm-cell {{
+  position: relative;
+  aspect-ratio: 1.4 / 1;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}}
+.risk-heatmap .hm-cell .hm-count {{
+  position: absolute; top: 3px; right: 5px;
+  font-size: 0.62rem; font-weight: 700;
+  background: rgba(15, 23, 42, 0.18); color: #fff;
+  padding: 1px 5px; border-radius: 8px;
+}}
+.risk-heatmap .hm-axis {{
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}}
+.risk-heatmap-legend {{
+  display: flex; gap: 8px; flex-wrap: wrap;
+  font-size: 0.72rem; color: var(--text-dim);
+  margin-top: 4px;
+}}
+.risk-heatmap-legend .leg-chip {{
+  display: inline-flex; align-items: center; gap: 4px;
+}}
+.risk-heatmap-legend .leg-sq {{
+  width: 10px; height: 10px; border-radius: 3px; display: inline-block;
+}}
+
+/* ── Score chips (risk inherent / residual) ── */
+.score-chip {{
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.74rem;
+  letter-spacing: 0.3px;
+  background: var(--surface-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+}}
+.score-chip.crit  {{ background: #FEE2E2; color: #991B1B; border-color: #FCA5A5; }}
+.score-chip.hi    {{ background: #FFEDD5; color: #9A3412; border-color: #FED7AA; }}
+.score-chip.mid   {{ background: #FEF9C3; color: #854D0E; border-color: #FDE68A; }}
+.score-chip.lo    {{ background: #D1FAE5; color: #065F46; border-color: #86EFAC; }}
+
+/* ── Breach banner (incidents) ── */
+.breach-banner {{
+  margin: 8px 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  color: #7F1D1D;
+  font-weight: 600;
+  font-size: 0.84rem;
+}}
+.breach-banner.overdue {{ background: #DC2626; color: #FEF2F2; border-color: #991B1B; }}
+.breach-banner.notified {{ background: #ECFDF5; border-color: #86EFAC; color: #065F46; }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1705,7 +2217,8 @@ with top_theme:
 
 # ─── Sidebar ─────────────────────────────────────────────────────────
 
-PAGE_KEYS = ["gap_analysis", "doc_gen", "dashboard", "registry", "library"]
+PAGE_KEYS = ["gap_analysis", "doc_gen", "dashboard", "registry", "library",
+             "risks", "vendors", "policies", "incidents"]
 # Inline SVG icons (lucide-style outline) used by the sidebar nav and
 # elsewhere. Kept tiny so they ship inside the stylesheet without
 # external HTTP. Single-stroke, no fills, currentColor — they inherit
@@ -1717,6 +2230,10 @@ def _nav_icon_svg(name: str) -> str:
         "dashboard":    "<line x1='4' y1='19' x2='4' y2='11'/><line x1='10' y1='19' x2='10' y2='5'/><line x1='16' y1='19' x2='16' y2='14'/><line x1='3' y1='19' x2='21' y2='19'/>",
         "registry":     "<line x1='6' y1='6' x2='20' y2='6'/><line x1='6' y1='12' x2='20' y2='12'/><line x1='6' y1='18' x2='20' y2='18'/><circle cx='3' cy='6' r='1.2'/><circle cx='3' cy='12' r='1.2'/><circle cx='3' cy='18' r='1.2'/>",
         "library":      "<path d='M4 5a2 2 0 0 1 2-2h6v18H6a2 2 0 0 1-2-2z'/><path d='M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6z'/>",
+        "risks":        "<polygon points='12 3 22 20 2 20'/><line x1='12' y1='10' x2='12' y2='15'/><circle cx='12' cy='18' r='0.7'/>",
+        "vendors":      "<path d='M16 3v2'/><path d='M8 3v2'/><rect x='3' y='6' width='18' height='15' rx='2'/><line x1='3' y1='11' x2='21' y2='11'/>",
+        "policies":     "<path d='M6 3h9l4 4v14H6z'/><line x1='9' y1='10' x2='15' y2='10'/><line x1='9' y1='14' x2='15' y2='14'/><line x1='9' y1='18' x2='13' y2='18'/>",
+        "incidents":    "<path d='M12 2 L22 22 H2 Z'/><line x1='12' y1='9' x2='12' y2='14'/><circle cx='12' cy='17' r='0.7'/>",
         "reset":        "<polyline points='4 8 4 4 8 4'/><path d='M4 12a8 8 0 1 0 2.3-5.7'/>",
     }
     return paths.get(name, "")
@@ -2658,6 +3175,1016 @@ with _main_col:
                                             st.error(f"API error {_r.status_code}: {_r.text[:200]}")
                                     except Exception as _e:
                                         st.error(f"Request failed: {_e}")
+
+
+    # ════════════════════════════════════════════════════════════════
+    # PAGE: RISK MANAGEMENT (Phase 1)
+    # ════════════════════════════════════════════════════════════════
+
+    elif page == "risks":
+        page_hero(t("risks.header"), t("risks.intro"))
+
+        RISK_CATEGORIES = ["operational", "cyber", "compliance", "financial",
+                            "strategic", "reputational"]
+        RISK_TREATMENTS = ["avoid", "transfer", "mitigate", "accept"]
+        RISK_STATUSES = ["open", "under_treatment", "accepted", "closed"]
+        ALL = "__ALL__"
+
+        # ── Filter row ──────────────────────────────────────────
+        fcol1, fcol2, fcol3 = st.columns(3)
+        f_status = fcol1.selectbox(
+            t("risks.filter.status"), [ALL] + RISK_STATUSES,
+            format_func=lambda v: t("all") if v == ALL else t(f"risks.status.{v}"),
+            key="risks_filter_status",
+        )
+        f_category = fcol2.selectbox(
+            t("risks.filter.category"), [ALL] + RISK_CATEGORIES,
+            format_func=lambda v: t("all") if v == ALL else t(f"risks.cat.{v}"),
+            key="risks_filter_category",
+        )
+        f_owner = fcol3.text_input(t("risks.filter.owner"), value="",
+                                    key="risks_filter_owner")
+
+        query = "/api/v1/risks?"
+        if f_status != ALL:
+            query += f"status={f_status}&"
+        if f_category != ALL:
+            query += f"category={f_category}&"
+        if f_owner.strip():
+            query += f"owner={f_owner.strip()}&"
+        resp = api_get(query.rstrip("&?")) or {"risks": []}
+        risks = resp.get("risks", []) or []
+
+        # ── KPI strip ───────────────────────────────────────────
+        kc1, kc2, kc3, kc4 = st.columns(4)
+        total = len(risks)
+        critical = sum(1 for r in risks if (r.get("residual_score") or 0) >= 15)
+        open_n = sum(1 for r in risks if r.get("status") == "open")
+        avg_res = round(
+            sum((r.get("residual_score") or 0) for r in risks) / total, 1
+        ) if total else 0
+        kc1.metric(t("risks.kpi.total"), total)
+        kc2.metric(t("risks.kpi.critical"), critical)
+        kc3.metric(t("risks.kpi.avg_residual"), avg_res)
+        kc4.metric(t("risks.kpi.open"), open_n)
+
+        # ── 5×5 Heatmap ─────────────────────────────────────────
+        def _heatmap_color(score: int) -> str:
+            # Green (low) → amber (mid) → red (high). Returns hex.
+            palette = [
+                "#D1FAE5",  # 1-3   very low
+                "#A7F3D0",  # 4-6   low
+                "#FEF3C7",  # 7-9   medium-low
+                "#FDE68A",  # 10-12 medium
+                "#FCA5A5",  # 13-15 medium-high
+                "#F87171",  # 16-19 high
+                "#DC2626",  # 20-25 critical
+            ]
+            if score <= 3: return palette[0]
+            if score <= 6: return palette[1]
+            if score <= 9: return palette[2]
+            if score <= 12: return palette[3]
+            if score <= 15: return palette[4]
+            if score <= 19: return palette[5]
+            return palette[6]
+
+        # Build grid: rows are likelihood 5..1 (top to bottom), cols are
+        # impact 1..5. Counts and max-score per cell drive the colour.
+        cells = {(L, I): [] for L in range(1, 6) for I in range(1, 6)}
+        for r in risks:
+            L = int(r.get("likelihood") or 0)
+            I = int(r.get("impact") or 0)
+            if 1 <= L <= 5 and 1 <= I <= 5:
+                cells[(L, I)].append(r)
+
+        st.markdown(f"#### {t('risks.heatmap_title')}")
+        # Grid: top header row (axis label + I1..I5), then 5 rows
+        # likelihood 5..1, each starting with the likelihood label.
+        html_parts = ['<div class="risk-heatmap">']
+        # Top-left empty + impact column headers
+        html_parts.append('<div class="hm-axis"></div>')
+        for I in range(1, 6):
+            html_parts.append(f'<div class="hm-axis">I={I}</div>')
+        # Rows: likelihood 5 down to 1
+        for L in range(5, 0, -1):
+            html_parts.append(f'<div class="hm-axis">L={L}</div>')
+            for I in range(1, 6):
+                cell_risks = cells.get((L, I), [])
+                score = L * I
+                color = _heatmap_color(score)
+                count = len(cell_risks)
+                count_html = f'<span class="hm-count">{count}</span>' if count else ''
+                html_parts.append(
+                    f'<div class="hm-cell" style="background:{color}" '
+                    f'title="L={L} × I={I} = {score} · {count} risk(s)">'
+                    f'{score}{count_html}</div>'
+                )
+        html_parts.append('</div>')
+        st.markdown("\n".join(html_parts), unsafe_allow_html=True)
+        st.caption(
+            f"{t('risks.heatmap_yaxis')} · {t('risks.heatmap_xaxis')}"
+        )
+
+        st.markdown("---")
+
+        # ── New Risk form ───────────────────────────────────────
+        show_new_key = "risks_show_new"
+        if st.button(t("risks.new_button"), key="risks_new_btn"):
+            st.session_state[show_new_key] = not st.session_state.get(show_new_key, False)
+
+        if st.session_state.get(show_new_key, False):
+            with st.form("risks_new_form", clear_on_submit=True):
+                st.markdown(f"**{t('risks.new_form_title')}**")
+                nc1, nc2 = st.columns(2)
+                title = nc1.text_input(t("risks.field.title"))
+                owner = nc2.text_input(t("risks.field.owner"))
+                description = st.text_area(t("risks.field.description"))
+                nc3, nc4, nc5 = st.columns(3)
+                category = nc3.selectbox(
+                    t("risks.field.category"), RISK_CATEGORIES,
+                    format_func=lambda v: t(f"risks.cat.{v}"),
+                )
+                treatment = nc4.selectbox(
+                    t("risks.field.treatment"), RISK_TREATMENTS,
+                    format_func=lambda v: t(f"risks.treat.{v}"),
+                )
+                status = nc5.selectbox(
+                    t("risks.field.status"), RISK_STATUSES,
+                    format_func=lambda v: t(f"risks.status.{v}"),
+                )
+                nc6, nc7, nc8 = st.columns(3)
+                likelihood = nc6.slider(t("risks.field.likelihood"), 1, 5, 3)
+                impact = nc7.slider(t("risks.field.impact"), 1, 5, 3)
+                residual = nc8.slider(t("risks.field.residual"), 0, 25,
+                                       likelihood * impact)
+                treatment_notes = st.text_area(t("risks.field.treatment_notes"))
+                linked_str = st.text_input(t("risks.field.linked_controls"))
+                submitted = st.form_submit_button(t("risks.create_button"))
+                if submitted:
+                    if not title.strip():
+                        st.error(t("risks.field.title"))
+                    else:
+                        linked = [s.strip() for s in linked_str.split(",") if s.strip()]
+                        payload = {
+                            "title": title.strip(),
+                            "description": description,
+                            "category": category,
+                            "likelihood": int(likelihood),
+                            "impact": int(impact),
+                            "residual_score": int(residual),
+                            "treatment_plan": treatment,
+                            "treatment_notes": treatment_notes,
+                            "owner": owner,
+                            "status": status,
+                            "linked_controls": linked,
+                        }
+                        out = api_post("/api/v1/risks", payload)
+                        if out and not out.get("error"):
+                            st.success(t("risks.created_ok"))
+                            st.session_state[show_new_key] = False
+                            st.rerun()
+                        else:
+                            st.error(out.get("error", "Failed to create risk"))
+
+        # ── Risk cards ──────────────────────────────────────────
+        if not risks:
+            st.info(t("risks.no_risks"))
+        else:
+            for r in risks:
+                rid = r["risk_id"]
+                residual = int(r.get("residual_score") or 0)
+                inherent = int(r.get("inherent_score") or 0)
+                sev_band = ("critical" if residual >= 20 else
+                            "high" if residual >= 15 else
+                            "medium" if residual >= 8 else "low")
+                chip_class = ("crit" if residual >= 15 else
+                              "hi" if residual >= 8 else
+                              "mid" if residual >= 4 else "lo")
+                status_v = r.get("status", "open")
+                cat_v = r.get("category", "operational")
+                treat_v = r.get("treatment_plan", "mitigate")
+                owner_v = r.get("owner") or "—"
+                linked_v = r.get("linked_controls") or []
+                linked_html = ""
+                if linked_v:
+                    chips = "".join(
+                        f"<span class='score-chip'>{c}</span> " for c in linked_v
+                    )
+                    linked_html = f"<div class='rc-foot'>{chips}</div>"
+
+                st.markdown(
+                    f"<div class='record-card {sev_band}'>"
+                    f"<div class='rc-head'>"
+                    f"<div class='rc-title'>{r.get('title','')}</div>"
+                    f"<div style='display:flex;gap:6px;align-items:center;flex-wrap:wrap'>"
+                    f"<span class='score-chip {chip_class}'>{t('risks.score_residual')}: {residual}</span>"
+                    f"<span class='score-chip'>{t('risks.score_inherent')}: {inherent}</span>"
+                    f"<span class='badge badge-gray'>{t(f'risks.cat.{cat_v}')}</span>"
+                    f"<span class='badge badge-yellow'>{t(f'risks.treat.{treat_v}')}</span>"
+                    f"<span class='badge badge-green'>{t(f'risks.status.{status_v}')}</span>"
+                    f"</div></div>"
+                    f"<div class='rc-meta'>👤 {owner_v} · L={r.get('likelihood','?')} × I={r.get('impact','?')}</div>"
+                    f"<div class='rc-body'>{r.get('description','') or ''}</div>"
+                    f"{linked_html}"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+
+                edit_key = f"risks_edit_{rid}"
+                btn_cols = st.columns([1, 1, 6])
+                if btn_cols[0].button(t("risks.edit_button"), key=f"risk_edit_btn_{rid}"):
+                    st.session_state[edit_key] = not st.session_state.get(edit_key, False)
+                if btn_cols[1].button(t("risks.delete_button"), key=f"risk_del_btn_{rid}"):
+                    try:
+                        dr = requests.delete(f"{API}/api/v1/risks/{rid}", timeout=10)
+                        if dr.ok:
+                            st.success(t("risks.delete_confirm"))
+                            st.rerun()
+                    except Exception as _e:
+                        st.error(str(_e))
+
+                if st.session_state.get(edit_key, False):
+                    with st.form(f"risk_edit_form_{rid}", clear_on_submit=False):
+                        ec1, ec2 = st.columns(2)
+                        e_title = ec1.text_input(t("risks.field.title"), value=r.get("title", ""))
+                        e_owner = ec2.text_input(t("risks.field.owner"), value=r.get("owner", "") or "")
+                        e_desc = st.text_area(t("risks.field.description"), value=r.get("description", "") or "")
+                        ec3, ec4, ec5 = st.columns(3)
+                        e_cat = ec3.selectbox(
+                            t("risks.field.category"), RISK_CATEGORIES,
+                            index=RISK_CATEGORIES.index(cat_v) if cat_v in RISK_CATEGORIES else 0,
+                            format_func=lambda v: t(f"risks.cat.{v}"),
+                            key=f"e_cat_{rid}",
+                        )
+                        e_treat = ec4.selectbox(
+                            t("risks.field.treatment"), RISK_TREATMENTS,
+                            index=RISK_TREATMENTS.index(treat_v) if treat_v in RISK_TREATMENTS else 2,
+                            format_func=lambda v: t(f"risks.treat.{v}"),
+                            key=f"e_treat_{rid}",
+                        )
+                        e_status = ec5.selectbox(
+                            t("risks.field.status"), RISK_STATUSES,
+                            index=RISK_STATUSES.index(status_v) if status_v in RISK_STATUSES else 0,
+                            format_func=lambda v: t(f"risks.status.{v}"),
+                            key=f"e_status_{rid}",
+                        )
+                        ec6, ec7, ec8 = st.columns(3)
+                        e_like = ec6.slider(t("risks.field.likelihood"), 1, 5,
+                                             int(r.get("likelihood") or 3),
+                                             key=f"e_like_{rid}")
+                        e_imp = ec7.slider(t("risks.field.impact"), 1, 5,
+                                            int(r.get("impact") or 3),
+                                            key=f"e_imp_{rid}")
+                        e_res = ec8.slider(t("risks.field.residual"), 0, 25,
+                                            int(r.get("residual_score") or 0),
+                                            key=f"e_res_{rid}")
+                        e_treat_notes = st.text_area(
+                            t("risks.field.treatment_notes"),
+                            value=r.get("treatment_notes", "") or "",
+                            key=f"e_tnotes_{rid}",
+                        )
+                        e_linked = st.text_input(
+                            t("risks.field.linked_controls"),
+                            value=", ".join(r.get("linked_controls") or []),
+                            key=f"e_linked_{rid}",
+                        )
+                        save_col, cancel_col = st.columns(2)
+                        save_clicked = save_col.form_submit_button(t("risks.save_button"))
+                        cancel_clicked = cancel_col.form_submit_button(t("risks.cancel_button"))
+                        if cancel_clicked:
+                            st.session_state[edit_key] = False
+                            st.rerun()
+                        if save_clicked:
+                            linked = [s.strip() for s in e_linked.split(",") if s.strip()]
+                            payload = {
+                                "title": e_title.strip(),
+                                "description": e_desc,
+                                "category": e_cat,
+                                "likelihood": int(e_like),
+                                "impact": int(e_imp),
+                                "residual_score": int(e_res),
+                                "treatment_plan": e_treat,
+                                "treatment_notes": e_treat_notes,
+                                "owner": e_owner,
+                                "status": e_status,
+                                "linked_controls": linked,
+                            }
+                            try:
+                                pr = requests.patch(
+                                    f"{API}/api/v1/risks/{rid}",
+                                    json=payload, timeout=10
+                                )
+                                if pr.ok:
+                                    st.success(t("risks.updated_ok"))
+                                    st.session_state[edit_key] = False
+                                    st.rerun()
+                                else:
+                                    st.error(f"{pr.status_code}: {pr.text[:200]}")
+                            except Exception as _e:
+                                st.error(str(_e))
+
+
+    # ════════════════════════════════════════════════════════════════
+    # PAGE: VENDOR RISK (Phase 1)
+    # ════════════════════════════════════════════════════════════════
+
+    elif page == "vendors":
+        page_hero(t("vendors.header"), t("vendors.intro"))
+
+        VENDOR_CATEGORIES = ["cloud_infra", "saas", "payment", "data_processor",
+                              "professional_services", "other"]
+        VENDOR_STATUSES = ["active", "under_review", "terminated"]
+        VENDOR_TIERS = ["low", "medium", "high", "critical"]
+        ALL = "__ALL__"
+
+        # ── Filter row ──────────────────────────────────────────
+        vfc1, vfc2, vfc3 = st.columns(3)
+        f_tier = vfc1.selectbox(
+            t("vendors.filter.tier"), [ALL] + VENDOR_TIERS,
+            format_func=lambda v: t("all") if v == ALL else t(f"vendors.tier.{v}"),
+            key="vendors_filter_tier",
+        )
+        f_vcat = vfc2.selectbox(
+            t("vendors.filter.category"), [ALL] + VENDOR_CATEGORIES,
+            format_func=lambda v: t("all") if v == ALL else t(f"vendors.cat.{v}"),
+            key="vendors_filter_category",
+        )
+        f_vstatus = vfc3.selectbox(
+            t("vendors.filter.status"), [ALL] + VENDOR_STATUSES,
+            format_func=lambda v: t("all") if v == ALL else t(f"vendors.status.{v}"),
+            key="vendors_filter_status",
+        )
+
+        vquery = "/api/v1/vendors?"
+        if f_tier != ALL:
+            vquery += f"risk_tier={f_tier}&"
+        if f_vcat != ALL:
+            vquery += f"category={f_vcat}&"
+        if f_vstatus != ALL:
+            vquery += f"status={f_vstatus}&"
+        vresp = api_get(vquery.rstrip("&?")) or {"vendors": []}
+        vendors = vresp.get("vendors", []) or []
+
+        # ── KPIs ────────────────────────────────────────────────
+        from datetime import datetime as _dt, timezone as _tz, timedelta as _td
+        def _parse_iso(s):
+            try:
+                return _dt.fromisoformat((s or "").replace("Z", "+00:00"))
+            except Exception:
+                return None
+        now_dt = _dt.now(_tz.utc)
+        total_v = len(vendors)
+        high_v = sum(1 for v in vendors if v.get("risk_tier") in ("high", "critical"))
+        active_v = sum(1 for v in vendors if v.get("status") == "active")
+        due_v = 0
+        for v in vendors:
+            la = _parse_iso(v.get("last_assessed_at"))
+            if la is None:
+                due_v += 1
+            elif (now_dt - la) > _td(days=365):
+                due_v += 1
+
+        kpc1, kpc2, kpc3, kpc4 = st.columns(4)
+        kpc1.metric(t("vendors.kpi.total"), total_v)
+        kpc2.metric(t("vendors.kpi.high_risk"), high_v)
+        kpc3.metric(t("vendors.kpi.due"), due_v)
+        kpc4.metric(t("vendors.kpi.active"), active_v)
+
+        st.markdown("---")
+
+        # ── New Vendor form ─────────────────────────────────────
+        nv_key = "vendors_show_new"
+        if st.button(t("vendors.new_button"), key="vendors_new_btn"):
+            st.session_state[nv_key] = not st.session_state.get(nv_key, False)
+
+        if st.session_state.get(nv_key, False):
+            with st.form("vendors_new_form", clear_on_submit=True):
+                st.markdown(f"**{t('vendors.new_form_title')}**")
+                vc1, vc2 = st.columns(2)
+                v_name = vc1.text_input(t("vendors.field.name"))
+                v_cat = vc2.selectbox(
+                    t("vendors.field.category"), VENDOR_CATEGORIES,
+                    format_func=lambda v: t(f"vendors.cat.{v}"),
+                )
+                vc3, vc4 = st.columns(2)
+                v_email = vc3.text_input(t("vendors.field.contact_email"))
+                v_url = vc4.text_input(t("vendors.field.contract_url"))
+                v_status = st.selectbox(
+                    t("vendors.field.status"), VENDOR_STATUSES,
+                    format_func=lambda v: t(f"vendors.status.{v}"),
+                )
+                submitted = st.form_submit_button(t("vendors.create_button"))
+                if submitted:
+                    if not v_name.strip():
+                        st.error(t("vendors.field.name"))
+                    else:
+                        out = api_post("/api/v1/vendors", {
+                            "name": v_name.strip(),
+                            "category": v_cat,
+                            "contact_email": v_email,
+                            "contract_url": v_url,
+                            "status": v_status,
+                        })
+                        if out and not out.get("error"):
+                            st.success(t("vendors.created_ok"))
+                            st.session_state[nv_key] = False
+                            st.rerun()
+                        else:
+                            st.error(out.get("error", "Failed to create vendor"))
+
+        # ── Vendor cards ────────────────────────────────────────
+        if not vendors:
+            st.info(t("vendors.no_vendors"))
+        else:
+            tier_to_band = {"critical": "critical", "high": "high",
+                            "medium": "medium", "low": "low"}
+            tier_to_badge = {"critical": "badge-red", "high": "badge-orange",
+                             "medium": "badge-yellow", "low": "badge-green"}
+            for v in vendors:
+                vid = v["vendor_id"]
+                tier_v = v.get("risk_tier") or "medium"
+                band = tier_to_band.get(tier_v, "medium")
+                badge_class = tier_to_badge.get(tier_v, "badge-gray")
+                score = v.get("risk_score")
+                score_txt = "—" if score is None else str(score)
+                la_str = v.get("last_assessed_at")
+                if la_str:
+                    la_display = t("vendors.last_assessed", date=la_str[:10])
+                else:
+                    la_display = t("vendors.never_assessed")
+                ai_summary_v = (v.get("ai_summary") or "").strip()
+                v_cat_key = v.get("category", "other")
+                v_status_key = v.get("status", "active")
+                v_cat_label = t(f"vendors.cat.{v_cat_key}")
+                v_status_label = t(f"vendors.status.{v_status_key}")
+                v_tier_label = t(f"vendors.tier.{tier_v}")
+                v_email_html = v.get("contact_email") or "—"
+
+                st.markdown(
+                    f"<div class='record-card {band}'>"
+                    f"<div class='rc-head'>"
+                    f"<div class='rc-title'>{v.get('name','')}</div>"
+                    f"<div style='display:flex;gap:6px;align-items:center;flex-wrap:wrap'>"
+                    f"<span class='score-chip'>{t('vendors.score')}: {score_txt}</span>"
+                    f"<span class='badge {badge_class}'>{t('vendors.tier')}: {v_tier_label}</span>"
+                    f"<span class='badge badge-gray'>{v_cat_label}</span>"
+                    f"<span class='badge badge-yellow'>{v_status_label}</span>"
+                    f"</div></div>"
+                    f"<div class='rc-meta'>✉ {v_email_html} · 📅 {la_display}</div>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+
+                if ai_summary_v:
+                    with st.expander(t("vendors.ai_summary")):
+                        st.markdown(ai_summary_v)
+
+                # Assess toggle
+                assess_key = f"vendors_assess_{vid}"
+                if st.button(t("vendors.assess_button"), key=f"vendors_assess_btn_{vid}"):
+                    st.session_state[assess_key] = not st.session_state.get(assess_key, False)
+
+                if st.session_state.get(assess_key, False):
+                    # Either use existing answers if any, else default template
+                    existing_answers = v.get("questionnaire") or []
+                    if not existing_answers:
+                        tpl = api_get("/api/v1/vendors/questionnaire-template") or {"questions": []}
+                        existing_answers = tpl.get("questions", [])
+                    with st.form(f"vendors_assess_form_{vid}", clear_on_submit=False):
+                        st.markdown(f"**{t('vendors.assess_form_title')}**")
+                        st.caption(t("vendors.assess_intro"))
+                        new_answers = []
+                        for idx, q in enumerate(existing_answers):
+                            qid = q.get("question_id", f"Q{idx+1}")
+                            st.markdown(
+                                f"**[{qid}]** {q.get('question','')} · "
+                                f"_weight: {q.get('weight','?')}_"
+                            )
+                            cA, cN = st.columns([1, 3])
+                            cur_ans = (q.get("answer") or "unknown").lower()
+                            ans_opts = ["yes", "no", "partial", "unknown"]
+                            cur_idx = ans_opts.index(cur_ans) if cur_ans in ans_opts else 3
+                            ans = cA.selectbox(
+                                "Answer", ans_opts,
+                                index=cur_idx,
+                                format_func=lambda v: t(f"vendors.answer.{v}"),
+                                key=f"v_a_{vid}_{idx}",
+                                label_visibility="collapsed",
+                            )
+                            note = cN.text_input(
+                                t("vendors.notes_label"),
+                                value=q.get("notes", "") or "",
+                                key=f"v_n_{vid}_{idx}",
+                                label_visibility="collapsed",
+                                placeholder=t("vendors.notes_label"),
+                            )
+                            new_answers.append({
+                                "question_id": qid,
+                                "question": q.get("question", ""),
+                                "answer": ans,
+                                "weight": int(q.get("weight", 0) or 0),
+                                "notes": note,
+                            })
+                        submit_assess = st.form_submit_button(t("vendors.assess_submit"))
+                        if submit_assess:
+                            try:
+                                rresp = requests.post(
+                                    f"{API}/api/v1/vendors/{vid}/assess",
+                                    json={"answers": new_answers},
+                                    timeout=90,
+                                )
+                                if rresp.ok:
+                                    st.success(t("vendors.assess_ok"))
+                                    st.session_state[assess_key] = False
+                                    st.rerun()
+                                else:
+                                    st.error(f"{rresp.status_code}: {rresp.text[:200]}")
+                            except Exception as _e:
+                                st.error(str(_e))
+
+
+    # ════════════════════════════════════════════════════════════════
+    # PAGE: POLICIES (Phase 1)
+    # ════════════════════════════════════════════════════════════════
+
+    elif page == "policies":
+        page_hero(t("policies.header"), t("policies.intro"))
+
+        POLICY_STATUSES = ["draft", "active", "superseded", "retired"]
+        tab_lib, tab_ack = st.tabs([t("policies.tab_library"), t("policies.tab_acks")])
+
+        # ── LIBRARY TAB ─────────────────────────────────────────
+        with tab_lib:
+            policies_resp = api_get("/api/v1/policies") or {"policies": []}
+            policies = policies_resp.get("policies", []) or []
+            pending_resp = api_get("/api/v1/policy-assignments?status=pending") or {"assignments": []}
+            pending_count = len(pending_resp.get("assignments", []) or [])
+            active_count = sum(1 for p in policies if p.get("status") == "active")
+
+            kp1, kp2, kp3 = st.columns(3)
+            kp1.metric(t("policies.kpi.total"), len(policies))
+            kp2.metric(t("policies.kpi.active"), active_count)
+            kp3.metric(t("policies.kpi.pending"), pending_count)
+
+            np_key = "policies_show_new"
+            if st.button(t("policies.new_button"), key="policies_new_btn"):
+                st.session_state[np_key] = not st.session_state.get(np_key, False)
+
+            if st.session_state.get(np_key, False):
+                with st.form("policies_new_form", clear_on_submit=True):
+                    st.markdown(f"**{t('policies.new_form_title')}**")
+                    pc1, pc2 = st.columns([3, 1])
+                    p_title = pc1.text_input(t("policies.field.title"))
+                    p_version = pc2.text_input(t("policies.field.version"), value="1.0")
+                    p_summary = st.text_area(t("policies.field.summary"))
+                    p_content = st.text_area(t("policies.field.content"), height=180)
+                    pc3, pc4, pc5 = st.columns(3)
+                    p_eff = pc3.text_input(t("policies.field.effective"))
+                    p_rev = pc4.text_input(t("policies.field.review"))
+                    p_owner = pc5.text_input(t("policies.field.owner"))
+                    p_status = st.selectbox(
+                        t("policies.field.status"), POLICY_STATUSES,
+                        index=1,
+                        format_func=lambda v: t(f"policies.status.{v}"),
+                    )
+                    p_linked = st.text_input(t("policies.field.linked_controls"))
+                    submit_p = st.form_submit_button(t("policies.create_button"))
+                    if submit_p:
+                        if not p_title.strip():
+                            st.error(t("policies.field.title"))
+                        else:
+                            linked = [s.strip() for s in p_linked.split(",") if s.strip()]
+                            out = api_post("/api/v1/policies", {
+                                "title": p_title.strip(),
+                                "version": p_version or "1.0",
+                                "summary": p_summary,
+                                "content": p_content,
+                                "effective_date": p_eff,
+                                "review_date": p_rev,
+                                "owner": p_owner,
+                                "status": p_status,
+                                "linked_controls": linked,
+                            })
+                            if out and not out.get("error"):
+                                st.success(t("policies.created_ok"))
+                                st.session_state[np_key] = False
+                                st.rerun()
+                            else:
+                                st.error(out.get("error", "Failed to create policy"))
+
+            if not policies:
+                st.info(t("policies.no_policies"))
+            else:
+                for p in policies:
+                    pid = p["policy_id"]
+                    p_status = p.get("status", "active")
+                    badge_map = {"active": "badge-green", "draft": "badge-yellow",
+                                  "superseded": "badge-gray", "retired": "badge-gray"}
+                    p_badge = badge_map.get(p_status, "badge-gray")
+                    st.markdown(
+                        f"<div class='record-card green'>"
+                        f"<div class='rc-head'>"
+                        f"<div class='rc-title'>{p.get('title','')}</div>"
+                        f"<div style='display:flex;gap:6px;align-items:center;flex-wrap:wrap'>"
+                        f"<span class='badge badge-gray'>{t('policies.policy_version', v=p.get('version','1.0'))}</span>"
+                        f"<span class='badge {p_badge}'>{t(f'policies.status.{p_status}')}</span>"
+                        f"</div></div>"
+                        f"<div class='rc-meta'>"
+                        f"{t('policies.policy_owner', o=p.get('owner','—') or '—')} · "
+                        f"{t('policies.policy_effective', d=p.get('effective_date','—') or '—')}"
+                        f"</div>"
+                        f"<div class='rc-body'>{p.get('summary','') or ''}</div>"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
+
+                    with st.expander(f"📄 {p.get('title','')} — {t('policies.policy_version', v=p.get('version','1.0'))}"):
+                        if p.get("content"):
+                            st.markdown(p["content"])
+                        st.markdown("---")
+                        assign_input = st.text_input(
+                            t("policies.assign_to"),
+                            key=f"pol_assign_in_{pid}",
+                            placeholder="alice@demo, bob@demo",
+                        )
+                        if st.button(t("policies.assign_button"), key=f"pol_assign_btn_{pid}"):
+                            uids = [s.strip() for s in (assign_input or "").split(",") if s.strip()]
+                            if uids:
+                                out = api_post(f"/api/v1/policies/{pid}/assign",
+                                                {"user_ids": uids})
+                                if out and not out.get("error"):
+                                    st.success(t("policies.assign_ok",
+                                                  n=out.get("assigned", 0),
+                                                  s=out.get("skipped", 0)))
+                                    st.rerun()
+                                else:
+                                    st.error(out.get("error", "Failed to assign"))
+
+        # ── MY ACKNOWLEDGMENTS TAB ──────────────────────────────
+        with tab_ack:
+            demo_user = st.text_input(
+                t("policies.demo_user_label"),
+                value=st.session_state.get("policies_demo_user", "alice@demo"),
+                help=t("policies.demo_user_help"),
+                key="policies_demo_user_input",
+            )
+            st.session_state["policies_demo_user"] = demo_user
+
+            user_resp = api_get(f"/api/v1/policy-assignments?user_id={demo_user}") or {"assignments": []}
+            all_assignments = user_resp.get("assignments", []) or []
+            pending = [a for a in all_assignments if a.get("status") == "pending"]
+            acked = [a for a in all_assignments if a.get("status") == "acknowledged"]
+
+            if not pending:
+                st.info(t("policies.no_pending"))
+            else:
+                for a in pending:
+                    aid = a["assignment_id"]
+                    ptitle = a.get("policy_title") or "(deleted policy)"
+                    pversion = a.get("policy_version", "1.0")
+                    psummary = a.get("policy_summary", "") or ""
+                    pcontent = a.get("policy_content", "") or ""
+                    preview = pcontent[:400] + ("…" if len(pcontent) > 400 else "")
+
+                    st.markdown(
+                        f"<div class='record-card medium'>"
+                        f"<div class='rc-head'>"
+                        f"<div class='rc-title'>{ptitle}</div>"
+                        f"<span class='badge badge-yellow'>"
+                        f"{t('policies.policy_version', v=pversion)}</span>"
+                        f"</div>"
+                        f"<div class='rc-meta'>{psummary}</div>"
+                        f"<div class='rc-body'><pre style='white-space:pre-wrap;font-family:inherit;font-size:0.85rem'>{preview}</pre></div>"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
+                    with st.form(f"ack_form_{aid}", clear_on_submit=True):
+                        sig = st.text_input(t("policies.signature_note"),
+                                              key=f"ack_sig_{aid}")
+                        submit_ack = st.form_submit_button(t("policies.accept_button"))
+                        if submit_ack:
+                            try:
+                                rr = requests.post(
+                                    f"{API}/api/v1/policy-assignments/{aid}/acknowledge",
+                                    json={"signature_note": sig}, timeout=10,
+                                )
+                                if rr.ok:
+                                    st.success(t("policies.acknowledged_ok"))
+                                    st.rerun()
+                                else:
+                                    st.error(f"{rr.status_code}: {rr.text[:200]}")
+                            except Exception as _e:
+                                st.error(str(_e))
+
+            if acked:
+                with st.expander(t("policies.acknowledged_section")):
+                    for a in acked:
+                        st.markdown(
+                            f"- ✅ **{a.get('policy_title') or '(deleted)'}** · "
+                            f"{t('policies.policy_version', v=a.get('policy_version','1.0'))} · "
+                            f"_acknowledged {((a.get('acknowledged_at') or '')[:10])}_"
+                            + (f" — _{a.get('signature_note')}_" if a.get('signature_note') else "")
+                        )
+
+
+    # ════════════════════════════════════════════════════════════════
+    # PAGE: INCIDENTS (Phase 1)
+    # ════════════════════════════════════════════════════════════════
+
+    elif page == "incidents":
+        page_hero(t("incidents.header"), t("incidents.intro"))
+
+        INC_SEVERITIES = ["low", "medium", "high", "critical"]
+        INC_STATUSES = ["open", "investigating", "contained", "resolved", "closed"]
+        INC_CATEGORIES = ["security_breach", "data_loss", "system_outage",
+                            "policy_violation", "third_party", "other"]
+        ALL = "__ALL__"
+
+        # ── Filter row ──────────────────────────────────────────
+        ifc1, ifc2, ifc3 = st.columns(3)
+        f_sev = ifc1.selectbox(
+            t("incidents.filter.severity"), [ALL] + INC_SEVERITIES,
+            format_func=lambda v: t("all") if v == ALL else t(f"incidents.severity.{v}"),
+            key="incidents_filter_sev",
+        )
+        f_istatus = ifc2.selectbox(
+            t("incidents.filter.status"), [ALL] + INC_STATUSES,
+            format_func=lambda v: t("all") if v == ALL else t(f"incidents.status.{v}"),
+            key="incidents_filter_status",
+        )
+        f_icat = ifc3.selectbox(
+            t("incidents.filter.category"), [ALL] + INC_CATEGORIES,
+            format_func=lambda v: t("all") if v == ALL else t(f"incidents.cat.{v}"),
+            key="incidents_filter_cat",
+        )
+
+        iquery = "/api/v1/incidents?"
+        if f_sev != ALL:
+            iquery += f"severity={f_sev}&"
+        if f_istatus != ALL:
+            iquery += f"status={f_istatus}&"
+        if f_icat != ALL:
+            iquery += f"category={f_icat}&"
+        iresp = api_get(iquery.rstrip("&?")) or {"incidents": []}
+        incidents = iresp.get("incidents", []) or []
+
+        # ── KPIs ────────────────────────────────────────────────
+        from datetime import datetime as _dt2, timezone as _tz2
+        def _iso(s):
+            try:
+                return _dt2.fromisoformat((s or "").replace("Z", "+00:00"))
+            except Exception:
+                return None
+        now2 = _dt2.now(_tz2.utc)
+        open_inc = [i for i in incidents if i.get("status") not in ("closed", "resolved")]
+        crit_open = sum(1 for i in open_inc if i.get("severity") == "critical")
+        breach_pending = sum(
+            1 for i in incidents
+            if i.get("breach_notification_required") and not i.get("breach_notified_at")
+        )
+        # MTTR over closed incidents
+        deltas = []
+        for i in incidents:
+            if i.get("status") in ("closed", "resolved") and i.get("reported_at") and i.get("resolved_at"):
+                r = _iso(i["reported_at"])
+                d = _iso(i["resolved_at"])
+                if r and d:
+                    deltas.append((d - r).total_seconds() / 86400.0)
+        mttr = round(sum(deltas) / len(deltas), 1) if deltas else 0.0
+
+        ic1, ic2, ic3, ic4 = st.columns(4)
+        ic1.metric(t("incidents.kpi.open"), len(open_inc))
+        ic2.metric(t("incidents.kpi.critical"), crit_open)
+        ic3.metric(t("incidents.kpi.breach_pending"), breach_pending)
+        ic4.metric(t("incidents.kpi.mttr"), mttr)
+
+        st.markdown("---")
+
+        # ── New Incident form ───────────────────────────────────
+        ni_key = "incidents_show_new"
+        if st.button(t("incidents.new_button"), key="incidents_new_btn"):
+            st.session_state[ni_key] = not st.session_state.get(ni_key, False)
+
+        if st.session_state.get(ni_key, False):
+            with st.form("incidents_new_form", clear_on_submit=True):
+                st.markdown(f"**{t('incidents.new_form_title')}**")
+                i_title = st.text_input(t("incidents.field.title"))
+                i_desc = st.text_area(t("incidents.field.description"))
+                inc1, inc2, inc3 = st.columns(3)
+                i_sev = inc1.selectbox(
+                    t("incidents.field.severity"), INC_SEVERITIES,
+                    index=1,
+                    format_func=lambda v: t(f"incidents.severity.{v}"),
+                )
+                i_status = inc2.selectbox(
+                    t("incidents.field.status"), INC_STATUSES,
+                    format_func=lambda v: t(f"incidents.status.{v}"),
+                )
+                i_cat = inc3.selectbox(
+                    t("incidents.field.category"), INC_CATEGORIES,
+                    format_func=lambda v: t(f"incidents.cat.{v}"),
+                )
+                inc4, inc5 = st.columns(2)
+                i_by = inc4.text_input(t("incidents.field.reported_by"))
+                i_breach = inc5.checkbox(t("incidents.field.breach_required"),
+                                          value=False)
+                i_impact = st.text_area(t("incidents.field.impact"))
+                submit_i = st.form_submit_button(t("incidents.create_button"))
+                if submit_i:
+                    if not i_title.strip():
+                        st.error(t("incidents.field.title"))
+                    else:
+                        out = api_post("/api/v1/incidents", {
+                            "title": i_title.strip(),
+                            "description": i_desc,
+                            "severity": i_sev,
+                            "status": i_status,
+                            "category": i_cat,
+                            "reported_by": i_by,
+                            "breach_notification_required": bool(i_breach),
+                            "impact_assessment": i_impact,
+                        })
+                        if out and not out.get("error"):
+                            st.success(t("incidents.created_ok"))
+                            st.session_state[ni_key] = False
+                            st.rerun()
+                        else:
+                            st.error(out.get("error", "Failed to create incident"))
+
+        # ── Incident cards ──────────────────────────────────────
+        if not incidents:
+            st.info(t("incidents.no_incidents"))
+        else:
+            for i in incidents:
+                iid = i["incident_id"]
+                sev_v = i.get("severity", "medium")
+                status_v = i.get("status", "open")
+                cat_v = i.get("category", "other")
+                reported_at = i.get("reported_at") or ""
+
+                # Severity badge styling reuses our existing severity_badge helper
+                sev_badge = severity_badge(sev_v)
+
+                # Status badge — yellow for in-flight, green for resolved/closed
+                status_color_map = {
+                    "open": "badge-red",
+                    "investigating": "badge-orange",
+                    "contained": "badge-yellow",
+                    "resolved": "badge-green",
+                    "closed": "badge-gray",
+                }
+                status_badge_cls = status_color_map.get(status_v, "badge-gray")
+
+                # Breach deadline banner
+                breach_html = ""
+                if i.get("breach_notification_required"):
+                    deadline = i.get("regulatory_deadline")
+                    notified = i.get("breach_notified_at")
+                    if notified:
+                        breach_html = (
+                            f"<div class='breach-banner notified'>✅ "
+                            f"{t('incidents.deadline_notified', when=notified[:16].replace('T',' '))}"
+                            f"</div>"
+                        )
+                    elif deadline:
+                        dl = _iso(deadline)
+                        is_overdue = dl is not None and now2 > dl
+                        when_display = deadline[:16].replace("T", " ")
+                        if is_overdue:
+                            breach_html = (
+                                f"<div class='breach-banner overdue'>"
+                                f"{t('incidents.breach_banner')} — "
+                                f"{t('incidents.deadline_overdue', when=when_display)}"
+                                f"</div>"
+                            )
+                        else:
+                            breach_html = (
+                                f"<div class='breach-banner'>"
+                                f"{t('incidents.breach_banner')} — "
+                                f"{t('incidents.deadline_in', when=when_display)}"
+                                f"</div>"
+                            )
+                    else:
+                        breach_html = (
+                            f"<div class='breach-banner'>"
+                            f"{t('incidents.breach_banner')}</div>"
+                        )
+
+                reported_line = t("incidents.reported_on",
+                                   date=(reported_at[:10] if reported_at else "—"))
+                if i.get("resolved_at"):
+                    reported_line += " · " + t("incidents.resolved_on",
+                                                date=i["resolved_at"][:10])
+                owner_line = "👤 " + (i.get("reported_by") or "—")
+
+                st.markdown(
+                    f"<div class='record-card {sev_v}'>"
+                    f"<div class='rc-head'>"
+                    f"<div class='rc-title'>{i.get('title','')}</div>"
+                    f"<div style='display:flex;gap:6px;align-items:center;flex-wrap:wrap'>"
+                    f"{sev_badge}"
+                    f"<span class='badge {status_badge_cls}'>{t(f'incidents.status.{status_v}')}</span>"
+                    f"<span class='badge badge-gray'>{t(f'incidents.cat.{cat_v}')}</span>"
+                    f"</div></div>"
+                    f"<div class='rc-meta'>{reported_line} · {owner_line}</div>"
+                    f"<div class='rc-body'>{i.get('description','') or ''}</div>"
+                    f"{breach_html}"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+
+                edit_key = f"incident_edit_{iid}"
+                if st.button(t("incidents.edit_section"), key=f"inc_edit_btn_{iid}"):
+                    st.session_state[edit_key] = not st.session_state.get(edit_key, False)
+
+                if st.session_state.get(edit_key, False):
+                    with st.form(f"incident_edit_form_{iid}", clear_on_submit=False):
+                        ei_title = st.text_input(t("incidents.field.title"),
+                                                  value=i.get("title", ""))
+                        ei_desc = st.text_area(t("incidents.field.description"),
+                                                value=i.get("description", "") or "")
+                        eic1, eic2, eic3 = st.columns(3)
+                        ei_sev = eic1.selectbox(
+                            t("incidents.field.severity"), INC_SEVERITIES,
+                            index=INC_SEVERITIES.index(sev_v) if sev_v in INC_SEVERITIES else 1,
+                            format_func=lambda v: t(f"incidents.severity.{v}"),
+                            key=f"ei_sev_{iid}",
+                        )
+                        ei_status = eic2.selectbox(
+                            t("incidents.field.status"), INC_STATUSES,
+                            index=INC_STATUSES.index(status_v) if status_v in INC_STATUSES else 0,
+                            format_func=lambda v: t(f"incidents.status.{v}"),
+                            key=f"ei_status_{iid}",
+                        )
+                        ei_cat = eic3.selectbox(
+                            t("incidents.field.category"), INC_CATEGORIES,
+                            index=INC_CATEGORIES.index(cat_v) if cat_v in INC_CATEGORIES else 5,
+                            format_func=lambda v: t(f"incidents.cat.{v}"),
+                            key=f"ei_cat_{iid}",
+                        )
+                        eic4, eic5 = st.columns(2)
+                        ei_by = eic4.text_input(t("incidents.field.reported_by"),
+                                                 value=i.get("reported_by", "") or "",
+                                                 key=f"ei_by_{iid}")
+                        ei_breach = eic5.checkbox(
+                            t("incidents.field.breach_required"),
+                            value=bool(i.get("breach_notification_required")),
+                            key=f"ei_breach_{iid}",
+                        )
+                        ei_breach_notified = st.text_input(
+                            t("incidents.field.breach_notified"),
+                            value=i.get("breach_notified_at") or "",
+                            key=f"ei_notif_{iid}",
+                        )
+                        ei_impact = st.text_area(t("incidents.field.impact"),
+                                                  value=i.get("impact_assessment", "") or "",
+                                                  key=f"ei_imp_{iid}")
+                        ei_root = st.text_area(t("incidents.field.root_cause"),
+                                                value=i.get("root_cause", "") or "",
+                                                key=f"ei_root_{iid}")
+                        ei_rem = st.text_area(t("incidents.field.remediation"),
+                                               value=i.get("remediation", "") or "",
+                                               key=f"ei_rem_{iid}")
+                        ei_lc = st.text_input(
+                            t("incidents.field.linked_controls"),
+                            value=", ".join(i.get("linked_controls") or []),
+                            key=f"ei_lc_{iid}",
+                        )
+                        ei_lf = st.text_input(
+                            t("incidents.field.linked_findings"),
+                            value=", ".join(i.get("linked_findings") or []),
+                            key=f"ei_lf_{iid}",
+                        )
+                        save_i = st.form_submit_button(t("incidents.update_button"))
+                        if save_i:
+                            payload = {
+                                "title": ei_title.strip(),
+                                "description": ei_desc,
+                                "severity": ei_sev,
+                                "status": ei_status,
+                                "category": ei_cat,
+                                "reported_by": ei_by,
+                                "breach_notification_required": bool(ei_breach),
+                                "breach_notified_at": ei_breach_notified or None,
+                                "impact_assessment": ei_impact,
+                                "root_cause": ei_root,
+                                "remediation": ei_rem,
+                                "linked_controls": [s.strip() for s in ei_lc.split(",") if s.strip()],
+                                "linked_findings": [s.strip() for s in ei_lf.split(",") if s.strip()],
+                            }
+                            try:
+                                pr = requests.patch(
+                                    f"{API}/api/v1/incidents/{iid}",
+                                    json=payload, timeout=10
+                                )
+                                if pr.ok:
+                                    st.success(t("incidents.updated_ok"))
+                                    st.session_state[edit_key] = False
+                                    st.rerun()
+                                else:
+                                    st.error(f"{pr.status_code}: {pr.text[:200]}")
+                            except Exception as _e:
+                                st.error(str(_e))
 
 
 # ── Render the avatar (last, so it reflects state changes from page handlers) ──
