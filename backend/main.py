@@ -31,6 +31,10 @@ from modules.database import (
     # Phase 1: Incidents
     create_incident, get_incident, list_incidents, update_incident,
     delete_incident,
+    # Ask GRACE: chat persistence
+    create_chat_session, get_chat_session, list_chat_sessions,
+    update_chat_session_title, delete_chat_session,
+    append_chat_message, list_chat_messages,
 )
 from modules.grc_engine import (
     run_gap_analysis, generate_document, explain_control,
@@ -235,7 +239,12 @@ def get_doc(document_id: str):
 # ─── Assessment ──────────────────────────────────────────────────────
 
 class AssessmentRequest(BaseModel):
-    document_id: str
+    # Either `document_id` (single doc, legacy) OR `document_ids` (list,
+    # for the Gap Analysis wizard). At least one must be supplied. When
+    # `document_ids` is used the run is registered against the FIRST id
+    # but findings reference the merged title (see run_assessment_sync).
+    document_id: Optional[str] = None
+    document_ids: Optional[list] = None
     framework: str
     controls_scope: Optional[list] = None
     channel: Optional[str] = "web"
@@ -309,23 +318,49 @@ def get_runs():
 
 @app.post("/api/v1/assessments/run-sync")
 def run_assessment_sync(body: AssessmentRequest):
-    """Run assessment synchronously and return result immediately."""
-    doc = get_document(body.document_id)
-    if not doc:
-        raise HTTPException(404, detail="Document not found")
+    """Run assessment synchronously and return result immediately.
 
-    run_id = create_run(body.document_id, body.framework, body.controls_scope, body.channel)
+    Accepts either:
+      - `document_id` (single document, legacy)
+      - `document_ids` (list — wizard-style multi-doc); the run is
+        registered against the first doc but the merged title is used so
+        the resulting findings reference every contributing document.
+    """
+    # Normalise to a list, preferring the multi-doc field when present.
+    ids: list = []
+    if body.document_ids:
+        ids = [d for d in body.document_ids if d]
+    elif body.document_id:
+        ids = [body.document_id]
+    if not ids:
+        raise HTTPException(400, detail="document_id or document_ids required")
+
+    # Materialise documents and assemble the merged text + title (same
+    # shape as the old `analyze_new` branch in /ask used to produce).
+    docs: list = []
+    for did in ids:
+        d = get_document(did)
+        if not d:
+            raise HTTPException(404, detail=f"Document not found: {did}")
+        docs.append(d)
+    primary_id   = ids[0]
+    merged_text  = "\n\n---\n\n".join(d["content_text"] for d in docs)
+    merged_title = " + ".join(d["title"] for d in docs)
+
+    run_id = create_run(primary_id, body.framework, body.controls_scope, body.channel)
     try:
         result = run_gap_analysis(
-            document_text=doc["content_text"],
-            document_title=doc["title"],
+            document_text=merged_text,
+            document_title=merged_title,
             framework_id=body.framework,
             controls_scope=body.controls_scope,
             language=body.language,
         )
-        finding_ids = save_findings(run_id, body.document_id, result, language=body.language or "en")
+        finding_ids = save_findings(run_id, primary_id, result, language=body.language or "en")
         complete_run(run_id, "completed")
-        return {"run_id": run_id, "status": "completed", "result": result, "finding_ids": finding_ids}
+        return {"run_id": run_id, "status": "completed", "result": result,
+                "finding_ids": finding_ids, "document_ids": ids,
+                "document_title": merged_title}
     except Exception as e:
         complete_run(run_id, "error", str(e))
         raise HTTPException(500, detail=str(e))
@@ -352,34 +387,37 @@ _INTENT_KEYWORDS = {
     "explain":         ["explain ", "spiega ", "what is ", "cosa è ", "cos'è "],
     "query_findings":  ["finding", "registr", "open", "aperti", "critical", "critici",
                         "list ", "show me", "mostra", "summari", "riassum"],
-    # 'analyze_new' is inferred from STRUCTURED signals (document_ids +
-    # framework_id), not keywords — see classify_intent below.
+    # NOTE: the historical `analyze_new` intent was removed. Structured
+    # assessments now live exclusively on /api/v1/assessments/run-sync,
+    # driven by the dedicated Gap Analysis wizard. Ask GRACE is purely
+    # conversational and never persists findings.
 }
 
 
 def classify_intent(query: str, has_docs: bool, has_framework: bool) -> str:
-    """Lightweight intent router.
+    """Lightweight intent router for Ask GRACE.
 
     Priority:
-      1. analyze_new   — user attached/pasted content AND picked a framework
-      2. explain       — query starts with 'explain X', 'what is X' …
-      3. query_findings — query mentions findings/registry/critical/etc.
-      4. free_qa       — everything else
+      1. explain       — query starts with 'explain X', 'what is X' …
+      2. query_findings — query mentions findings/registry/critical/etc.
+      3. document_qa   — everything else (with or without attached docs)
+
+    The `has_docs` / `has_framework` flags are kept in the signature so the
+    chat layer can pass them through if we want to specialise routing
+    later, but they no longer trigger a persisted assessment.
     """
     q = (query or "").strip().lower()
-    if has_docs and has_framework:
-        return "analyze_new"
     for kw in _INTENT_KEYWORDS["explain"]:
         if q.startswith(kw):
             return "explain"
     for kw in _INTENT_KEYWORDS["query_findings"]:
         if kw in q:
             return "query_findings"
-    return "free_qa"
+    return "document_qa"
 
 
-def _free_qa_response(query: str, framework_id: Optional[str], language: str,
-                      document_ids: Optional[list] = None) -> str:
+def _document_qa_response(query: str, framework_id: Optional[str], language: str,
+                          document_ids: Optional[list] = None) -> str:
     """Generic Claude Q&A about GRC. Lightweight system prompt that
     keeps GRACE on-topic without long-context overhead. When
     `document_ids` are supplied, their text is injected into the user
@@ -485,84 +523,46 @@ def _findings_summary_response(query: str, language: str) -> tuple[str, list]:
     return (text, citations)
 
 
-@app.post("/api/v1/ask")
-def ask_grace(body: AskRequest):
-    """Unified Ask-GRACE dispatcher. Returns a flexible envelope:
+def _dispatch_ask(query: str, document_ids: Optional[list],
+                  framework_id: Optional[str], language: str) -> dict:
+    """Shared Ask-GRACE dispatch logic — used by /api/v1/ask AND by the
+    chat-message POST. Returns the same envelope shape as before, minus
+    the removed `analyze_new` branch.
 
-    {
-      "intent":         "analyze_new" | "explain" | "query_findings" | "free_qa",
-      "response_type":  "analysis"    | "explanation" | "findings_qa" | "qa",
-      "response_text":  "<markdown>",                           # for non-analysis
-      "result":         {...gap_analysis result...} (optional), # for analysis
-      "finding_ids":    [...] (optional),
-      "citations":      [{"type": "...", "id": "...", "label": "..."}]
-    }
+    Envelope:
+      {
+        "intent":        "explain" | "query_findings" | "document_qa",
+        "response_type": "explanation" | "findings_qa" | "qa",
+        "response_text": "<markdown>",
+        "citations":     [{"type": "...", "id": "...", "label": "..."}]
+      }
     """
-    document_ids = body.document_ids or []
+    document_ids = document_ids or []
     has_docs = bool(document_ids)
-    has_fw   = bool(body.framework_id)
-    intent   = classify_intent(body.query or "", has_docs, has_fw)
-    language = body.language or "en"
-
-    if intent == "analyze_new":
-        # Concatenate text from all attached docs into one analysis input,
-        # then run the existing gap_analysis pipeline.
-        merged_chunks = []
-        titles = []
-        for did in document_ids:
-            d = get_document(did)
-            if d:
-                merged_chunks.append(d["content_text"])
-                titles.append(d["title"])
-        merged_text  = "\n\n---\n\n".join(merged_chunks)
-        merged_title = " + ".join(titles) if titles else "Untitled"
-
-        run_id = create_run(document_ids[0], body.framework_id, None, "ask_grace")
-        try:
-            result = run_gap_analysis(
-                document_text=merged_text,
-                document_title=merged_title,
-                framework_id=body.framework_id,
-                controls_scope=None,
-                language=language,
-            )
-            finding_ids = save_findings(run_id, document_ids[0], result, language=language)
-            complete_run(run_id, "completed")
-            return {
-                "intent":        intent,
-                "response_type": "analysis",
-                "result":        result,
-                "finding_ids":   finding_ids,
-                "run_id":        run_id,
-                "citations":     [{"type": "document", "id": did, "label": ttl}
-                                  for did, ttl in zip(document_ids, titles)],
-            }
-        except Exception as e:
-            complete_run(run_id, "error", str(e))
-            return {"intent": intent, "response_type": "error",
-                    "response_text": f"_Analysis failed: {e}_", "citations": []}
+    has_fw   = bool(framework_id)
+    intent   = classify_intent(query or "", has_docs, has_fw)
+    language = language or "en"
 
     if intent == "explain":
         # Try to parse 'explain CONTROL_ID' or 'spiega CONTROL_ID'.
-        # Fall back to free_qa if no recognisable control ID.
+        # Fall back to document_qa if no recognisable control ID.
         import re as _re
-        m = _re.search(r"([A-Z]+\.?[A-Z0-9.\-]+|Art\.\d+(?:\.\d+)*\.?[a-z]?)", body.query or "")
-        if m and body.framework_id:
+        m = _re.search(r"([A-Z]+\.?[A-Z0-9.\-]+|Art\.\d+(?:\.\d+)*\.?[a-z]?)", query or "")
+        if m and framework_id:
             ctrl_id = m.group(1)
             from modules.grc_engine import explain_control
-            text = explain_control(body.framework_id, ctrl_id, language=language)
+            text = explain_control(framework_id, ctrl_id, language=language)
             return {
                 "intent":        intent,
                 "response_type": "explanation",
                 "response_text": text,
                 "citations":     [{"type": "control", "id": ctrl_id,
-                                   "label": f"{body.framework_id} · {ctrl_id}"}],
+                                   "label": f"{framework_id} · {ctrl_id}"}],
             }
-        # No control ID matched → free Q&A
-        intent = "free_qa"
+        intent = "document_qa"
 
     if intent == "query_findings":
-        text, citations = _findings_summary_response(body.query, language)
+        text, citations = _findings_summary_response(query, language)
         return {
             "intent":        intent,
             "response_type": "findings_qa",
@@ -570,23 +570,154 @@ def ask_grace(body: AskRequest):
             "citations":     citations,
         }
 
-    # free_qa fallback — attached documents (without a framework) flow
-    # through here as "document-grounded Q&A", which still uses Claude
-    # but with the docs as authoritative context.
-    text = _free_qa_response(body.query, body.framework_id, language,
-                             document_ids=document_ids)
+    # document_qa — attached documents (with or without a framework) flow
+    # through here as document-grounded Q&A. NEVER persists findings;
+    # users wanting a structured assessment go through the Gap Analysis
+    # wizard at /api/v1/assessments/run-sync.
+    text = _document_qa_response(query, framework_id, language,
+                                 document_ids=document_ids)
     titles = []
     for did in document_ids:
         d = get_document(did)
         if d:
             titles.append(d["title"])
     return {
-        "intent":        "free_qa",
+        "intent":        "document_qa",
         "response_type": "qa",
         "response_text": text,
         "citations":     [{"type": "document", "id": did, "label": ttl}
                           for did, ttl in zip(document_ids, titles)],
     }
+
+
+@app.post("/api/v1/ask")
+def ask_grace(body: AskRequest):
+    """Unified Ask-GRACE dispatcher. Kept for backwards compatibility with
+    any caller that still talks to /api/v1/ask directly; the new chat UI
+    routes through /api/v1/chat/sessions/{id}/messages, which calls the
+    same `_dispatch_ask` helper.
+
+    NOTE: as of the Ask GRACE / Gap Analysis split, this endpoint no
+    longer triggers a persisted gap analysis even when document_ids +
+    framework_id are both supplied — that path moved to the dedicated
+    /api/v1/assessments/run-sync endpoint.
+    """
+    return _dispatch_ask(
+        query=body.query or "",
+        document_ids=body.document_ids,
+        framework_id=body.framework_id,
+        language=body.language or "en",
+    )
+
+
+# ─── Chat ─────────────────────────────────────────────────────────────
+#
+# Persistent chat sessions for the Ask GRACE page. Each session is a
+# thread of messages; the assistant reply is produced by `_dispatch_ask`,
+# so chat and the legacy /api/v1/ask endpoint share intent routing.
+
+class ChatSessionCreate(BaseModel):
+    title: Optional[str] = None
+
+
+class ChatSessionRename(BaseModel):
+    title: str
+
+
+class ChatMessageCreate(BaseModel):
+    query: str
+    document_ids: Optional[list] = None
+    framework_id: Optional[str] = None
+    language: Optional[str] = "en"
+
+
+def _autotitle_from_query(q: str) -> str:
+    """First 60 chars of the user's opening message, cleaned of newlines."""
+    s = (q or "").strip().replace("\n", " ")
+    if len(s) <= 60:
+        return s or "Untitled"
+    return s[:57].rstrip() + "…"
+
+
+@app.post("/api/v1/chat/sessions")
+def chat_create_session(body: ChatSessionCreate):
+    return create_chat_session(user_id="demo", title=body.title)
+
+
+@app.get("/api/v1/chat/sessions")
+def chat_list_sessions(limit: int = 50):
+    return {"sessions": list_chat_sessions(user_id="demo", limit=limit)}
+
+
+@app.get("/api/v1/chat/sessions/{session_id}")
+def chat_get_session(session_id: str):
+    sess = get_chat_session(session_id)
+    if not sess:
+        raise HTTPException(404, detail="Session not found")
+    sess["messages"] = list_chat_messages(session_id)
+    return sess
+
+
+@app.patch("/api/v1/chat/sessions/{session_id}")
+def chat_rename_session(session_id: str, body: ChatSessionRename):
+    sess = get_chat_session(session_id)
+    if not sess:
+        raise HTTPException(404, detail="Session not found")
+    update_chat_session_title(session_id, body.title)
+    return get_chat_session(session_id)
+
+
+@app.delete("/api/v1/chat/sessions/{session_id}")
+def chat_delete_session(session_id: str):
+    sess = get_chat_session(session_id)
+    if not sess:
+        raise HTTPException(404, detail="Session not found")
+    delete_chat_session(session_id)
+    return {"status": "deleted", "session_id": session_id}
+
+
+@app.get("/api/v1/chat/sessions/{session_id}/messages")
+def chat_get_messages(session_id: str, limit: int = 200):
+    sess = get_chat_session(session_id)
+    if not sess:
+        raise HTTPException(404, detail="Session not found")
+    return {"messages": list_chat_messages(session_id, limit=limit)}
+
+
+@app.post("/api/v1/chat/sessions/{session_id}/messages")
+def chat_post_message(session_id: str, body: ChatMessageCreate):
+    sess = get_chat_session(session_id)
+    if not sess:
+        raise HTTPException(404, detail="Session not found")
+
+    user_msg = append_chat_message(
+        session_id, role="user", content=body.query or "",
+        document_ids=body.document_ids,
+        framework_id=body.framework_id,
+    )
+
+    # If this is the FIRST message and the session has no title yet,
+    # auto-title from the opening query so the sidebar list is readable.
+    if not sess.get("title"):
+        update_chat_session_title(session_id, _autotitle_from_query(body.query or ""))
+
+    resp = _dispatch_ask(
+        query=body.query or "",
+        document_ids=body.document_ids,
+        framework_id=body.framework_id,
+        language=body.language or "en",
+    )
+
+    asst_msg = append_chat_message(
+        session_id, role="assistant",
+        content=resp.get("response_text", ""),
+        document_ids=body.document_ids,
+        framework_id=body.framework_id,
+        citations=resp.get("citations"),
+        intent=resp.get("intent"),
+        response_type=resp.get("response_type"),
+    )
+    return {"user_message": user_msg, "assistant_message": asst_msg}
 
 
 # ─── Findings ────────────────────────────────────────────────────────

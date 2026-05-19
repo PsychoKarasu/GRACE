@@ -106,7 +106,8 @@ TRANSLATIONS = {
         "topbar.theme.light":         "Light",
         "topbar.theme.dark":          "Dark",
         "topbar.tagline":             "Governance · Risk · Assurance · Compliance Engine",
-        "nav.gap_analysis":           "Ask GRACE",
+        "nav.ask_grace":              "🤖 Ask GRACE",
+        "nav.gap_analysis":           "📊 Gap Analysis",
         "nav.doc_gen":                "Document Generation",
         "nav.dashboard":              "Governance Dashboard",
         "nav.registry":               "Finding Registry",
@@ -115,8 +116,54 @@ TRANSLATIONS = {
         "nav.vendors":                "🤝 Vendor Risk",
         "nav.policies":               "📜 Policies",
         "nav.incidents":              "🚨 Incidents",
-        "ga.header":                  "Ask GRACE",
-        "ga.intro":                   "Analyse, ask or add context — one natural-language workspace over your GRC content.",
+        # ── Ask GRACE (chat) ──────────────────────────────────────
+        "ask.header":                 "🤖 Ask GRACE",
+        "ask.intro":                  "Conversational AI for GRC — explore, explain, map. Doesn't create findings or runs.",
+        "ask.new_chat":               "+ New chat",
+        "ask.delete_chat":            "Delete chat",
+        "ask.delete_confirm":         "Confirm delete",
+        "ask.rename_chat":            "Rename",
+        "ask.save":                   "Save",
+        "ask.cancel":                 "Cancel",
+        "ask.history_title":          "Conversations",
+        "ask.no_history":             "No conversations yet — start one below.",
+        "ask.placeholder":            "Ask GRACE anything — explain a control, map two documents, summarise your findings…",
+        "ask.send_button":            "Send",
+        "ask.attached_files_label":   "Attached files (optional)",
+        "ask.paste_label":            "Paste text (optional)",
+        "ask.context_framework_label":"Framework context (optional)",
+        "ask.no_framework":           "(none)",
+        "ask.empty_state_title":      "Start a conversation",
+        "ask.empty_state_body":       "Ask a question, attach evidence, or paste text for cross-mapping. For a structured assessment that generates findings, use **Gap Analysis** instead.",
+        "ask.empty_state_cta":        "+ Start a chat",
+        "ask.thinking":               "GRACE is thinking…",
+        "ask.you":                    "You",
+        "ask.grace":                  "GRACE",
+        "ask.add_context":            "Add Context",
+        "ask.no_session_yet":         "Start a new chat from the sidebar to begin.",
+        "ask.untitled":               "Untitled",
+        "ga.header":                  "📊 Gap Analysis",
+        "ga.intro":                   "Run a structured compliance assessment. Findings are persisted and populate the Governance Dashboard.",
+        # ── Gap Analysis wizard ───────────────────────────────────
+        "ga.wizard_step1":            "Step 1 — Upload evidence",
+        "ga.wizard_step2":            "Step 2 — Choose framework",
+        "ga.wizard_step3":            "Step 3 — Optional scope",
+        "ga.wizard_step4":            "Step 4 — Run analysis",
+        "ga.run_button":              "▶ Run Gap Analysis",
+        "ga.running":                 "Running gap analysis — this may take 30-60s…",
+        "ga.results_title":           "Assessment results",
+        "ga.coverage_score":          "Overall coverage score",
+        "ga.open_in_registry":        "Open in Finding Registry",
+        "ga.gen_report":              "📄 Generate Assessment Report",
+        "ga.no_docs_yet":             "Upload at least one document to enable analysis.",
+        "ga.no_fw_yet":               "Select a framework to enable analysis.",
+        "ga.results_placeholder_title": "Results will appear here",
+        "ga.results_placeholder_body":  "When you click Run, GRACE will:\n- Concatenate your evidence and analyse it against every control\n- Score overall coverage and list gaps with severity\n- Persist findings so they show up in the Registry and Dashboard\n- Let you export a PDF report",
+        "ga.paste_label":             "Paste evidence (optional)",
+        "ga.scope_label":             "Limit to specific controls",
+        "ga.report_filename":         "GRACE_Gap_Analysis",
+        "ga.report_failed":           "Report export failed: {detail}",
+        "ga.intro_legacy":            "Analyse, ask or add context — one natural-language workspace over your GRC content.",
         "ga.input":                   "Input",
         "ga.ws.query_label":          "Ask GRACE",
         "ga.ws.query_placeholder":    "Ask GRACE to analyse a document, explain a finding, summarise results, or compare frameworks…",
@@ -470,7 +517,8 @@ TRANSLATIONS = {
         "topbar.theme.light":         "Chiaro",
         "topbar.theme.dark":          "Scuro",
         "topbar.tagline":             "Governance · Risk · Assurance · Compliance Engine",
-        "nav.gap_analysis":           "Ask GRACE",
+        "nav.ask_grace":              "🤖 Chiedi a GRACE",
+        "nav.gap_analysis":           "📊 Analisi dei Gap",
         "nav.doc_gen":                "Generazione Documenti",
         "nav.dashboard":              "Dashboard Governance",
         "nav.registry":               "Registro Findings",
@@ -479,8 +527,54 @@ TRANSLATIONS = {
         "nav.vendors":                "🤝 Rischio Fornitori",
         "nav.policies":               "📜 Policy",
         "nav.incidents":              "🚨 Incidenti",
-        "ga.header":                  "Ask GRACE",
-        "ga.intro":                   "Analizza, chiedi o aggiungi contesto — un unico workspace in linguaggio naturale sui tuoi contenuti GRC.",
+        # ── Ask GRACE (chat) ──────────────────────────────────────
+        "ask.header":                 "🤖 Chiedi a GRACE",
+        "ask.intro":                  "IA conversazionale per il GRC — esplora, spiega, mappa. Non crea finding né run.",
+        "ask.new_chat":               "+ Nuova chat",
+        "ask.delete_chat":            "Elimina chat",
+        "ask.delete_confirm":         "Conferma eliminazione",
+        "ask.rename_chat":            "Rinomina",
+        "ask.save":                   "Salva",
+        "ask.cancel":                 "Annulla",
+        "ask.history_title":          "Conversazioni",
+        "ask.no_history":             "Nessuna conversazione — iniziane una qui sotto.",
+        "ask.placeholder":            "Chiedi a GRACE qualsiasi cosa — spiega un controllo, mappa due documenti, riassumi i tuoi finding…",
+        "ask.send_button":            "Invia",
+        "ask.attached_files_label":   "File allegati (opzionale)",
+        "ask.paste_label":            "Incolla testo (opzionale)",
+        "ask.context_framework_label":"Contesto framework (opzionale)",
+        "ask.no_framework":           "(nessuno)",
+        "ask.empty_state_title":      "Inizia una conversazione",
+        "ask.empty_state_body":       "Fai una domanda, allega evidenze, o incolla del testo per il cross-mapping. Per un assessment strutturato che genera finding, usa **Analisi dei Gap**.",
+        "ask.empty_state_cta":        "+ Inizia una chat",
+        "ask.thinking":               "GRACE sta pensando…",
+        "ask.you":                    "Tu",
+        "ask.grace":                  "GRACE",
+        "ask.add_context":            "Aggiungi Contesto",
+        "ask.no_session_yet":         "Avvia una nuova chat dalla sidebar per iniziare.",
+        "ask.untitled":               "Senza titolo",
+        "ga.header":                  "📊 Analisi dei Gap",
+        "ga.intro":                   "Esegui un assessment di conformità strutturato. I finding sono persistiti e popolano la Governance Dashboard.",
+        # ── Gap Analysis wizard ───────────────────────────────────
+        "ga.wizard_step1":            "Step 1 — Carica le evidenze",
+        "ga.wizard_step2":            "Step 2 — Scegli il framework",
+        "ga.wizard_step3":            "Step 3 — Scope opzionale",
+        "ga.wizard_step4":            "Step 4 — Esegui analisi",
+        "ga.run_button":              "▶ Esegui analisi",
+        "ga.running":                 "Analisi in corso — può richiedere 30-60s…",
+        "ga.results_title":           "Risultati assessment",
+        "ga.coverage_score":          "Punteggio di copertura",
+        "ga.open_in_registry":        "Apri nel Registro Finding",
+        "ga.gen_report":              "📄 Genera Report di Assessment",
+        "ga.no_docs_yet":             "Carica almeno un documento per abilitare l'analisi.",
+        "ga.no_fw_yet":               "Seleziona un framework per abilitare l'analisi.",
+        "ga.results_placeholder_title": "I risultati appariranno qui",
+        "ga.results_placeholder_body":  "Quando clicchi Esegui, GRACE:\n- Unisce le tue evidenze e le analizza rispetto a ogni controllo\n- Calcola la copertura complessiva e elenca i gap con severità\n- Persiste i finding così appaiono nel Registro e nella Dashboard\n- Ti permette di esportare un report PDF",
+        "ga.paste_label":             "Incolla evidenze (opzionale)",
+        "ga.scope_label":             "Limita a controlli specifici",
+        "ga.report_filename":         "GRACE_Analisi_Gap",
+        "ga.report_failed":           "Esportazione report fallita: {detail}",
+        "ga.intro_legacy":            "Analizza, chiedi o aggiungi contesto — un unico workspace in linguaggio naturale sui tuoi contenuti GRC.",
         "ga.input":                   "Input",
         "ga.ws.query_label":          "Chiedi a GRACE",
         "ga.ws.query_placeholder":    "Chiedi a GRACE di analizzare un documento, spiegare un finding, riassumere i risultati o confrontare framework…",
@@ -1296,6 +1390,118 @@ code, pre, .stCode {{ font-family: var(--font-mono) !important; }}
   padding-top: 10px; border-top: 1px solid var(--border);
 }}
 .finding-card .reg-ref {{ color: var(--text-dim); font-size: 0.78rem; font-family: var(--font-mono); }}
+
+/* ── Ask GRACE: chat bubbles & history ── */
+.chat-bubble {{
+  padding: 12px 14px;
+  border-radius: 14px;
+  max-width: 80%;
+  margin: 8px 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  box-shadow: var(--shadow);
+}}
+.chat-bubble.user {{
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  color: var(--text);
+  margin-left: auto;
+  margin-right: 0;
+  border-bottom-right-radius: 4px;
+}}
+.chat-bubble.assistant {{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  margin-right: auto;
+  margin-left: 0;
+  border-bottom-left-radius: 4px;
+}}
+.chat-bubble .chat-role {{
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  font-weight: 700;
+}}
+.chat-bubble.user .chat-role {{ color: var(--accent); text-align: right; }}
+.chat-bubble.assistant .chat-role {{ color: var(--primary); }}
+.chat-bubble .chat-body {{ color: var(--text); }}
+.chat-citations {{
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+  padding-top: 8px; border-top: 1px dashed var(--border);
+}}
+.chat-citation {{
+  display: inline-block;
+  background: color-mix(in srgb, var(--text-dim) 12%, transparent);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+}}
+.chat-history-item {{
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}}
+.chat-history-item:hover {{
+  background: color-mix(in srgb, var(--text-dim) 8%, transparent);
+}}
+.chat-history-item.active {{
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-left: 3px solid var(--accent);
+}}
+.chat-empty-state {{
+  text-align: center;
+  padding: 36px 24px;
+  background: var(--surface-alt);
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  color: var(--text-dim);
+}}
+.chat-empty-state h3 {{
+  color: var(--primary);
+  font-family: var(--font-display);
+  margin: 0 0 8px 0;
+}}
+
+/* ── Gap Analysis wizard ── */
+.wizard-step {{
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-display);
+  font-size: 0.78rem; font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 1px; text-transform: uppercase;
+  margin: 16px 0 6px 0;
+}}
+.wizard-step .step-num {{
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border));
+  font-size: 0.72rem;
+}}
+.wizard-placeholder {{
+  text-align: left;
+  padding: 24px 22px;
+  background: var(--surface-alt);
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  color: var(--text-dim);
+}}
+.wizard-placeholder h3 {{
+  color: var(--primary);
+  font-family: var(--font-display);
+  margin: 0 0 8px 0; font-size: 1.05rem;
+}}
 
 /* ── KPI cards (hub-grid style) ── */
 .kpi-card {{
@@ -2149,14 +2355,19 @@ with top_left:
     # estate). What stays here is a slim breadcrumb-style row that
     # tells the user where they are.
     _crumb_labels = {
+        "ask_grace":    t("nav.ask_grace"),
         "gap_analysis": t("nav.gap_analysis"),
         "doc_gen":      t("nav.doc_gen"),
         "dashboard":    t("nav.dashboard"),
         "registry":     t("nav.registry"),
         "library":      t("nav.library"),
+        "risks":        t("nav.risks"),
+        "vendors":      t("nav.vendors"),
+        "policies":     t("nav.policies"),
+        "incidents":    t("nav.incidents"),
     }
     _crumb_current = _crumb_labels.get(
-        st.session_state.get("current_page", "gap_analysis"),
+        st.session_state.get("current_page", "ask_grace"),
         ""
     )
     st.markdown(
@@ -2217,7 +2428,7 @@ with top_theme:
 
 # ─── Sidebar ─────────────────────────────────────────────────────────
 
-PAGE_KEYS = ["gap_analysis", "doc_gen", "dashboard", "registry", "library",
+PAGE_KEYS = ["ask_grace", "gap_analysis", "doc_gen", "dashboard", "registry", "library",
              "risks", "vendors", "policies", "incidents"]
 # Inline SVG icons (lucide-style outline) used by the sidebar nav and
 # elsewhere. Kept tiny so they ship inside the stylesheet without
@@ -2225,6 +2436,7 @@ PAGE_KEYS = ["gap_analysis", "doc_gen", "dashboard", "registry", "library",
 # the active/inactive accent automatically.
 def _nav_icon_svg(name: str) -> str:
     paths = {
+        "ask_grace":    "<path d='M4 5h16v11H8l-4 4z'/><circle cx='9' cy='10' r='0.9'/><circle cx='12' cy='10' r='0.9'/><circle cx='15' cy='10' r='0.9'/>",
         "gap_analysis": "<circle cx='10' cy='10' r='6'/><line x1='14.5' y1='14.5' x2='19' y2='19'/>",
         "doc_gen":      "<path d='M5 3h9l5 5v13H5z'/><path d='M14 3v5h5'/><line x1='8' y1='13' x2='16' y2='13'/><line x1='8' y1='16' x2='14' y2='16'/>",
         "dashboard":    "<line x1='4' y1='19' x2='4' y2='11'/><line x1='10' y1='19' x2='10' y2='5'/><line x1='16' y1='19' x2='16' y2='14'/><line x1='3' y1='19' x2='21' y2='19'/>",
@@ -2388,55 +2600,488 @@ def _resolve_avatar_message() -> str:
 _avatar_col, _main_col = st.columns([1.5, 6])
 
 with _main_col:
-    if page == "gap_analysis":
+    # ════════════════════════════════════════════════════════════════
+    # PAGE: ASK GRACE (conversational chat with persistent history)
+    # ════════════════════════════════════════════════════════════════
+    if page == "ask_grace":
+        page_hero(t("ask.header"), t("ask.intro"))
+
+        # ── Cached message fetcher (cheap re-render guard) ────────
+        @st.cache_data(ttl=10, show_spinner=False)
+        def _fetch_chat_messages(sid: str, cache_buster: int = 0):
+            data = api_get(f"/api/v1/chat/sessions/{sid}/messages")
+            if not isinstance(data, dict):
+                return []
+            return data.get("messages", [])
+
+        def _bust_message_cache():
+            # Bump the buster integer to force the cache_data layer to miss
+            # without nuking the wider cache (other sessions stay warm).
+            st.session_state["ask_msg_cache_buster"] = (
+                st.session_state.get("ask_msg_cache_buster", 0) + 1
+            )
+
+        if "ask_msg_cache_buster" not in st.session_state:
+            st.session_state["ask_msg_cache_buster"] = 0
+
+        # ── Layout: history sidebar (1) | active chat (3) ─────────
+        side_col, chat_col = st.columns([1, 3])
+
+        # ── LEFT: history sidebar ─────────────────────────────────
+        with side_col:
+            st.markdown(
+                f'<div class="section-sub">{t("ask.history_title")}</div>',
+                unsafe_allow_html=True,
+            )
+            if st.button(t("ask.new_chat"), type="primary",
+                         use_container_width=True, key="ask_new_chat_btn"):
+                r = api_post("/api/v1/chat/sessions", {"title": None})
+                if isinstance(r, dict) and r.get("session_id"):
+                    st.session_state["ask_session_id"] = r["session_id"]
+                    _bust_message_cache()
+                    st.rerun()
+
+            sessions_data = api_get("/api/v1/chat/sessions")
+            sessions = (sessions_data or {}).get("sessions", [])
+            active_sid = st.session_state.get("ask_session_id")
+
+            if not sessions:
+                st.caption(t("ask.no_history"))
+            else:
+                for s in sessions:
+                    sid = s["session_id"]
+                    label = s.get("title") or t("ask.untitled")
+                    if len(label) > 38:
+                        label = label[:35] + "…"
+                    is_active = (sid == active_sid)
+                    btn_label = ("● " if is_active else "") + label
+                    if st.button(
+                        btn_label,
+                        key=f"ask_sess_btn_{sid}",
+                        type=("primary" if is_active else "secondary"),
+                        use_container_width=True,
+                        help=s.get("updated_at", "")[:19].replace("T", " "),
+                    ):
+                        st.session_state["ask_session_id"] = sid
+                        _bust_message_cache()
+                        st.rerun()
+
+            # Rename / delete affordances apply ONLY to the active session
+            if active_sid:
+                st.markdown("---")
+                renaming_key = f"ask_rename_open_{active_sid}"
+                if st.session_state.get(renaming_key):
+                    new_title = st.text_input(
+                        t("ask.rename_chat"),
+                        value=(next((s.get("title") or "" for s in sessions
+                                     if s["session_id"] == active_sid), "")),
+                        key=f"ask_rename_input_{active_sid}",
+                    )
+                    cc1, cc2 = st.columns(2)
+                    with cc1:
+                        if st.button(t("ask.save"),
+                                     key=f"ask_rename_save_{active_sid}",
+                                     use_container_width=True):
+                            requests.patch(
+                                f"{API}/api/v1/chat/sessions/{active_sid}",
+                                json={"title": (new_title or "").strip() or None},
+                                timeout=10,
+                            )
+                            st.session_state[renaming_key] = False
+                            st.rerun()
+                    with cc2:
+                        if st.button(t("ask.cancel"),
+                                     key=f"ask_rename_cancel_{active_sid}",
+                                     use_container_width=True):
+                            st.session_state[renaming_key] = False
+                            st.rerun()
+                else:
+                    if st.button(f"✏ {t('ask.rename_chat')}",
+                                 key=f"ask_rename_btn_{active_sid}",
+                                 use_container_width=True):
+                        st.session_state[renaming_key] = True
+                        st.rerun()
+
+                # Two-click delete confirm
+                confirm_key = f"ask_delete_confirm_{active_sid}"
+                if st.session_state.get(confirm_key):
+                    if st.button(f"⚠ {t('ask.delete_confirm')}",
+                                 type="primary",
+                                 key=f"ask_delete_confirm_btn_{active_sid}",
+                                 use_container_width=True):
+                        requests.delete(
+                            f"{API}/api/v1/chat/sessions/{active_sid}",
+                            timeout=10,
+                        )
+                        st.session_state.pop("ask_session_id", None)
+                        st.session_state[confirm_key] = False
+                        _bust_message_cache()
+                        st.rerun()
+                else:
+                    if st.button(f"🗑 {t('ask.delete_chat')}",
+                                 key=f"ask_delete_btn_{active_sid}",
+                                 use_container_width=True):
+                        st.session_state[confirm_key] = True
+                        st.rerun()
+
+        # ── RIGHT: active conversation ────────────────────────────
+        with chat_col:
+            active_sid = st.session_state.get("ask_session_id")
+
+            # No session yet → empty state with CTA
+            if not active_sid:
+                st.markdown(
+                    f"""
+<div class="chat-empty-state">
+  <h3>{t("ask.empty_state_title")}</h3>
+  <p>{t("ask.empty_state_body")}</p>
+</div>
+""",
+                    unsafe_allow_html=True,
+                )
+                if st.button(t("ask.empty_state_cta"), type="primary",
+                             key="ask_empty_cta"):
+                    r = api_post("/api/v1/chat/sessions", {"title": None})
+                    if isinstance(r, dict) and r.get("session_id"):
+                        st.session_state["ask_session_id"] = r["session_id"]
+                        _bust_message_cache()
+                        st.rerun()
+
+            else:
+                # Render existing messages as bubbles
+                messages = _fetch_chat_messages(
+                    active_sid,
+                    st.session_state["ask_msg_cache_buster"],
+                )
+                if not messages:
+                    st.caption(t("ask.no_session_yet"))
+                for m in messages:
+                    role = m.get("role", "assistant")
+                    if role == "system":
+                        continue
+                    role_label = t("ask.you") if role == "user" else t("ask.grace")
+                    body_md = m.get("content", "")
+                    # Escape minimally — Streamlit markdown handles formatting
+                    cites = m.get("citations") or []
+                    cites_html = ""
+                    if cites and role == "assistant":
+                        chip_spans = []
+                        for c in cites[:6]:
+                            icon = ("📄" if c.get("type") == "document"
+                                    else "🔗" if c.get("type") == "control"
+                                    else "🏷")
+                            chip_spans.append(
+                                f"<span class='chat-citation'>{icon} "
+                                f"{c.get('label', c.get('id', ''))}</span>"
+                            )
+                        cites_html = (
+                            "<div class='chat-citations'>"
+                            + "".join(chip_spans)
+                            + "</div>"
+                        )
+                    st.markdown(
+                        f"""
+<div class="chat-bubble {role}">
+  <div class="chat-role">{role_label}</div>
+  <div class="chat-body">{body_md}</div>
+  {cites_html}
+</div>
+""",
+                        unsafe_allow_html=True,
+                    )
+
+                # ── Sticky input zone ─────────────────────────────
+                st.markdown("---")
+                with st.expander(t("ask.add_context"), expanded=False):
+                    pasted_context = st.text_area(
+                        t("ask.paste_label"),
+                        key=f"ask_paste_{active_sid}",
+                        height=120,
+                    )
+                    uploaded_files = st.file_uploader(
+                        t("ask.attached_files_label"),
+                        type=["pdf", "docx", "txt", "csv", "xlsx"],
+                        accept_multiple_files=True,
+                        key=f"ask_files_{active_sid}",
+                    )
+
+                # Framework context (optional)
+                fw_data = api_get("/api/v1/frameworks")
+                fw_options = {t("ask.no_framework"): None}
+                if fw_data:
+                    for fw in fw_data.get("frameworks", []):
+                        if not fw.get("coming_soon"):
+                            fw_options[fw["name"]] = fw["id"]
+                selected_fw_name = st.selectbox(
+                    t("ask.context_framework_label"),
+                    list(fw_options.keys()),
+                    key=f"ask_fw_{active_sid}",
+                )
+                selected_fw_id = fw_options.get(selected_fw_name)
+
+                query_text = st.chat_input(t("ask.placeholder"),
+                                           key=f"ask_input_{active_sid}")
+
+                if query_text:
+                    # Materialise any attached evidence as documents
+                    document_ids: list = []
+                    if (pasted_context or "").strip() or uploaded_files:
+                        with st.spinner(t("ask.thinking")):
+                            if (pasted_context or "").strip():
+                                r = api_post("/api/v1/documents/text", {
+                                    "title":   "Pasted context",
+                                    "content": pasted_context,
+                                })
+                                if isinstance(r, dict) and r.get("document_id"):
+                                    document_ids.append(r["document_id"])
+                            for upl in (uploaded_files or []):
+                                files = {"file": (upl.name, upl.getvalue(), upl.type)}
+                                rr = requests.post(
+                                    f"{API}/api/v1/documents/upload",
+                                    files=files, data={"owner": "demo"},
+                                    timeout=60,
+                                )
+                                if rr.ok:
+                                    j = rr.json()
+                                    if j.get("document_id"):
+                                        document_ids.append(j["document_id"])
+
+                    set_avatar_state(AvatarState.ANALYZING)
+                    with st.spinner(t("ask.thinking")):
+                        api_post(
+                            f"/api/v1/chat/sessions/{active_sid}/messages",
+                            {
+                                "query":         query_text.strip(),
+                                "document_ids":  document_ids,
+                                "framework_id":  selected_fw_id,
+                                "language":      get_lang(),
+                            },
+                        )
+                    set_avatar_state(AvatarState.SUCCESS)
+                    _bust_message_cache()
+                    st.rerun()
+
+        # Avatar state machine — chat is always "ready" once a session is open
+        _terminal_ask = (AvatarState.SUCCESS, AvatarState.ERROR, AvatarState.WARNING)
+        if get_avatar_state() not in _terminal_ask:
+            set_avatar_state(
+                AvatarState.READY if st.session_state.get("ask_session_id")
+                else AvatarState.GUIDANCE
+            )
+
+    # ════════════════════════════════════════════════════════════════
+    # PAGE: GAP ANALYSIS WIZARD (structured assessment, persisted)
+    # ════════════════════════════════════════════════════════════════
+    elif page == "gap_analysis":
         page_hero(t("ga.header"), t("ga.intro"))
 
-        # ── Helper: render the response envelope from /api/v1/ask ──
-        def _render_ask_response(resp: dict, framework_label: str = ""):
-            """Generic renderer that handles every response_type the
-            ask endpoint can return. Kept inline so each page handler
-            can call it without indirection."""
-            rt = resp.get("response_type", "qa")
-            intent_label = {
-                "analysis":    t("ga.ws.intent_analysis"),
-                "explanation": t("ga.ws.intent_explanation"),
-                "findings_qa": t("ga.ws.intent_findings_qa"),
-                "qa":          t("ga.ws.intent_qa"),
-                "error":       t("ga.ws.intent_error"),
-            }.get(rt, rt)
-            intent_color = {
-                "analysis":    "var(--accent)",
-                "explanation": "#0EA5E9",
-                "findings_qa": "#EAB308",
-                "qa":          "#94A3B8",
-                "error":       "#DC2626",
-            }.get(rt, "var(--text-dim)")
+        wiz_col, res_col = st.columns([2, 3])
+
+        # ── LEFT: wizard ──────────────────────────────────────────
+        with wiz_col:
+            # Step 1: upload + paste
             st.markdown(
-                f"<div style='display:inline-flex;align-items:center;gap:6px;"
-                f"background:color-mix(in srgb, {intent_color} 14%, transparent);"
-                f"border:1px solid color-mix(in srgb, {intent_color} 35%, transparent);"
-                f"color:{intent_color};padding:3px 10px;border-radius:999px;"
-                f"font-family:var(--font-display);font-size:0.7rem;font-weight:700;"
-                f"letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px'>"
-                f"{intent_label}</div>",
+                f"<div class='wizard-step'><span class='step-num'>1</span>"
+                f"{t('ga.wizard_step1')}</div>",
+                unsafe_allow_html=True,
+            )
+            uploaded_files = st.file_uploader(
+                t("ga.wizard_step1"),
+                type=["pdf", "docx", "txt", "xlsx", "csv"],
+                accept_multiple_files=True,
+                key="ga_files",
+                label_visibility="collapsed",
+            )
+            pasted_text = st.text_area(
+                t("ga.paste_label"),
+                key="ga_paste",
+                height=120,
+                placeholder=t("ga.paste_label"),
+                label_visibility="collapsed",
+            )
+
+            # Step 2: framework
+            st.markdown(
+                f"<div class='wizard-step'><span class='step-num'>2</span>"
+                f"{t('ga.wizard_step2')}</div>",
+                unsafe_allow_html=True,
+            )
+            fw_data = api_get("/api/v1/frameworks")
+            fw_options: dict = {}
+            if fw_data:
+                for fw in fw_data.get("frameworks", []):
+                    if not fw.get("coming_soon"):
+                        fw_options[fw["name"]] = fw["id"]
+            if not fw_options:
+                st.warning(t("lib.cannot_reach"))
+                fw_options = {"(none)": None}
+            selected_fw_name = st.selectbox(
+                t("ga.wizard_step2"),
+                list(fw_options.keys()),
+                key="ga_framework",
+                label_visibility="collapsed",
+            )
+            selected_fw_id = fw_options.get(selected_fw_name)
+
+            # Step 3: optional scope
+            st.markdown(
+                f"<div class='wizard-step'><span class='step-num'>3</span>"
+                f"{t('ga.wizard_step3')}</div>",
+                unsafe_allow_html=True,
+            )
+            with st.expander(t("ga.scope_label"), expanded=False):
+                controls_scope: list = []
+                if selected_fw_id:
+                    ctrl_data = api_get(
+                        f"/api/v1/frameworks/{selected_fw_id}/controls"
+                    )
+                    if isinstance(ctrl_data, dict):
+                        all_ctrls = ctrl_data.get("controls", [])
+                        ctrl_labels = [
+                            f"{c.get('control_id', c.get('id', '?'))} · "
+                            f"{c.get('control_title', c.get('title', ''))[:60]}"
+                            for c in all_ctrls
+                        ]
+                        ctrl_ids_by_label = {
+                            lbl: (c.get("control_id") or c.get("id"))
+                            for lbl, c in zip(ctrl_labels, all_ctrls)
+                        }
+                        picked = st.multiselect(
+                            t("ga.scope_label"),
+                            ctrl_labels,
+                            key="ga_scope",
+                            label_visibility="collapsed",
+                        )
+                        controls_scope = [
+                            ctrl_ids_by_label[p] for p in picked
+                            if ctrl_ids_by_label.get(p)
+                        ]
+                else:
+                    st.caption(t("ga.no_fw_yet"))
+
+            # Step 4: run
+            st.markdown(
+                f"<div class='wizard-step'><span class='step-num'>4</span>"
+                f"{t('ga.wizard_step4')}</div>",
                 unsafe_allow_html=True,
             )
 
-            # Analysis: rich result UI (overall card + finding cards)
-            if rt == "analysis":
-                result = resp.get("result", {})
-                overall_score  = result.get("overall_coverage_score", 0)
-                overall_status = result.get("overall_status", "partial")
-                color = "#16A34A" if overall_score >= 80 else "#EA580C" if overall_score >= 40 else "#DC2626"
-                st.markdown(f"""
+            has_docs = bool(uploaded_files) or bool((pasted_text or "").strip())
+            if not has_docs:
+                st.caption(t("ga.no_docs_yet"))
+            elif not selected_fw_id:
+                st.caption(t("ga.no_fw_yet"))
+
+            run_clicked = st.button(
+                t("ga.run_button"),
+                type="primary",
+                use_container_width=True,
+                disabled=not (has_docs and selected_fw_id),
+                key="ga_run_btn",
+            )
+
+        # ── RIGHT: results panel ──────────────────────────────────
+        with res_col:
+            st.markdown(
+                f"<div class='section-sub'>{t('ga.results_title')}</div>",
+                unsafe_allow_html=True,
+            )
+            res_container = st.container()
+
+            # Pull most recent result (per session) for sticky render
+            last_run_id = st.session_state.get("ga_last_run_id")
+            last_result_key = (
+                f"gap_result_{last_run_id}" if last_run_id else None
+            )
+
+            if run_clicked:
+                with res_container:
+                    set_avatar_state(AvatarState.ANALYZING)
+                    document_ids: list = []
+                    with st.spinner(t("ga.running")):
+                        if (pasted_text or "").strip():
+                            r = api_post("/api/v1/documents/text", {
+                                "title":   "Pasted evidence",
+                                "content": pasted_text,
+                            })
+                            if isinstance(r, dict) and r.get("document_id"):
+                                document_ids.append(r["document_id"])
+                        for upl in (uploaded_files or []):
+                            files = {"file": (upl.name, upl.getvalue(), upl.type)}
+                            rr = requests.post(
+                                f"{API}/api/v1/documents/upload",
+                                files=files, data={"owner": "demo"},
+                                timeout=60,
+                            )
+                            if rr.ok:
+                                j = rr.json()
+                                if j.get("document_id"):
+                                    document_ids.append(j["document_id"])
+
+                        if not document_ids:
+                            st.error(t("ga.no_docs_yet"))
+                            set_avatar_state(AvatarState.ERROR)
+                            st.stop()
+
+                        resp = api_post("/api/v1/assessments/run-sync", {
+                            "document_ids":   document_ids,
+                            "framework":      selected_fw_id,
+                            "controls_scope": controls_scope or None,
+                            "language":       get_lang(),
+                        })
+
+                    if not isinstance(resp, dict) or "error" in resp:
+                        set_avatar_state(AvatarState.ERROR)
+                        err = resp.get("error", "unknown") if isinstance(resp, dict) else "unknown"
+                        st.error(t("ga.assessment_failed", detail=str(err)))
+                        st.stop()
+
+                    rid = resp.get("run_id")
+                    st.session_state["ga_last_run_id"] = rid
+                    st.session_state[f"gap_result_{rid}"] = resp
+                    last_run_id = rid
+                    last_result_key = f"gap_result_{rid}"
+
+                    # Avatar mood
+                    score = (resp.get("result") or {}).get("overall_coverage_score", 0)
+                    if score >= 80:
+                        set_avatar_state(AvatarState.SUCCESS)
+                    elif score < 40:
+                        set_avatar_state(AvatarState.WARNING)
+                    else:
+                        set_avatar_state(AvatarState.ATTENTIVE)
+
+            # Render persisted result if any
+            stored = (st.session_state.get(last_result_key)
+                      if last_result_key else None)
+            with res_container:
+                if not stored:
+                    st.markdown(
+                        f"""
+<div class="wizard-placeholder">
+  <h3>{t("ga.results_placeholder_title")}</h3>
+  <div>{t("ga.results_placeholder_body").replace(chr(10), '<br/>')}</div>
+</div>
+""",
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    result = stored.get("result", {}) or {}
+                    overall_score  = result.get("overall_coverage_score", 0)
+                    overall_status = result.get("overall_status", "partial")
+                    color = ("#16A34A" if overall_score >= 80
+                             else "#EA580C" if overall_score >= 40 else "#DC2626")
+                    fw_label = selected_fw_name or ""
+                    st.markdown(f"""
 <div class="page-hero" style="margin-top:0">
   <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px">
     <div>
-      <div style="font-weight:700;color:var(--primary);font-size:1.05rem">{framework_label}</div>
-      <div style="color:var(--text-dim);font-size:0.85rem">{', '.join(c.get('label','') for c in resp.get('citations',[])[:3])}</div>
+      <div style="font-weight:700;color:var(--primary);font-size:1.05rem">{fw_label}</div>
+      <div style="color:var(--text-dim);font-size:0.85rem">{stored.get('document_title','')}</div>
     </div>
     <div style="text-align:right">
-      <div style="font-size:2rem;font-weight:700;color:{color};line-height:1">{overall_score}%</div>
+      <div style="font-family:var(--font-display);font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.2px">{t('ga.coverage_score')}</div>
+      <div style="font-size:2.2rem;font-weight:700;color:{color};line-height:1">{overall_score}%</div>
       {status_badge(overall_status)}
     </div>
   </div>
@@ -2446,9 +3091,10 @@ with _main_col:
   </div>
 </div>
 """, unsafe_allow_html=True)
-                for ctrl in result.get("controls", []):
-                    sev = ctrl.get("severity", "medium")
-                    st.markdown(f"""
+
+                    for ctrl in result.get("controls", []):
+                        sev = ctrl.get("severity", "medium")
+                        st.markdown(f"""
 <div class="finding-card {sev}">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
     <div>
@@ -2466,189 +3112,87 @@ with _main_col:
     <div class="reg-ref" style="margin-top:4px">{ctrl.get('regulatory_reference','')}</div>
   </div>
 </div>""", unsafe_allow_html=True)
-                with st.expander(t("ga.evidence_required")):
-                    for ctrl in result.get("controls", []):
-                        if ctrl.get("evidence_required"):
-                            st.markdown(f"**{ctrl.get('control_id')} — {ctrl.get('control_title')}**")
-                            for ev in ctrl.get("evidence_required", []):
-                                st.markdown(f"  - {ev}")
-                return
 
-            # Plain markdown response for explanation / findings_qa / qa / error
-            st.markdown(resp.get("response_text", ""))
-            cites = resp.get("citations") or []
-            if cites:
-                st.markdown(f"<div class='section-sub' style='margin-top:14px'>{t('ga.ws.cites')}</div>",
-                            unsafe_allow_html=True)
-                for c in cites[:8]:
-                    st.markdown(f"<div class='recent-row'><span class='doc-name'>{c.get('label','')}</span>"
-                                f"<span class='meta'>{c.get('type','')}</span></div>",
-                                unsafe_allow_html=True)
+                    with st.expander(t("ga.evidence_required")):
+                        for ctrl in result.get("controls", []):
+                            if ctrl.get("evidence_required"):
+                                st.markdown(
+                                    f"**{ctrl.get('control_id')} — "
+                                    f"{ctrl.get('control_title')}**"
+                                )
+                                for ev in ctrl.get("evidence_required", []):
+                                    st.markdown(f"  - {ev}")
 
-        # ── Layout ────────────────────────────────────────────────
-        col1, col2 = st.columns([1.2, 1])
+                    # Action row
+                    act_a, act_b = st.columns(2)
+                    with act_a:
+                        if st.button(t("ga.open_in_registry"),
+                                     use_container_width=True,
+                                     key="ga_open_registry"):
+                            st.session_state["current_page"] = "registry"
+                            st.rerun()
+                    with act_b:
+                        # Build a markdown report and stream it as PDF
+                        if st.button(t("ga.gen_report"),
+                                     type="primary",
+                                     use_container_width=True,
+                                     key="ga_export_pdf"):
+                            md_lines = [
+                                f"# {t('ga.results_title')}",
+                                "",
+                                f"**Framework:** {fw_label}",
+                                f"**Document(s):** {stored.get('document_title','')}",
+                                f"**Coverage:** {overall_score}% · {overall_status}",
+                                "",
+                                f"## Executive summary",
+                                "",
+                                result.get("executive_summary", ""),
+                                "",
+                                "## Findings",
+                                "",
+                            ]
+                            for ctrl in result.get("controls", []):
+                                md_lines += [
+                                    f"### {ctrl.get('control_id','')} — {ctrl.get('control_title','')}",
+                                    f"- Status: **{ctrl.get('status','')}**  · Severity: **{ctrl.get('severity','')}**",
+                                    f"- Finding: {ctrl.get('finding','')}",
+                                    f"- Remediation: {ctrl.get('remediation','')}",
+                                    "",
+                                ]
+                            try:
+                                exp = requests.post(
+                                    f"{API}/api/v1/generate/export",
+                                    json={
+                                        "content":  "\n".join(md_lines),
+                                        "format":   "pdf",
+                                        "filename": t("ga.report_filename"),
+                                    },
+                                    timeout=120,
+                                )
+                                if exp.ok:
+                                    st.download_button(
+                                        t("dg.download_pdf"),
+                                        data=exp.content,
+                                        file_name=f"{t('ga.report_filename')}.pdf",
+                                        mime="application/pdf",
+                                        use_container_width=True,
+                                        key="ga_dl_pdf",
+                                    )
+                                else:
+                                    st.error(t("ga.report_failed",
+                                               detail=exp.text[:200]))
+                            except Exception as e:
+                                st.error(t("ga.report_failed", detail=str(e)))
 
-        with col1:
-            st.markdown(f'<div class="section-sub">{t("ga.ws.query_label")}</div>',
-                        unsafe_allow_html=True)
-
-            # 1) Framework selector (still useful for analysis intent)
-            fw_data = api_get("/api/v1/frameworks")
-            fw_options = {"— " + t("ga.ws.no_framework") + " —": None}
-            if fw_data:
-                for fw in fw_data.get("frameworks", []):
-                    if not fw.get("coming_soon"):
-                        fw_options[fw["name"]] = fw["id"]
-                    else:
-                        fw_options[f"{fw['name']}  (coming soon)"] = None
-            selected_fw_name = st.selectbox(t("ga.select_framework"),
-                                            list(fw_options.keys()),
-                                            key="ask_framework")
-            selected_fw_id   = fw_options.get(selected_fw_name)
-
-            # 2) Main query field — the centre of the new flow
-            query_text = st.text_area(
-                t("ga.ws.query_label"),
-                key="ask_query",
-                height=160,
-                placeholder=t("ga.ws.query_placeholder"),
-                label_visibility="collapsed",
-            )
-            st.caption(t("ga.ws.query_examples"))
-
-            # 3) Optional context (paste + upload, both at once)
-            with st.expander(t("ga.ws.add_context"), expanded=False):
-                pasted_context = st.text_area(
-                    t("ga.ws.paste_label"),
-                    key="ask_paste",
-                    height=140,
-                    placeholder=t("ga.paste_placeholder"),
-                )
-                uploaded_files = st.file_uploader(
-                    t("ga.ws.upload_label"),
-                    type=["pdf", "docx", "txt", "csv", "xlsx"],
-                    accept_multiple_files=True,
-                    key="ask_files",
-                )
-
-            # 4) Active context chips (live, shows what GRACE will see)
-            chips = []
-            if (pasted_context or "").strip():
-                chips.append(t("ga.ws.ctx_paste", n=len(pasted_context.strip())))
-            if uploaded_files:
-                chips.append(t("ga.ws.ctx_files", n=len(uploaded_files)))
-            if selected_fw_id:
-                chips.append(t("ga.ws.ctx_framework", fw=selected_fw_name))
-            if chips:
-                st.markdown(
-                    f"<div class='section-sub' style='margin-top:14px'>{t('ga.ws.active_context')}</div>",
-                    unsafe_allow_html=True,
-                )
-                st.markdown(
-                    "<div style='display:flex;flex-wrap:wrap;gap:6px'>" +
-                    "".join(f"<span class='badge badge-blue'>{c}</span>" for c in chips) +
-                    "</div>",
-                    unsafe_allow_html=True,
-                )
-
-            ask_clicked = st.button(t("ga.ws.submit"),
-                                    type="primary", use_container_width=True,
-                                    key="ask_submit")
-
-        with col2:
-            st.markdown(f'<div class="section-sub">{t("ga.copilot_response")}</div>',
-                        unsafe_allow_html=True)
-            result_container = st.container()
-
-        # ── Avatar state machine (READY / GUIDANCE) ───────────────
+        # Avatar state machine — disabled-Run = GUIDANCE, otherwise READY
         _terminal_ga = (AvatarState.SUCCESS, AvatarState.ERROR, AvatarState.WARNING)
         if get_avatar_state() not in _terminal_ga:
-            # Any of: a query OR a doc + framework constitutes "ready".
-            has_query = bool((query_text or "").strip())
-            has_ctx   = bool((pasted_context or "").strip()) or bool(uploaded_files)
-            ready = has_query or (has_ctx and selected_fw_id)
-            set_avatar_state(AvatarState.READY if ready else AvatarState.GUIDANCE)
-
-        if ask_clicked:
-            if not (query_text or "").strip() and not pasted_context and not uploaded_files:
-                st.warning(t("ga.ws.no_input"))
-                st.stop()
-
-            with result_container:
-                # 1) Materialise every context source as a document_id
-                #    (the backend works on registered documents).
-                document_ids: list = []
-                with st.spinner(t("ga.ws.uploading")):
-                    if (pasted_context or "").strip():
-                        r = api_post("/api/v1/documents/text", {
-                            "title":   "Pasted context",
-                            "content": pasted_context,
-                        })
-                        if r.get("document_id"):
-                            document_ids.append(r["document_id"])
-                    for upl in (uploaded_files or []):
-                        files = {"file": (upl.name, upl.getvalue(), upl.type)}
-                        rr = requests.post(f"{API}/api/v1/documents/upload",
-                                           files=files, data={"owner": "demo"},
-                                           timeout=60)
-                        if rr.ok:
-                            j = rr.json()
-                            if j.get("document_id"):
-                                document_ids.append(j["document_id"])
-
-                # 2) Dispatch via the unified /ask endpoint
-                set_avatar_state(AvatarState.ANALYZING)
-                with st.spinner(t("ga.ws.thinking")):
-                    ask_resp = api_post("/api/v1/ask", {
-                        "query":         (query_text or "").strip(),
-                        "document_ids":  document_ids,
-                        "framework_id":  selected_fw_id,
-                        "language":      get_lang(),
-                    })
-
-                if not isinstance(ask_resp, dict) or "error" in ask_resp:
-                    set_avatar_state(AvatarState.ERROR)
-                    st.error(t("ga.assessment_failed",
-                               detail=str(ask_resp.get("error", "unknown"))))
-                    st.stop()
-
-                # 3) Avatar mood + dynamic message based on the response
-                rt = ask_resp.get("response_type", "qa")
-                _lang = get_lang()
-                if rt == "analysis":
-                    result = ask_resp.get("result", {})
-                    score = result.get("overall_coverage_score", 0)
-                    if score >= 80:
-                        set_avatar_state(AvatarState.SUCCESS)
-                        st.session_state["avatar_message"] = (
-                            f"Solid coverage at {score}%. Open Finding Registry for the full triage."
-                            if _lang == "en" else
-                            f"Copertura solida al {score}%. Apri il Registro Findings per il triage completo."
-                        )
-                    elif score < 40:
-                        set_avatar_state(AvatarState.WARNING)
-                        st.session_state["avatar_message"] = (
-                            f"Only {score}% coverage — open the findings below, critical-first."
-                            if _lang == "en" else
-                            f"Solo {score}% di copertura — apri i finding qui sotto, partendo dai critici."
-                        )
-                    else:
-                        set_avatar_state(AvatarState.ATTENTIVE)
-                        st.session_state["avatar_message"] = (
-                            f"Partial coverage at {score}%. Let's prioritise medium/high severity items."
-                            if _lang == "en" else
-                            f"Copertura parziale al {score}%. Prioritizziamo i finding medi/alti."
-                        )
-                else:
-                    set_avatar_state(AvatarState.SUCCESS)
-                    st.session_state["avatar_message"] = (
-                        "Here's what I found — check the response panel on the right."
-                        if _lang == "en" else
-                        "Ecco cosa ho trovato — controlla il pannello di risposta a destra."
-                    )
-
-                # 4) Render
-                _render_ask_response(ask_resp, framework_label=selected_fw_name or "")
+            ready_ga = bool((uploaded_files or
+                             (pasted_text or "").strip())
+                            and selected_fw_id)
+            set_avatar_state(
+                AvatarState.READY if ready_ga else AvatarState.GUIDANCE
+            )
 
 
     # ════════════════════════════════════════════════════════════════
