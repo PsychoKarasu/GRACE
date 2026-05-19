@@ -124,6 +124,7 @@ def resolve_state(*candidates: AvatarState) -> AvatarState:
 # UI event → default avatar state mapping. The page renderer can override
 # the resolved state at any point (e.g. after an API call returns success).
 PAGE_DEFAULT_STATE = {
+    "ask_grace":    AvatarState.ATTENTIVE,
     "gap_analysis": AvatarState.ATTENTIVE,
     "doc_gen":      AvatarState.ATTENTIVE,
     "dashboard":    AvatarState.IDLE,
@@ -155,6 +156,15 @@ MESSAGES = {
     ("doc_gen",      AvatarState.SUCCESS,   "en"): "Draft is ready in the right panel. Read it end-to-end and tailor it to your organisation before publishing.",
     ("doc_gen",      AvatarState.ERROR,     "en"): "The generator hit an issue. Try again or simplify the context.",
 
+    # Ask GRACE (chat)
+    ("ask_grace",    AvatarState.IDLE,      "en"): "Open a chat to ask me anything — explain a control, map two documents, summarise findings. Conversations are saved.",
+    ("ask_grace",    AvatarState.GUIDANCE,  "en"): "Click + New chat to start, then ask a question or attach evidence.",
+    ("ask_grace",    AvatarState.ATTENTIVE, "en"): "I'm listening. Type your question below — I'll keep the thread.",
+    ("ask_grace",    AvatarState.READY,     "en"): "Ready when you are.",
+    ("ask_grace",    AvatarState.ANALYZING, "en"): "Thinking through it now…",
+    ("ask_grace",    AvatarState.SUCCESS,   "en"): "Done — see the reply above. Ask a follow-up or open Gap Analysis for a structured run.",
+    ("ask_grace",    AvatarState.ERROR,     "en"): "Couldn't reach the model. Check the backend status and retry.",
+
     # Other pages
     ("dashboard",    AvatarState.IDLE,      "en"): "Here's the live picture of your compliance posture. Click any KPI for the filtered registry view.",
     ("registry",     AvatarState.IDLE,      "en"): "Findings grouped by source document. Update the operational status as you triage.",
@@ -177,6 +187,14 @@ MESSAGES = {
     ("doc_gen",      AvatarState.THINKING,  "it"): "Sto redigendo — seleziono le clausole, cito i riferimenti…",
     ("doc_gen",      AvatarState.SUCCESS,   "it"): "Il draft è pronto nel pannello a destra. Rileggilo per intero e adattalo alla tua organizzazione prima di pubblicare.",
     ("doc_gen",      AvatarState.ERROR,     "it"): "Il generatore ha riscontrato un problema. Riprova o semplifica il contesto.",
+
+    ("ask_grace",    AvatarState.IDLE,      "it"): "Apri una chat per chiedermi qualunque cosa — spiegare un controllo, mappare due documenti, riassumere i finding. Le conversazioni si salvano.",
+    ("ask_grace",    AvatarState.GUIDANCE,  "it"): "Clicca + Nuova chat per iniziare, poi fai una domanda o allega evidenze.",
+    ("ask_grace",    AvatarState.ATTENTIVE, "it"): "Ti ascolto. Scrivi la domanda qui sotto — mantengo il thread.",
+    ("ask_grace",    AvatarState.READY,     "it"): "Pronta quando vuoi.",
+    ("ask_grace",    AvatarState.ANALYZING, "it"): "Sto pensando…",
+    ("ask_grace",    AvatarState.SUCCESS,   "it"): "Fatto — leggi la risposta sopra. Fai una follow-up o apri Analisi dei Gap per un run strutturato.",
+    ("ask_grace",    AvatarState.ERROR,     "it"): "Non sono riuscita a raggiungere il modello. Controlla lo stato del backend e riprova.",
 
     ("dashboard",    AvatarState.IDLE,      "it"): "Ecco la fotografia live della tua compliance. Clicca un KPI per la vista filtrata.",
     ("registry",     AvatarState.IDLE,      "it"): "Finding raggruppati per documento sorgente. Aggiorna lo stato operativo durante il triage.",
