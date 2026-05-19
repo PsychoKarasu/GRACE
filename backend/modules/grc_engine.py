@@ -636,6 +636,56 @@ def explain_control(framework_id: str, control_id: str, language: str = "en") ->
         return f"_Could not generate explanation — {e}_"
 
 
+# ─── Vendor risk assessment summary (Phase 1) ─────────────────────
+
+def generate_vendor_assessment_summary(vendor_name: str, category: str,
+                                        questionnaire: list) -> str:
+    """Generate a 3-paragraph qualitative summary of a completed vendor
+    questionnaire — strengths, key risks, recommended next step. Used by
+    POST /api/v1/vendors/{id}/assess. Haiku 4.5 keeps latency low so the
+    UI can render the summary inline right after the form submission."""
+    if not questionnaire:
+        return "_No questionnaire provided — cannot generate a summary._"
+    lines = []
+    for a in questionnaire:
+        lines.append(
+            f"- [{a.get('question_id','?')}] (weight={a.get('weight','?')}) "
+            f"{a.get('question','')} → answer: {a.get('answer','unknown')}"
+            + (f" · notes: {a.get('notes','')}" if a.get('notes') else "")
+        )
+    user = (
+        f"Vendor: {vendor_name}\n"
+        f"Category: {category or 'unspecified'}\n\n"
+        f"Completed questionnaire:\n" + "\n".join(lines)
+    )
+    system = (
+        "You are a vendor risk analyst. Summarise the key strengths, key "
+        "risks and recommended next step in 3 short paragraphs based on "
+        "this completed vendor questionnaire. Use markdown with three "
+        "bolded paragraph labels: **Strengths**, **Key risks**, "
+        "**Recommended next step**. Be concrete and reference the most "
+        "important answers verbatim."
+    )
+    try:
+        msg = get_client().messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=700,
+            system=system,
+            messages=[{"role": "user", "content": user}],
+        )
+        text = (msg.content[0].text or "").strip()
+        # Minimal schema validation: must include at least one of the
+        # expected section markers; otherwise treat as malformed and fall
+        # back to a safe sentinel string.
+        if not text or not any(k in text.lower() for k in
+                                ("strength", "risk", "recommend")):
+            return "_AI summary returned without expected sections._"
+        return text
+    except Exception as e:
+        logger.warning("generate_vendor_assessment_summary failed: %s", e)
+        return f"_Could not generate vendor summary — {e}_"
+
+
 # ─── Synthetic Document Generation (demo dataset) ─────────────────
 
 def generate_synthetic_document(

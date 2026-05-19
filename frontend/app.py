@@ -111,6 +111,10 @@ TRANSLATIONS = {
         "nav.dashboard":              "Governance Dashboard",
         "nav.registry":               "Finding Registry",
         "nav.library":                "Framework Library",
+        "nav.risks":                  "🎲 Risk Management",
+        "nav.vendors":                "🤝 Vendor Risk",
+        "nav.policies":               "📜 Policies",
+        "nav.incidents":              "🚨 Incidents",
         "ga.header":                  "Ask GRACE",
         "ga.intro":                   "Analyse, ask or add context — one natural-language workspace over your GRC content.",
         "ga.input":                   "Input",
@@ -259,6 +263,197 @@ TRANSLATIONS = {
         "opstatus.closed":            "Closed",
         "opstatus.dismissed":         "Dismissed",
         "all":                        "All",
+        # ── Risk Management ──────────────────────────────────────
+        "risks.header":               "Risk Management",
+        "risks.intro":                "Maintain the corporate risk register — likelihood × impact, treatment plans, owners.",
+        "risks.kpi.total":            "Total risks",
+        "risks.kpi.critical":         "Critical (score ≥ 15)",
+        "risks.kpi.avg_residual":     "Avg residual score",
+        "risks.kpi.open":             "Open",
+        "risks.filter.status":        "Status",
+        "risks.filter.category":      "Category",
+        "risks.filter.owner":         "Owner",
+        "risks.heatmap_title":        "5 × 5 Risk Heatmap (likelihood × impact)",
+        "risks.heatmap_xaxis":        "Impact →",
+        "risks.heatmap_yaxis":        "Likelihood →",
+        "risks.new_button":           "+ New Risk",
+        "risks.new_form_title":       "Create a new risk",
+        "risks.edit_button":          "Edit",
+        "risks.cancel_button":        "Cancel",
+        "risks.save_button":          "Save changes",
+        "risks.delete_button":        "Delete",
+        "risks.delete_confirm":       "Risk deleted.",
+        "risks.no_risks":             "No risks registered yet. Click '+ New Risk' to add one.",
+        "risks.field.title":          "Title",
+        "risks.field.description":    "Description",
+        "risks.field.category":       "Category",
+        "risks.field.likelihood":     "Likelihood (1–5)",
+        "risks.field.impact":         "Impact (1–5)",
+        "risks.field.residual":       "Residual score (0–25)",
+        "risks.field.treatment":      "Treatment plan",
+        "risks.field.treatment_notes":"Treatment notes",
+        "risks.field.owner":          "Owner",
+        "risks.field.status":         "Status",
+        "risks.field.linked_controls":"Linked controls (comma-separated, e.g. ISO27001:2022:A.5.1, GDPR:Art.32)",
+        "risks.create_button":        "Create risk",
+        "risks.created_ok":           "Risk created.",
+        "risks.updated_ok":           "Risk updated.",
+        "risks.score_inherent":       "Inherent",
+        "risks.score_residual":       "Residual",
+        "risks.cat.operational":      "Operational",
+        "risks.cat.cyber":            "Cyber",
+        "risks.cat.compliance":       "Compliance",
+        "risks.cat.financial":        "Financial",
+        "risks.cat.strategic":        "Strategic",
+        "risks.cat.reputational":     "Reputational",
+        "risks.treat.avoid":          "Avoid",
+        "risks.treat.transfer":       "Transfer",
+        "risks.treat.mitigate":       "Mitigate",
+        "risks.treat.accept":         "Accept",
+        "risks.status.open":          "Open",
+        "risks.status.under_treatment": "Under Treatment",
+        "risks.status.accepted":      "Accepted",
+        "risks.status.closed":        "Closed",
+        # ── Vendor Risk ──────────────────────────────────────────
+        "vendors.header":             "Vendor Risk",
+        "vendors.intro":              "Assess and monitor your third-party suppliers against a 10-question security baseline.",
+        "vendors.kpi.total":          "Total vendors",
+        "vendors.kpi.high_risk":      "Critical / High risk",
+        "vendors.kpi.due":            "Due for reassessment",
+        "vendors.kpi.active":         "Active",
+        "vendors.filter.tier":        "Risk tier",
+        "vendors.filter.category":    "Category",
+        "vendors.filter.status":      "Status",
+        "vendors.new_button":         "+ Add Vendor",
+        "vendors.new_form_title":     "Add a new vendor",
+        "vendors.field.name":         "Vendor name",
+        "vendors.field.category":     "Category",
+        "vendors.field.contact_email":"Contact email",
+        "vendors.field.contract_url": "Contract URL",
+        "vendors.field.status":       "Status",
+        "vendors.create_button":      "Create vendor",
+        "vendors.created_ok":         "Vendor added.",
+        "vendors.updated_ok":         "Vendor updated.",
+        "vendors.assess_button":      "Assess",
+        "vendors.assess_form_title":  "Vendor security questionnaire",
+        "vendors.assess_intro":       "Answer each question, optionally add notes, then submit to compute the risk score.",
+        "vendors.assess_submit":      "Submit assessment",
+        "vendors.assess_ok":          "Assessment saved. Risk score and tier updated.",
+        "vendors.ai_summary":         "AI summary",
+        "vendors.never_assessed":     "Not yet assessed",
+        "vendors.last_assessed":      "Last assessed {date}",
+        "vendors.score":              "Score",
+        "vendors.tier":               "Tier",
+        "vendors.no_vendors":         "No vendors registered. Click '+ Add Vendor' to start.",
+        "vendors.answer.yes":         "Yes",
+        "vendors.answer.no":          "No",
+        "vendors.answer.partial":     "Partial",
+        "vendors.answer.unknown":     "Unknown",
+        "vendors.notes_label":        "Notes",
+        "vendors.cat.cloud_infra":    "Cloud Infrastructure",
+        "vendors.cat.saas":           "SaaS",
+        "vendors.cat.payment":        "Payment",
+        "vendors.cat.data_processor": "Data Processor",
+        "vendors.cat.professional_services": "Professional Services",
+        "vendors.cat.other":          "Other",
+        "vendors.tier.low":           "Low",
+        "vendors.tier.medium":        "Medium",
+        "vendors.tier.high":          "High",
+        "vendors.tier.critical":      "Critical",
+        "vendors.status.active":      "Active",
+        "vendors.status.under_review":"Under Review",
+        "vendors.status.terminated":  "Terminated",
+        # ── Policies ─────────────────────────────────────────────
+        "policies.header":            "Policies",
+        "policies.intro":             "Publish internal policies, assign them to people and collect acknowledgments.",
+        "policies.tab_library":       "📚 Library",
+        "policies.tab_acks":          "✅ My Acknowledgments",
+        "policies.kpi.total":         "Total policies",
+        "policies.kpi.active":        "Active",
+        "policies.kpi.pending":       "Pending acknowledgments",
+        "policies.new_button":        "+ Create Policy",
+        "policies.new_form_title":    "Create a new policy",
+        "policies.field.title":       "Title",
+        "policies.field.version":     "Version",
+        "policies.field.summary":     "Summary",
+        "policies.field.content":     "Content (markdown)",
+        "policies.field.effective":   "Effective date (YYYY-MM-DD)",
+        "policies.field.review":      "Review date (YYYY-MM-DD)",
+        "policies.field.owner":       "Owner",
+        "policies.field.status":      "Status",
+        "policies.field.linked_controls": "Linked controls (comma-separated)",
+        "policies.create_button":     "Create policy",
+        "policies.created_ok":        "Policy created.",
+        "policies.assign_to":         "Assign to users (comma-separated user IDs, e.g. alice@demo, bob@demo)",
+        "policies.assign_button":     "Assign",
+        "policies.assign_ok":         "Assigned to {n} user(s); {s} already had this policy.",
+        "policies.no_policies":       "No policies created yet. Click '+ Create Policy' to start.",
+        "policies.demo_user_label":   "Demo user",
+        "policies.demo_user_help":    "Type a user ID to see their pending acknowledgments.",
+        "policies.no_pending":        "No pending acknowledgments for this user.",
+        "policies.accept_button":     "✅ Accept",
+        "policies.signature_note":    "Signature note (optional)",
+        "policies.acknowledged_ok":   "Policy acknowledged. Thanks.",
+        "policies.acknowledged_section": "Already acknowledged",
+        "policies.policy_version":    "Version {v}",
+        "policies.policy_owner":      "Owner: {o}",
+        "policies.policy_effective":  "Effective: {d}",
+        "policies.status.draft":      "Draft",
+        "policies.status.active":     "Active",
+        "policies.status.superseded": "Superseded",
+        "policies.status.retired":    "Retired",
+        # ── Incidents ────────────────────────────────────────────
+        "incidents.header":           "Incidents",
+        "incidents.intro":            "Track security incidents from report to resolution — with regulatory deadline awareness.",
+        "incidents.kpi.open":         "Open incidents",
+        "incidents.kpi.critical":     "Critical open",
+        "incidents.kpi.breach_pending":"Breach notifications pending",
+        "incidents.kpi.mttr":         "MTTR (days)",
+        "incidents.filter.severity":  "Severity",
+        "incidents.filter.status":    "Status",
+        "incidents.filter.category":  "Category",
+        "incidents.new_button":       "+ Report Incident",
+        "incidents.new_form_title":   "Report a new incident",
+        "incidents.field.title":      "Title",
+        "incidents.field.description":"Description",
+        "incidents.field.severity":   "Severity",
+        "incidents.field.status":     "Status",
+        "incidents.field.category":   "Category",
+        "incidents.field.reported_by":"Reported by",
+        "incidents.field.impact":     "Impact assessment",
+        "incidents.field.root_cause": "Root cause",
+        "incidents.field.remediation":"Remediation",
+        "incidents.field.linked_controls": "Linked controls (comma-separated)",
+        "incidents.field.linked_findings": "Linked finding IDs (comma-separated)",
+        "incidents.field.breach_required":"Regulatory breach notification required",
+        "incidents.field.breach_notified":"Breach notified at (ISO timestamp)",
+        "incidents.create_button":    "Report incident",
+        "incidents.created_ok":       "Incident reported.",
+        "incidents.update_button":    "Save changes",
+        "incidents.updated_ok":       "Incident updated.",
+        "incidents.no_incidents":     "No incidents reported. Click '+ Report Incident' to log one.",
+        "incidents.breach_banner":    "⚠ Regulatory breach notification required",
+        "incidents.deadline_in":      "Deadline: {when}",
+        "incidents.deadline_overdue": "OVERDUE — was due {when}",
+        "incidents.deadline_notified":"Notified at {when}",
+        "incidents.reported_on":      "Reported {date}",
+        "incidents.resolved_on":      "Resolved {date}",
+        "incidents.edit_section":     "Edit incident",
+        "incidents.severity.low":     "Low",
+        "incidents.severity.medium":  "Medium",
+        "incidents.severity.high":    "High",
+        "incidents.severity.critical":"Critical",
+        "incidents.status.open":      "Open",
+        "incidents.status.investigating":"Investigating",
+        "incidents.status.contained": "Contained",
+        "incidents.status.resolved":  "Resolved",
+        "incidents.status.closed":    "Closed",
+        "incidents.cat.security_breach": "Security Breach",
+        "incidents.cat.data_loss":    "Data Loss",
+        "incidents.cat.system_outage":"System Outage",
+        "incidents.cat.policy_violation":"Policy Violation",
+        "incidents.cat.third_party":  "Third Party",
+        "incidents.cat.other":        "Other",
     },
     "it": {
         "sidebar.navigation":         "Navigazione",
@@ -280,6 +475,10 @@ TRANSLATIONS = {
         "nav.dashboard":              "Dashboard Governance",
         "nav.registry":               "Registro Findings",
         "nav.library":                "Libreria Framework",
+        "nav.risks":                  "🎲 Gestione Rischi",
+        "nav.vendors":                "🤝 Rischio Fornitori",
+        "nav.policies":               "📜 Policy",
+        "nav.incidents":              "🚨 Incidenti",
         "ga.header":                  "Ask GRACE",
         "ga.intro":                   "Analizza, chiedi o aggiungi contesto — un unico workspace in linguaggio naturale sui tuoi contenuti GRC.",
         "ga.input":                   "Input",
@@ -428,6 +627,197 @@ TRANSLATIONS = {
         "opstatus.closed":            "Chiuso",
         "opstatus.dismissed":         "Scartato",
         "all":                        "Tutti",
+        # ── Risk Management ──────────────────────────────────────
+        "risks.header":               "Gestione Rischi",
+        "risks.intro":                "Mantieni il registro dei rischi aziendali — probabilità × impatto, piani di trattamento, owner.",
+        "risks.kpi.total":            "Rischi totali",
+        "risks.kpi.critical":         "Critici (score ≥ 15)",
+        "risks.kpi.avg_residual":     "Score residuo medio",
+        "risks.kpi.open":             "Aperti",
+        "risks.filter.status":        "Stato",
+        "risks.filter.category":      "Categoria",
+        "risks.filter.owner":         "Owner",
+        "risks.heatmap_title":        "Heatmap 5 × 5 dei rischi (probabilità × impatto)",
+        "risks.heatmap_xaxis":        "Impatto →",
+        "risks.heatmap_yaxis":        "Probabilità →",
+        "risks.new_button":           "+ Nuovo rischio",
+        "risks.new_form_title":       "Crea un nuovo rischio",
+        "risks.edit_button":          "Modifica",
+        "risks.cancel_button":        "Annulla",
+        "risks.save_button":          "Salva modifiche",
+        "risks.delete_button":        "Elimina",
+        "risks.delete_confirm":       "Rischio eliminato.",
+        "risks.no_risks":             "Nessun rischio registrato. Clicca '+ Nuovo rischio' per aggiungerne uno.",
+        "risks.field.title":          "Titolo",
+        "risks.field.description":    "Descrizione",
+        "risks.field.category":       "Categoria",
+        "risks.field.likelihood":     "Probabilità (1–5)",
+        "risks.field.impact":         "Impatto (1–5)",
+        "risks.field.residual":       "Score residuo (0–25)",
+        "risks.field.treatment":      "Piano di trattamento",
+        "risks.field.treatment_notes":"Note al trattamento",
+        "risks.field.owner":          "Owner",
+        "risks.field.status":         "Stato",
+        "risks.field.linked_controls":"Controlli collegati (separati da virgola, es. ISO27001:2022:A.5.1, GDPR:Art.32)",
+        "risks.create_button":        "Crea rischio",
+        "risks.created_ok":           "Rischio creato.",
+        "risks.updated_ok":           "Rischio aggiornato.",
+        "risks.score_inherent":       "Inerente",
+        "risks.score_residual":       "Residuo",
+        "risks.cat.operational":      "Operativo",
+        "risks.cat.cyber":            "Cyber",
+        "risks.cat.compliance":       "Compliance",
+        "risks.cat.financial":        "Finanziario",
+        "risks.cat.strategic":        "Strategico",
+        "risks.cat.reputational":     "Reputazionale",
+        "risks.treat.avoid":          "Evitare",
+        "risks.treat.transfer":       "Trasferire",
+        "risks.treat.mitigate":       "Mitigare",
+        "risks.treat.accept":         "Accettare",
+        "risks.status.open":          "Aperto",
+        "risks.status.under_treatment": "In Trattamento",
+        "risks.status.accepted":      "Accettato",
+        "risks.status.closed":        "Chiuso",
+        # ── Vendor Risk ──────────────────────────────────────────
+        "vendors.header":             "Rischio Fornitori",
+        "vendors.intro":              "Valuta e monitora i tuoi fornitori esterni rispetto a una baseline di sicurezza di 10 domande.",
+        "vendors.kpi.total":          "Fornitori totali",
+        "vendors.kpi.high_risk":      "Rischio critico / alto",
+        "vendors.kpi.due":            "Da rivalutare",
+        "vendors.kpi.active":         "Attivi",
+        "vendors.filter.tier":        "Livello rischio",
+        "vendors.filter.category":    "Categoria",
+        "vendors.filter.status":      "Stato",
+        "vendors.new_button":         "+ Aggiungi fornitore",
+        "vendors.new_form_title":     "Aggiungi un nuovo fornitore",
+        "vendors.field.name":         "Nome fornitore",
+        "vendors.field.category":     "Categoria",
+        "vendors.field.contact_email":"Email di contatto",
+        "vendors.field.contract_url": "URL contratto",
+        "vendors.field.status":       "Stato",
+        "vendors.create_button":      "Crea fornitore",
+        "vendors.created_ok":         "Fornitore aggiunto.",
+        "vendors.updated_ok":         "Fornitore aggiornato.",
+        "vendors.assess_button":      "Valuta",
+        "vendors.assess_form_title":  "Questionario di sicurezza fornitore",
+        "vendors.assess_intro":       "Rispondi a ciascuna domanda, eventualmente aggiungi delle note, poi invia per calcolare lo score di rischio.",
+        "vendors.assess_submit":      "Invia valutazione",
+        "vendors.assess_ok":          "Valutazione salvata. Score e tier aggiornati.",
+        "vendors.ai_summary":         "Sintesi AI",
+        "vendors.never_assessed":     "Non ancora valutato",
+        "vendors.last_assessed":      "Ultima valutazione: {date}",
+        "vendors.score":              "Score",
+        "vendors.tier":               "Tier",
+        "vendors.no_vendors":         "Nessun fornitore registrato. Clicca '+ Aggiungi fornitore' per iniziare.",
+        "vendors.answer.yes":         "Sì",
+        "vendors.answer.no":          "No",
+        "vendors.answer.partial":     "Parziale",
+        "vendors.answer.unknown":     "Sconosciuto",
+        "vendors.notes_label":        "Note",
+        "vendors.cat.cloud_infra":    "Infrastruttura Cloud",
+        "vendors.cat.saas":           "SaaS",
+        "vendors.cat.payment":        "Pagamenti",
+        "vendors.cat.data_processor": "Responsabile del Trattamento",
+        "vendors.cat.professional_services": "Servizi Professionali",
+        "vendors.cat.other":          "Altro",
+        "vendors.tier.low":           "Basso",
+        "vendors.tier.medium":        "Medio",
+        "vendors.tier.high":          "Alto",
+        "vendors.tier.critical":      "Critico",
+        "vendors.status.active":      "Attivo",
+        "vendors.status.under_review":"In Revisione",
+        "vendors.status.terminated":  "Terminato",
+        # ── Policies ─────────────────────────────────────────────
+        "policies.header":            "Policy",
+        "policies.intro":             "Pubblica policy interne, assegnale alle persone e raccogli le conferme di presa visione.",
+        "policies.tab_library":       "📚 Libreria",
+        "policies.tab_acks":          "✅ Le mie conferme",
+        "policies.kpi.total":         "Policy totali",
+        "policies.kpi.active":        "Attive",
+        "policies.kpi.pending":       "Conferme in attesa",
+        "policies.new_button":        "+ Crea policy",
+        "policies.new_form_title":    "Crea una nuova policy",
+        "policies.field.title":       "Titolo",
+        "policies.field.version":     "Versione",
+        "policies.field.summary":     "Sintesi",
+        "policies.field.content":     "Contenuto (markdown)",
+        "policies.field.effective":   "Data di entrata in vigore (YYYY-MM-DD)",
+        "policies.field.review":      "Data revisione (YYYY-MM-DD)",
+        "policies.field.owner":       "Owner",
+        "policies.field.status":      "Stato",
+        "policies.field.linked_controls": "Controlli collegati (separati da virgola)",
+        "policies.create_button":     "Crea policy",
+        "policies.created_ok":        "Policy creata.",
+        "policies.assign_to":         "Assegna agli utenti (ID separati da virgola, es. alice@demo, bob@demo)",
+        "policies.assign_button":     "Assegna",
+        "policies.assign_ok":         "Assegnata a {n} utente/i; {s} già la avevano.",
+        "policies.no_policies":       "Nessuna policy creata. Clicca '+ Crea policy' per iniziare.",
+        "policies.demo_user_label":   "Utente demo",
+        "policies.demo_user_help":    "Inserisci un ID utente per vedere le sue conferme in attesa.",
+        "policies.no_pending":        "Nessuna conferma in attesa per questo utente.",
+        "policies.accept_button":     "✅ Accetto",
+        "policies.signature_note":    "Nota di firma (opzionale)",
+        "policies.acknowledged_ok":   "Policy confermata. Grazie.",
+        "policies.acknowledged_section": "Già confermate",
+        "policies.policy_version":    "Versione {v}",
+        "policies.policy_owner":      "Owner: {o}",
+        "policies.policy_effective":  "In vigore dal: {d}",
+        "policies.status.draft":      "Bozza",
+        "policies.status.active":     "Attiva",
+        "policies.status.superseded": "Sostituita",
+        "policies.status.retired":    "Ritirata",
+        # ── Incidents ────────────────────────────────────────────
+        "incidents.header":           "Incidenti",
+        "incidents.intro":            "Traccia gli incidenti di sicurezza dalla segnalazione alla risoluzione — con consapevolezza dei termini regolatori.",
+        "incidents.kpi.open":         "Incidenti aperti",
+        "incidents.kpi.critical":     "Critici aperti",
+        "incidents.kpi.breach_pending":"Notifiche da inviare",
+        "incidents.kpi.mttr":         "MTTR (giorni)",
+        "incidents.filter.severity":  "Severità",
+        "incidents.filter.status":    "Stato",
+        "incidents.filter.category":  "Categoria",
+        "incidents.new_button":       "+ Segnala incidente",
+        "incidents.new_form_title":   "Segnala un nuovo incidente",
+        "incidents.field.title":      "Titolo",
+        "incidents.field.description":"Descrizione",
+        "incidents.field.severity":   "Severità",
+        "incidents.field.status":     "Stato",
+        "incidents.field.category":   "Categoria",
+        "incidents.field.reported_by":"Segnalato da",
+        "incidents.field.impact":     "Valutazione d'impatto",
+        "incidents.field.root_cause": "Causa principale",
+        "incidents.field.remediation":"Rimedio",
+        "incidents.field.linked_controls": "Controlli collegati (separati da virgola)",
+        "incidents.field.linked_findings": "ID finding collegati (separati da virgola)",
+        "incidents.field.breach_required":"Notifica di violazione richiesta",
+        "incidents.field.breach_notified":"Notificato il (timestamp ISO)",
+        "incidents.create_button":    "Segnala incidente",
+        "incidents.created_ok":       "Incidente segnalato.",
+        "incidents.update_button":    "Salva modifiche",
+        "incidents.updated_ok":       "Incidente aggiornato.",
+        "incidents.no_incidents":     "Nessun incidente segnalato. Clicca '+ Segnala incidente' per registrarne uno.",
+        "incidents.breach_banner":    "⚠ Notifica regolatoria richiesta",
+        "incidents.deadline_in":      "Scadenza: {when}",
+        "incidents.deadline_overdue": "IN RITARDO — scadeva il {when}",
+        "incidents.deadline_notified":"Notificato il {when}",
+        "incidents.reported_on":      "Segnalato il {date}",
+        "incidents.resolved_on":      "Risolto il {date}",
+        "incidents.edit_section":     "Modifica incidente",
+        "incidents.severity.low":     "Bassa",
+        "incidents.severity.medium":  "Media",
+        "incidents.severity.high":    "Alta",
+        "incidents.severity.critical":"Critica",
+        "incidents.status.open":      "Aperto",
+        "incidents.status.investigating":"In indagine",
+        "incidents.status.contained": "Contenuto",
+        "incidents.status.resolved":  "Risolto",
+        "incidents.status.closed":    "Chiuso",
+        "incidents.cat.security_breach": "Violazione di Sicurezza",
+        "incidents.cat.data_loss":    "Perdita di Dati",
+        "incidents.cat.system_outage":"Disservizio Sistema",
+        "incidents.cat.policy_violation":"Violazione di Policy",
+        "incidents.cat.third_party":  "Terze Parti",
+        "incidents.cat.other":        "Altro",
     },
 }
 
@@ -1454,6 +1844,128 @@ hr {{
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }}
+
+/* ── Phase 1 — Risk / Vendor / Policy / Incident module styles ── */
+
+/* Generic record card — drop-in for findings-style cards in non-findings
+   pages. Keeps the navy/teal/amber palette and the same left-border
+   severity colouring. */
+.record-card {{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--text-dim);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  transition: transform .15s ease, box-shadow .15s ease;
+}}
+.record-card:hover {{ transform: translateY(-1px); box-shadow: var(--shadow-lg); }}
+.record-card.critical {{ border-left-color: #DC2626; }}
+.record-card.high     {{ border-left-color: #EA580C; }}
+.record-card.medium   {{ border-left-color: #EAB308; }}
+.record-card.low      {{ border-left-color: #6B7280; }}
+.record-card.green    {{ border-left-color: #10B981; }}
+.record-card .rc-head {{
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 10px; flex-wrap: wrap;
+}}
+.record-card .rc-title {{
+  font-weight: 700;
+  color: var(--text);
+  font-size: 0.98rem;
+}}
+.record-card .rc-meta {{
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  margin-top: 4px;
+}}
+.record-card .rc-body {{
+  color: var(--text);
+  margin-top: 8px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}}
+.record-card .rc-foot {{
+  margin-top: 10px;
+  display: flex; flex-wrap: wrap; gap: 6px;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}}
+
+/* ── Risk heatmap (5×5) ── */
+.risk-heatmap {{
+  display: grid;
+  grid-template-columns: 36px repeat(5, 1fr);
+  gap: 4px;
+  margin: 8px 0 14px 0;
+}}
+.risk-heatmap .hm-cell {{
+  position: relative;
+  aspect-ratio: 1.4 / 1;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}}
+.risk-heatmap .hm-cell .hm-count {{
+  position: absolute; top: 3px; right: 5px;
+  font-size: 0.62rem; font-weight: 700;
+  background: rgba(15, 23, 42, 0.18); color: #fff;
+  padding: 1px 5px; border-radius: 8px;
+}}
+.risk-heatmap .hm-axis {{
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}}
+.risk-heatmap-legend {{
+  display: flex; gap: 8px; flex-wrap: wrap;
+  font-size: 0.72rem; color: var(--text-dim);
+  margin-top: 4px;
+}}
+.risk-heatmap-legend .leg-chip {{
+  display: inline-flex; align-items: center; gap: 4px;
+}}
+.risk-heatmap-legend .leg-sq {{
+  width: 10px; height: 10px; border-radius: 3px; display: inline-block;
+}}
+
+/* ── Score chips (risk inherent / residual) ── */
+.score-chip {{
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.74rem;
+  letter-spacing: 0.3px;
+  background: var(--surface-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+}}
+.score-chip.crit  {{ background: #FEE2E2; color: #991B1B; border-color: #FCA5A5; }}
+.score-chip.hi    {{ background: #FFEDD5; color: #9A3412; border-color: #FED7AA; }}
+.score-chip.mid   {{ background: #FEF9C3; color: #854D0E; border-color: #FDE68A; }}
+.score-chip.lo    {{ background: #D1FAE5; color: #065F46; border-color: #86EFAC; }}
+
+/* ── Breach banner (incidents) ── */
+.breach-banner {{
+  margin: 8px 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  color: #7F1D1D;
+  font-weight: 600;
+  font-size: 0.84rem;
+}}
+.breach-banner.overdue {{ background: #DC2626; color: #FEF2F2; border-color: #991B1B; }}
+.breach-banner.notified {{ background: #ECFDF5; border-color: #86EFAC; color: #065F46; }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1705,7 +2217,8 @@ with top_theme:
 
 # ─── Sidebar ─────────────────────────────────────────────────────────
 
-PAGE_KEYS = ["gap_analysis", "doc_gen", "dashboard", "registry", "library"]
+PAGE_KEYS = ["gap_analysis", "doc_gen", "dashboard", "registry", "library",
+             "risks", "vendors", "policies", "incidents"]
 # Inline SVG icons (lucide-style outline) used by the sidebar nav and
 # elsewhere. Kept tiny so they ship inside the stylesheet without
 # external HTTP. Single-stroke, no fills, currentColor — they inherit
@@ -1717,6 +2230,10 @@ def _nav_icon_svg(name: str) -> str:
         "dashboard":    "<line x1='4' y1='19' x2='4' y2='11'/><line x1='10' y1='19' x2='10' y2='5'/><line x1='16' y1='19' x2='16' y2='14'/><line x1='3' y1='19' x2='21' y2='19'/>",
         "registry":     "<line x1='6' y1='6' x2='20' y2='6'/><line x1='6' y1='12' x2='20' y2='12'/><line x1='6' y1='18' x2='20' y2='18'/><circle cx='3' cy='6' r='1.2'/><circle cx='3' cy='12' r='1.2'/><circle cx='3' cy='18' r='1.2'/>",
         "library":      "<path d='M4 5a2 2 0 0 1 2-2h6v18H6a2 2 0 0 1-2-2z'/><path d='M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6z'/>",
+        "risks":        "<polygon points='12 3 22 20 2 20'/><line x1='12' y1='10' x2='12' y2='15'/><circle cx='12' cy='18' r='0.7'/>",
+        "vendors":      "<path d='M16 3v2'/><path d='M8 3v2'/><rect x='3' y='6' width='18' height='15' rx='2'/><line x1='3' y1='11' x2='21' y2='11'/>",
+        "policies":     "<path d='M6 3h9l4 4v14H6z'/><line x1='9' y1='10' x2='15' y2='10'/><line x1='9' y1='14' x2='15' y2='14'/><line x1='9' y1='18' x2='13' y2='18'/>",
+        "incidents":    "<path d='M12 2 L22 22 H2 Z'/><line x1='12' y1='9' x2='12' y2='14'/><circle cx='12' cy='17' r='0.7'/>",
         "reset":        "<polyline points='4 8 4 4 8 4'/><path d='M4 12a8 8 0 1 0 2.3-5.7'/>",
     }
     return paths.get(name, "")

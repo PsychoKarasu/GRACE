@@ -20,11 +20,22 @@ from modules.database import (
     save_findings, list_findings, get_finding, update_operational_status,
     get_kpi_summary, save_output_document, list_output_documents,
     count_mappings,
+    # Phase 1: Risks
+    create_risk, get_risk, list_risks, update_risk, delete_risk,
+    # Phase 1: Vendors
+    create_vendor, get_vendor, list_vendors, update_vendor,
+    save_vendor_assessment, delete_vendor, DEFAULT_VENDOR_QUESTIONS,
+    # Phase 1: Policies + Acknowledgments
+    create_policy, get_policy, list_policies, update_policy,
+    assign_policy, list_policy_assignments, acknowledge_assignment,
+    # Phase 1: Incidents
+    create_incident, get_incident, list_incidents, update_incident,
+    delete_incident,
 )
 from modules.grc_engine import (
     run_gap_analysis, generate_document, explain_control,
     list_supported_frameworks, load_framework,
-    get_or_compute_mappings,
+    get_or_compute_mappings, generate_vendor_assessment_summary,
 )
 
 app = FastAPI(
@@ -105,6 +116,12 @@ def reset_prototype_data():
         "assessment_runs",
         "output_documents",
         "documents",
+        # Phase 1 GRC modules
+        "risks",
+        "vendors",
+        "policy_assignments",
+        "policies",
+        "incidents",
     ]
     counts = {}
     for table in tables:
@@ -767,3 +784,397 @@ def export_document(body: ExportRequest):
 @app.get("/api/v1/kpi/summary")
 def kpi_summary():
     return get_kpi_summary()
+
+
+# ─── Risks ───────────────────────────────────────────────────────────
+
+_RISK_CATEGORIES = {"operational", "cyber", "compliance", "financial",
+                    "strategic", "reputational"}
+_RISK_TREATMENTS = {"avoid", "transfer", "mitigate", "accept"}
+_RISK_STATUSES = {"open", "under_treatment", "accepted", "closed"}
+
+
+class RiskCreate(BaseModel):
+    title: str
+    description: Optional[str] = ""
+    category: Optional[str] = "operational"
+    likelihood: int = 3
+    impact: int = 3
+    residual_score: Optional[int] = None
+    treatment_plan: Optional[str] = "mitigate"
+    treatment_notes: Optional[str] = ""
+    owner: Optional[str] = ""
+    status: Optional[str] = "open"
+    linked_controls: Optional[list] = None
+
+
+class RiskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    likelihood: Optional[int] = None
+    impact: Optional[int] = None
+    residual_score: Optional[int] = None
+    treatment_plan: Optional[str] = None
+    treatment_notes: Optional[str] = None
+    owner: Optional[str] = None
+    status: Optional[str] = None
+    linked_controls: Optional[list] = None
+
+
+def _validate_risk_payload(d: dict):
+    if "category" in d and d["category"] and d["category"] not in _RISK_CATEGORIES:
+        raise HTTPException(400, detail=f"category must be one of {sorted(_RISK_CATEGORIES)}")
+    if "treatment_plan" in d and d["treatment_plan"] and d["treatment_plan"] not in _RISK_TREATMENTS:
+        raise HTTPException(400, detail=f"treatment_plan must be one of {sorted(_RISK_TREATMENTS)}")
+    if "status" in d and d["status"] and d["status"] not in _RISK_STATUSES:
+        raise HTTPException(400, detail=f"status must be one of {sorted(_RISK_STATUSES)}")
+    for f in ("likelihood", "impact"):
+        if f in d and d[f] is not None and not (1 <= int(d[f]) <= 5):
+            raise HTTPException(400, detail=f"{f} must be between 1 and 5")
+
+
+@app.post("/api/v1/risks", status_code=201)
+def api_create_risk(body: RiskCreate):
+    payload = body.model_dump(exclude_none=True)
+    _validate_risk_payload(payload)
+    if not payload.get("title", "").strip():
+        raise HTTPException(400, detail="title is required")
+    return create_risk(payload)
+
+
+@app.get("/api/v1/risks")
+def api_list_risks(status: Optional[str] = None, category: Optional[str] = None,
+                    owner: Optional[str] = None, min_score: Optional[int] = None):
+    return {"risks": list_risks(status=status, category=category,
+                                 owner=owner, min_score=min_score)}
+
+
+@app.get("/api/v1/risks/{risk_id}")
+def api_get_risk(risk_id: str):
+    r = get_risk(risk_id)
+    if not r:
+        raise HTTPException(404, detail="Risk not found")
+    return r
+
+
+@app.patch("/api/v1/risks/{risk_id}")
+def api_update_risk(risk_id: str, body: RiskUpdate):
+    payload = body.model_dump(exclude_none=True)
+    _validate_risk_payload(payload)
+    out = update_risk(risk_id, payload)
+    if not out:
+        raise HTTPException(404, detail="Risk not found")
+    return out
+
+
+@app.delete("/api/v1/risks/{risk_id}")
+def api_delete_risk(risk_id: str):
+    if not delete_risk(risk_id):
+        raise HTTPException(404, detail="Risk not found")
+    return {"status": "deleted", "risk_id": risk_id}
+
+
+# ─── Vendors ─────────────────────────────────────────────────────────
+
+_VENDOR_CATEGORIES = {"cloud_infra", "saas", "payment", "data_processor",
+                      "professional_services", "other"}
+_VENDOR_STATUSES = {"active", "under_review", "terminated"}
+_VENDOR_TIERS = {"low", "medium", "high", "critical"}
+_ANSWER_OPTIONS = {"yes", "no", "partial", "unknown"}
+
+
+class VendorCreate(BaseModel):
+    name: str
+    category: Optional[str] = "saas"
+    contact_email: Optional[str] = ""
+    contract_url: Optional[str] = ""
+    status: Optional[str] = "active"
+
+
+class VendorUpdate(BaseModel):
+    name: Optional[str] = None
+    category: Optional[str] = None
+    contact_email: Optional[str] = None
+    contract_url: Optional[str] = None
+    status: Optional[str] = None
+
+
+class VendorAssessment(BaseModel):
+    answers: list  # list of {question_id, question, answer, weight, notes}
+
+
+@app.get("/api/v1/vendors/questionnaire-template")
+def api_vendor_questionnaire_template():
+    """Return the default 10-question template — frontend uses this to
+    pre-populate the assessment form when no prior answers exist."""
+    return {"questions": [
+        {**q, "answer": "unknown", "notes": ""} for q in DEFAULT_VENDOR_QUESTIONS
+    ]}
+
+
+@app.post("/api/v1/vendors", status_code=201)
+def api_create_vendor(body: VendorCreate):
+    payload = body.model_dump(exclude_none=True)
+    if not payload.get("name", "").strip():
+        raise HTTPException(400, detail="name is required")
+    if payload.get("category") and payload["category"] not in _VENDOR_CATEGORIES:
+        raise HTTPException(400, detail=f"category must be one of {sorted(_VENDOR_CATEGORIES)}")
+    if payload.get("status") and payload["status"] not in _VENDOR_STATUSES:
+        raise HTTPException(400, detail=f"status must be one of {sorted(_VENDOR_STATUSES)}")
+    return create_vendor(payload)
+
+
+@app.get("/api/v1/vendors")
+def api_list_vendors(risk_tier: Optional[str] = None,
+                      category: Optional[str] = None,
+                      status: Optional[str] = None):
+    return {"vendors": list_vendors(risk_tier=risk_tier, category=category, status=status)}
+
+
+@app.get("/api/v1/vendors/{vendor_id}")
+def api_get_vendor(vendor_id: str):
+    v = get_vendor(vendor_id)
+    if not v:
+        raise HTTPException(404, detail="Vendor not found")
+    return v
+
+
+@app.patch("/api/v1/vendors/{vendor_id}")
+def api_update_vendor(vendor_id: str, body: VendorUpdate):
+    payload = body.model_dump(exclude_none=True)
+    if payload.get("category") and payload["category"] not in _VENDOR_CATEGORIES:
+        raise HTTPException(400, detail=f"category must be one of {sorted(_VENDOR_CATEGORIES)}")
+    if payload.get("status") and payload["status"] not in _VENDOR_STATUSES:
+        raise HTTPException(400, detail=f"status must be one of {sorted(_VENDOR_STATUSES)}")
+    out = update_vendor(vendor_id, payload)
+    if not out:
+        raise HTTPException(404, detail="Vendor not found")
+    return out
+
+
+@app.post("/api/v1/vendors/{vendor_id}/assess")
+def api_assess_vendor(vendor_id: str, body: VendorAssessment):
+    vendor = get_vendor(vendor_id)
+    if not vendor:
+        raise HTTPException(404, detail="Vendor not found")
+    # Validate answer enum + normalise
+    clean = []
+    for a in body.answers or []:
+        ans = (a.get("answer") or "unknown").lower()
+        if ans not in _ANSWER_OPTIONS:
+            ans = "unknown"
+        clean.append({
+            "question_id": a.get("question_id", ""),
+            "question": a.get("question", ""),
+            "answer": ans,
+            "weight": int(a.get("weight", 0) or 0),
+            "notes": a.get("notes", ""),
+        })
+    if not clean:
+        raise HTTPException(400, detail="answers list cannot be empty")
+    # Call Claude for AI summary (failure is non-fatal — saved as empty)
+    try:
+        summary = generate_vendor_assessment_summary(
+            vendor.get("name", ""), vendor.get("category", ""), clean
+        )
+    except Exception as e:
+        summary = f"_AI summary unavailable: {e}_"
+    out = save_vendor_assessment(vendor_id, clean, ai_summary=summary)
+    if not out:
+        raise HTTPException(500, detail="Failed to save assessment")
+    return out
+
+
+@app.delete("/api/v1/vendors/{vendor_id}")
+def api_delete_vendor(vendor_id: str):
+    if not delete_vendor(vendor_id):
+        raise HTTPException(404, detail="Vendor not found")
+    return {"status": "deleted", "vendor_id": vendor_id}
+
+
+# ─── Policies & Acknowledgments ──────────────────────────────────────
+
+_POLICY_STATUSES = {"draft", "active", "superseded", "retired"}
+
+
+class PolicyCreate(BaseModel):
+    title: str
+    version: str = "1.0"
+    summary: Optional[str] = ""
+    content: Optional[str] = ""
+    effective_date: Optional[str] = ""
+    review_date: Optional[str] = ""
+    owner: Optional[str] = ""
+    status: Optional[str] = "active"
+    linked_controls: Optional[list] = None
+
+
+class PolicyUpdate(BaseModel):
+    title: Optional[str] = None
+    version: Optional[str] = None
+    summary: Optional[str] = None
+    content: Optional[str] = None
+    effective_date: Optional[str] = None
+    review_date: Optional[str] = None
+    owner: Optional[str] = None
+    status: Optional[str] = None
+    linked_controls: Optional[list] = None
+
+
+class PolicyAssign(BaseModel):
+    user_ids: list
+
+
+class AcknowledgeRequest(BaseModel):
+    signature_note: Optional[str] = ""
+
+
+@app.post("/api/v1/policies", status_code=201)
+def api_create_policy(body: PolicyCreate):
+    payload = body.model_dump(exclude_none=True)
+    if not payload.get("title", "").strip():
+        raise HTTPException(400, detail="title is required")
+    if payload.get("status") and payload["status"] not in _POLICY_STATUSES:
+        raise HTTPException(400, detail=f"status must be one of {sorted(_POLICY_STATUSES)}")
+    return create_policy(payload)
+
+
+@app.get("/api/v1/policies")
+def api_list_policies(status: Optional[str] = None):
+    return {"policies": list_policies(status=status)}
+
+
+@app.get("/api/v1/policies/{policy_id}")
+def api_get_policy(policy_id: str):
+    p = get_policy(policy_id)
+    if not p:
+        raise HTTPException(404, detail="Policy not found")
+    return p
+
+
+@app.patch("/api/v1/policies/{policy_id}")
+def api_update_policy(policy_id: str, body: PolicyUpdate):
+    payload = body.model_dump(exclude_none=True)
+    if payload.get("status") and payload["status"] not in _POLICY_STATUSES:
+        raise HTTPException(400, detail=f"status must be one of {sorted(_POLICY_STATUSES)}")
+    out = update_policy(policy_id, payload)
+    if not out:
+        raise HTTPException(404, detail="Policy not found")
+    return out
+
+
+@app.post("/api/v1/policies/{policy_id}/assign")
+def api_assign_policy(policy_id: str, body: PolicyAssign):
+    if not get_policy(policy_id):
+        raise HTTPException(404, detail="Policy not found")
+    result = assign_policy(policy_id, body.user_ids or [])
+    return result
+
+
+@app.get("/api/v1/policy-assignments")
+def api_list_assignments(user_id: Optional[str] = None,
+                          status: Optional[str] = None,
+                          policy_id: Optional[str] = None):
+    return {"assignments": list_policy_assignments(
+        user_id=user_id, status=status, policy_id=policy_id
+    )}
+
+
+@app.post("/api/v1/policy-assignments/{assignment_id}/acknowledge")
+def api_acknowledge(assignment_id: str, body: AcknowledgeRequest):
+    out = acknowledge_assignment(assignment_id, signature_note=body.signature_note or "")
+    if not out:
+        raise HTTPException(404, detail="Assignment not found")
+    return out
+
+
+# ─── Incidents ───────────────────────────────────────────────────────
+
+_INCIDENT_SEVERITIES = {"low", "medium", "high", "critical"}
+_INCIDENT_STATUSES = {"open", "investigating", "contained", "resolved", "closed"}
+_INCIDENT_CATEGORIES = {"security_breach", "data_loss", "system_outage",
+                        "policy_violation", "third_party", "other"}
+
+
+class IncidentCreate(BaseModel):
+    title: str
+    description: Optional[str] = ""
+    severity: str = "medium"
+    status: Optional[str] = "open"
+    category: Optional[str] = "other"
+    reported_at: Optional[str] = None
+    reported_by: Optional[str] = ""
+    breach_notification_required: Optional[bool] = False
+    impact_assessment: Optional[str] = ""
+    root_cause: Optional[str] = ""
+    remediation: Optional[str] = ""
+    linked_controls: Optional[list] = None
+    linked_findings: Optional[list] = None
+
+
+class IncidentUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    severity: Optional[str] = None
+    status: Optional[str] = None
+    category: Optional[str] = None
+    reported_by: Optional[str] = None
+    resolved_at: Optional[str] = None
+    breach_notification_required: Optional[bool] = None
+    breach_notified_at: Optional[str] = None
+    impact_assessment: Optional[str] = None
+    root_cause: Optional[str] = None
+    remediation: Optional[str] = None
+    linked_controls: Optional[list] = None
+    linked_findings: Optional[list] = None
+
+
+def _validate_incident_payload(d: dict):
+    if "severity" in d and d["severity"] and d["severity"] not in _INCIDENT_SEVERITIES:
+        raise HTTPException(400, detail=f"severity must be one of {sorted(_INCIDENT_SEVERITIES)}")
+    if "status" in d and d["status"] and d["status"] not in _INCIDENT_STATUSES:
+        raise HTTPException(400, detail=f"status must be one of {sorted(_INCIDENT_STATUSES)}")
+    if "category" in d and d["category"] and d["category"] not in _INCIDENT_CATEGORIES:
+        raise HTTPException(400, detail=f"category must be one of {sorted(_INCIDENT_CATEGORIES)}")
+
+
+@app.post("/api/v1/incidents", status_code=201)
+def api_create_incident(body: IncidentCreate):
+    payload = body.model_dump(exclude_none=True)
+    _validate_incident_payload(payload)
+    if not payload.get("title", "").strip():
+        raise HTTPException(400, detail="title is required")
+    return create_incident(payload)
+
+
+@app.get("/api/v1/incidents")
+def api_list_incidents(status: Optional[str] = None,
+                        severity: Optional[str] = None,
+                        category: Optional[str] = None):
+    return {"incidents": list_incidents(status=status, severity=severity, category=category)}
+
+
+@app.get("/api/v1/incidents/{incident_id}")
+def api_get_incident(incident_id: str):
+    inc = get_incident(incident_id)
+    if not inc:
+        raise HTTPException(404, detail="Incident not found")
+    return inc
+
+
+@app.patch("/api/v1/incidents/{incident_id}")
+def api_update_incident(incident_id: str, body: IncidentUpdate):
+    payload = body.model_dump(exclude_none=True)
+    _validate_incident_payload(payload)
+    out = update_incident(incident_id, payload)
+    if not out:
+        raise HTTPException(404, detail="Incident not found")
+    return out
+
+
+@app.delete("/api/v1/incidents/{incident_id}")
+def api_delete_incident(incident_id: str):
+    if not delete_incident(incident_id):
+        raise HTTPException(404, detail="Incident not found")
+    return {"status": "deleted", "incident_id": incident_id}
