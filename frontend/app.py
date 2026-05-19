@@ -2677,24 +2677,26 @@ with _main_col:
                                      if s["session_id"] == active_sid), "")),
                         key=f"ask_rename_input_{active_sid}",
                     )
-                    cc1, cc2 = st.columns(2)
-                    with cc1:
-                        if st.button(t("ask.save"),
-                                     key=f"ask_rename_save_{active_sid}",
-                                     use_container_width=True):
-                            requests.patch(
-                                f"{API}/api/v1/chat/sessions/{active_sid}",
-                                json={"title": (new_title or "").strip() or None},
-                                timeout=10,
-                            )
-                            st.session_state[renaming_key] = False
-                            st.rerun()
-                    with cc2:
-                        if st.button(t("ask.cancel"),
-                                     key=f"ask_rename_cancel_{active_sid}",
-                                     use_container_width=True):
-                            st.session_state[renaming_key] = False
-                            st.rerun()
+                    # Streamlit allows columns nested only 1 level deep.
+                    # The rename form is already inside the left history
+                    # column, so we stack Save/Cancel vertically instead
+                    # of side-by-side.
+                    if st.button(t("ask.save"),
+                                 key=f"ask_rename_save_{active_sid}",
+                                 use_container_width=True,
+                                 type="primary"):
+                        requests.patch(
+                            f"{API}/api/v1/chat/sessions/{active_sid}",
+                            json={"title": (new_title or "").strip() or None},
+                            timeout=10,
+                        )
+                        st.session_state[renaming_key] = False
+                        st.rerun()
+                    if st.button(t("ask.cancel"),
+                                 key=f"ask_rename_cancel_{active_sid}",
+                                 use_container_width=True):
+                        st.session_state[renaming_key] = False
+                        st.rerun()
                 else:
                     if st.button(f"✏ {t('ask.rename_chat')}",
                                  key=f"ask_rename_btn_{active_sid}",
@@ -3123,66 +3125,64 @@ with _main_col:
                                 for ev in ctrl.get("evidence_required", []):
                                     st.markdown(f"  - {ev}")
 
-                    # Action row
-                    act_a, act_b = st.columns(2)
-                    with act_a:
-                        if st.button(t("ga.open_in_registry"),
-                                     use_container_width=True,
-                                     key="ga_open_registry"):
-                            st.session_state["current_page"] = "registry"
-                            st.rerun()
-                    with act_b:
-                        # Build a markdown report and stream it as PDF
-                        if st.button(t("ga.gen_report"),
-                                     type="primary",
-                                     use_container_width=True,
-                                     key="ga_export_pdf"):
-                            md_lines = [
-                                f"# {t('ga.results_title')}",
-                                "",
-                                f"**Framework:** {fw_label}",
-                                f"**Document(s):** {stored.get('document_title','')}",
-                                f"**Coverage:** {overall_score}% · {overall_status}",
-                                "",
-                                f"## Executive summary",
-                                "",
-                                result.get("executive_summary", ""),
-                                "",
-                                "## Findings",
+                    # Action row — stacked because we're already inside
+                    # the right-hand column of the wizard layout (Streamlit
+                    # only allows 1 level of column nesting).
+                    if st.button(t("ga.open_in_registry"),
+                                 use_container_width=True,
+                                 key="ga_open_registry"):
+                        st.session_state["current_page"] = "registry"
+                        st.rerun()
+                    if st.button(t("ga.gen_report"),
+                                 type="primary",
+                                 use_container_width=True,
+                                 key="ga_export_pdf"):
+                        md_lines = [
+                            f"# {t('ga.results_title')}",
+                            "",
+                            f"**Framework:** {fw_label}",
+                            f"**Document(s):** {stored.get('document_title','')}",
+                            f"**Coverage:** {overall_score}% · {overall_status}",
+                            "",
+                            f"## Executive summary",
+                            "",
+                            result.get("executive_summary", ""),
+                            "",
+                            "## Findings",
+                            "",
+                        ]
+                        for ctrl in result.get("controls", []):
+                            md_lines += [
+                                f"### {ctrl.get('control_id','')} — {ctrl.get('control_title','')}",
+                                f"- Status: **{ctrl.get('status','')}**  · Severity: **{ctrl.get('severity','')}**",
+                                f"- Finding: {ctrl.get('finding','')}",
+                                f"- Remediation: {ctrl.get('remediation','')}",
                                 "",
                             ]
-                            for ctrl in result.get("controls", []):
-                                md_lines += [
-                                    f"### {ctrl.get('control_id','')} — {ctrl.get('control_title','')}",
-                                    f"- Status: **{ctrl.get('status','')}**  · Severity: **{ctrl.get('severity','')}**",
-                                    f"- Finding: {ctrl.get('finding','')}",
-                                    f"- Remediation: {ctrl.get('remediation','')}",
-                                    "",
-                                ]
-                            try:
-                                exp = requests.post(
-                                    f"{API}/api/v1/generate/export",
-                                    json={
-                                        "content":  "\n".join(md_lines),
-                                        "format":   "pdf",
-                                        "filename": t("ga.report_filename"),
-                                    },
-                                    timeout=120,
+                        try:
+                            exp = requests.post(
+                                f"{API}/api/v1/generate/export",
+                                json={
+                                    "content":  "\n".join(md_lines),
+                                    "format":   "pdf",
+                                    "filename": t("ga.report_filename"),
+                                },
+                                timeout=120,
+                            )
+                            if exp.ok:
+                                st.download_button(
+                                    t("dg.download_pdf"),
+                                    data=exp.content,
+                                    file_name=f"{t('ga.report_filename')}.pdf",
+                                    mime="application/pdf",
+                                    use_container_width=True,
+                                    key="ga_dl_pdf",
                                 )
-                                if exp.ok:
-                                    st.download_button(
-                                        t("dg.download_pdf"),
-                                        data=exp.content,
-                                        file_name=f"{t('ga.report_filename')}.pdf",
-                                        mime="application/pdf",
-                                        use_container_width=True,
-                                        key="ga_dl_pdf",
-                                    )
-                                else:
-                                    st.error(t("ga.report_failed",
-                                               detail=exp.text[:200]))
-                            except Exception as e:
-                                st.error(t("ga.report_failed", detail=str(e)))
+                            else:
+                                st.error(t("ga.report_failed",
+                                           detail=exp.text[:200]))
+                        except Exception as e:
+                            st.error(t("ga.report_failed", detail=str(e)))
 
         # Avatar state machine — disabled-Run = GUIDANCE, otherwise READY
         _terminal_ga = (AvatarState.SUCCESS, AvatarState.ERROR, AvatarState.WARNING)
